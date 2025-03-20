@@ -1,3 +1,5 @@
+
+
 // @/components/dialogs/contact/edit-contact.jsx
 import React, { useState, useEffect } from 'react';
 import { toast, Toaster } from "sonner";
@@ -97,6 +99,7 @@ const EditContactDialog = ({ open, onOpenChange, contact, onSuccess }) => {
               <Label htmlFor="value">{contactType === 'email' ? 'Email' : 'Phone Number'}</Label>
               <Input
                 id="value"
+                name={contactType === 'email' ? 'email' : 'phone_number'}
                 value={value}
                 onChange={(e) => setValue(contactType === 'phone' ? e.target.value.replace(/\D/g, '') : e.target.value)}
                 placeholder={`Enter ${contactType === 'email' ? 'email' : '10-digit phone number'}`}

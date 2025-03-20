@@ -19,7 +19,7 @@ const AddContactDialog = ({ open, onOpenChange, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contactType, setContactType] = useState('phone');
   const [email, setEmail] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phone_number, setPhoneNumber] = useState(''); // Changed variable name to match payload
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
@@ -32,10 +32,10 @@ const AddContactDialog = ({ open, onOpenChange, onSuccess }) => {
         newErrors.email = 'Invalid email format';
       }
     } else {
-      if (!phoneNumber.trim()) {
-        newErrors.phoneNumber = 'Phone number is required';
-      } else if (!/^\d{10}$/.test(phoneNumber.trim())) {
-        newErrors.phoneNumber = 'Phone number must be exactly 10 digits';
+      if (!phone_number.trim()) {
+        newErrors.phone_number = 'Phone number is required';
+      } else if (!/^\d{10}$/.test(phone_number.trim())) {
+        newErrors.phone_number = 'Phone number must be exactly 10 digits';
       }
     }
     
@@ -51,8 +51,10 @@ const AddContactDialog = ({ open, onOpenChange, onSuccess }) => {
       setIsSubmitting(true);
       const payload = contactType === "email" 
         ? { email: email.trim() }
-        : { phone_number: phoneNumber.trim() };
+        : { phone_number: phone_number.trim() }; // Fixed payload key to match API
 
+      console.log("Submitting payload:", payload); // Debug log
+      
       const response = await addContact(payload);
       
       if (response.status === true) {
@@ -128,17 +130,18 @@ const AddContactDialog = ({ open, onOpenChange, onSuccess }) => {
 
             {contactType === "phone" ? (
               <div className="grid gap-2">
-                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Label htmlFor="phone_number">Phone Number</Label>
                 <Input
-                  id="phoneNumber"
-                  value={phoneNumber}
+                  id="phone_number"
+                  name="phone_number"
+                  value={phone_number}
                   onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
                   placeholder="Enter 10-digit phone number"
                   maxLength={10}
                   type="text"
                 />
-                {errors.phoneNumber && (
-                  <p className="text-destructive text-sm">{errors.phoneNumber}</p>
+                {errors.phone_number && (
+                  <p className="text-destructive text-sm">{errors.phone_number}</p>
                 )}
               </div>
             ) : (
@@ -146,6 +149,7 @@ const AddContactDialog = ({ open, onOpenChange, onSuccess }) => {
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  name="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter email"

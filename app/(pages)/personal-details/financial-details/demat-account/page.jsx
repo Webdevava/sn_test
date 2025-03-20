@@ -73,8 +73,8 @@ export default function DematAccountPage() {
       <Toaster richColors />
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-3">
-          <BankIcon size={32} className="text-primary" />
-          <h1 className="text-xl font-bold">Demat Accounts</h1>
+          {/* <BankIcon size={32} className="text-primary" /> */}
+          <h1 className="text-xl font-bold">Demat Accounts ({dematAccounts.length})</h1>
         </div>
         <AddDematDialog onDematAdded={fetchDematAccounts} />
       </div>

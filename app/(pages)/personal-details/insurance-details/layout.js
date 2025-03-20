@@ -1,4 +1,3 @@
-// app/personal-details/layout.jsx
 "use client"
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -9,7 +8,6 @@ export default function InsuranceDetailsLayout({ children }) {
   const router = useRouter()
   const pathname = usePathname()
   
-  // Map routes to tab values
   const tabRoutes = {
     'health': '/personal-details/insurance-details/health',
     'life': '/personal-details/insurance-details/life',
@@ -18,24 +16,22 @@ export default function InsuranceDetailsLayout({ children }) {
     'vehicle': '/personal-details/insurance-details/vehicle'
   }
 
-  // Determine active tab based on current pathname
-  const getActiveTab = () => {
-    if (pathname.includes('health')) return 'health'
-    if (pathname.includes('life')) return 'life'
-    if (pathname.includes('property')) return 'property'
-    if (pathname.includes('travel')) return 'travel'
-    if (pathname.includes('vehicle')) return 'vehicle'
-    return 'health' // Default tab
-  }
+  const [activeTab, setActiveTab] = useState('health')
 
-  const [activeTab, setActiveTab] = useState(getActiveTab())
-
-  // Sync tab with URL on mount and when pathname changes
   useEffect(() => {
-    setActiveTab(getActiveTab())
+    // Determine active tab based on current pathname
+    const determineActiveTab = () => {
+      if (pathname.includes('health')) return 'health'
+      if (pathname.includes('life')) return 'life'
+      if (pathname.includes('property')) return 'property'
+      if (pathname.includes('travel')) return 'travel'
+      if (pathname.includes('vehicle')) return 'vehicle'
+      return 'health' // Default tab
+    }
+    
+    setActiveTab(determineActiveTab())
   }, [pathname])
 
-  // Handle tab change and redirect
   const handleTabChange = (value) => {
     setActiveTab(value)
     router.push(tabRoutes[value])
@@ -50,7 +46,7 @@ export default function InsuranceDetailsLayout({ children }) {
           className="w-full h-full flex flex-col"
         >
           <div className="rounded-lg p-2">
-            <TabsList className="bg-popover  w-fit">
+            <TabsList className="bg-popover w-fit">
               <TabsTrigger
                 value="health"
                 className="data-[state=active]:bg-foreground data-[state=active]:text-background min-w-24"
@@ -84,7 +80,6 @@ export default function InsuranceDetailsLayout({ children }) {
             </TabsList>
           </div>
           
-          {/* Content area - renders children regardless of tab */}
           <div className="h-full bg-background rounded-lg">
             {children}
           </div>

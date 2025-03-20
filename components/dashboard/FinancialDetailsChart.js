@@ -1,6 +1,6 @@
 "use client"
 
-import { PlusCircle, TrendingUp } from "lucide-react"
+import { PlusCircle } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import {

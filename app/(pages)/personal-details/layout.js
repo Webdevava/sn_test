@@ -10,7 +10,6 @@ export default function PersonalDetailsLayout({ children }) {
   const router = useRouter()
   const pathname = usePathname()
   
-  // Map routes to tab values and labels
   const tabRoutes = {
     'family-details': {
       path: '/personal-details/family-details',
@@ -26,39 +25,34 @@ export default function PersonalDetailsLayout({ children }) {
     }
   }
   
-  // Determine active tab based on current pathname
-  const getActiveTab = () => {
-    if (pathname.includes('family-details')) return 'family-details'
-    if (pathname.includes('financial-details')) return 'financial-details'
-    if (pathname.includes('insurance-details')) return 'insurance-details'
-    return 'family-details' // Default tab
-  }
+  const [activeTab, setActiveTab] = useState('family-details')
   
-  const [activeTab, setActiveTab] = useState(getActiveTab())
-  
-  // Determine if we're in a child route or main route
   const isMainRoute = pathname === '/personal-details'
   const isChildRoute = !isMainRoute
   
-  // Sync tab with URL on mount and when pathname changes
   useEffect(() => {
-    setActiveTab(getActiveTab())
+    // Determine active tab based on current pathname
+    const determineActiveTab = () => {
+      if (pathname.includes('family-details')) return 'family-details'
+      if (pathname.includes('financial-details')) return 'financial-details'
+      if (pathname.includes('insurance-details')) return 'insurance-details'
+      return 'family-details' // Default tab
+    }
+    
+    setActiveTab(determineActiveTab())
   }, [pathname])
   
-  // Handle tab change and redirect
   const handleTabChange = (value) => {
     setActiveTab(value)
     router.push(tabRoutes[value].path)
   }
   
-  // Handle back button click
   const handleBackClick = () => {
     router.push('/personal-details')
   }
   
   return (
     <div className="flex flex-col w-full h-full overflow-hidden">
-      {/* Mobile header with back button - only visible on child routes */}
       {isChildRoute && (
         <div className="md:hidden flex items-center p-4 border-b">
           <Button 
@@ -74,23 +68,19 @@ export default function PersonalDetailsLayout({ children }) {
       )}
       
       <div className="flex w-full h-full overflow-hidden">
-        {/* Sidebar - hidden on mobile */}
         <div className="hidden md:block">
           <PersonalSidebar />
         </div>
         
         <main className="flex-1 overflow-auto p-4 md:ml-3 lg:ml-4 bg-card rounded-lg border">
           {isMainRoute ? (
-            // For main route, just render children (which contains the buttons on mobile)
             <div className="h-full">{children}</div>
           ) : (
-            // For child routes, use the tabs layout
             <Tabs
               value={activeTab}
               onValueChange={handleTabChange}
               className="w-full h-full flex flex-col"
             >
-              {/* Desktop tabs - always visible on desktop for child routes */}
               <div className="hidden md:block bg-popover rounded-lg p-2">
                 <TabsList className="bg-popover w-fit">
                   {Object.entries(tabRoutes).map(([key, { label }]) => (
@@ -105,7 +95,6 @@ export default function PersonalDetailsLayout({ children }) {
                 </TabsList>
               </div>
               
-              {/* Content area - renders children */}
               <div className="h-full bg-popover rounded-lg mt-4">
                 {children}
               </div>

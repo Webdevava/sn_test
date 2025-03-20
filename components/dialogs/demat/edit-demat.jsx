@@ -1,136 +1,194 @@
+// @/components/demat-account/EditDematDialog.jsx
+"use client";
 
-
-// @/components/dialogs/contact/edit-contact.jsx
-import React, { useState, useEffect } from 'react';
-import { toast, Toaster } from "sonner";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
+  DialogTrigger,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { updateContact } from '@/lib/auth-api';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { updateDematAccount } from "@/lib/demat-account-api";
+import { listBanks } from "@/lib/bank-api";
+import { toast } from "sonner";
+import { PencilSimple } from "@phosphor-icons/react";
 
-const EditContactDialog = ({ open, onOpenChange, contact, onSuccess }) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [contactType, setContactType] = useState('');
-  const [value, setValue] = useState('');
-  const [errors, setErrors] = useState({});
+export default function EditDematDialog({ dematAccount, onDematUpdated }) {
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState(dematAccount || {});
+  const [banks, setBanks] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (contact) {
-      const isEmail = !!contact.email;
-      setContactType(isEmail ? 'email' : 'phone');
-      setValue(isEmail ? contact.email : contact.phone_number);
-    }
-  }, [contact]);
+    setFormData(dematAccount || {});
+    if (open) fetchBanks();
+  }, [dematAccount, open]);
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (contactType === 'email') {
-      if (!value.trim()) {
-        newErrors.value = 'Email is required';
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
-        newErrors.value = 'Invalid email format';
-      }
-    } else {
-      if (!value.trim()) {
-        newErrors.value = 'Phone number is required';
-      } else if (!/^\d{10}$/.test(value.trim())) {
-        newErrors.value = 'Phone number must be exactly 10 digits';
-      }
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm() || !contact) return;
-
+  const fetchBanks = async () => {
     try {
-      setIsSubmitting(true);
-      const payload = contactType === 'email' 
-        ? { email: value.trim() }
-        : { phone_number: value.trim() };
-        
-      const response = await updateContact(contact.id, payload);
-      
-      if (response.status === true) {
-        toast.success(response.message || "Contact updated successfully", {
-          richColors: true,
-        });
-        onSuccess();
-      } else {
-        throw new Error(response.message || 'Failed to update contact');
+      const response = await listBanks();
+      if (response.status) {
+        setBanks(response.data);
       }
     } catch (error) {
-      console.error('Edit Contact Error:', error);
-      toast.error(error.message || 'Failed to update contact', {
-        richColors: true,
-      });
-    } finally {
-      setIsSubmitting(false);
+      toast.error("Failed to fetch bank accounts");
     }
   };
 
-  const handleClose = () => {
-    setErrors({});
-    setValue('');
-    onOpenChange(false);
+  const isDematFormValid = () =>
+    formData?.depository_name &&
+    formData?.account_number &&
+    formData?.unique_client_code &&
+    formData?.dp_id &&
+    formData?.account_type &&
+    formData?.bank_account &&
+    formData?.linked_mobile;
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      const response = await updateDematAccount(dematAccount.id, {
+        ...formData,
+        bank_account: parseInt(formData.bank_account),
+      });
+      if (response.status) {
+        toast.success("Demat account updated successfully");
+        setOpen(false);
+        onDematUpdated();
+      }
+    } catch (error) {
+      toast.error("Failed to update demat account");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <Toaster richColors />
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="gap-2">
+          <PencilSimple size={16} />
+          Edit
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>
-            Edit {contactType === 'email' ? 'Email' : 'Phone Number'}
-          </DialogTitle>
+          <DialogTitle>Edit Demat Account</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="value">{contactType === 'email' ? 'Email' : 'Phone Number'}</Label>
-              <Input
-                id="value"
-                name={contactType === 'email' ? 'email' : 'phone_number'}
-                value={value}
-                onChange={(e) => setValue(contactType === 'phone' ? e.target.value.replace(/\D/g, '') : e.target.value)}
-                placeholder={`Enter ${contactType === 'email' ? 'email' : '10-digit phone number'}`}
-                maxLength={contactType === 'phone' ? 10 : undefined}
-                type={contactType === 'email' ? 'email' : 'text'}
-              />
-              {errors.value && (
-                <p className="text-destructive text-sm">{errors.value}</p>
-              )}
-            </div>
+        <form className="space-y-4">
+          <div>
+            <Label>Depository Name</Label>
+            <Input
+              value={formData.depository_name || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, depository_name: e.target.value })
+              }
+              placeholder="e.g., CDSL"
+              required
+            />
           </div>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting}
+          <div>
+            <Label>Account Number</Label>
+            <Input
+              value={formData.account_number || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, account_number: e.target.value })
+              }
+              placeholder="e.g., 987654321098"
+              required
+            />
+          </div>
+          <div>
+            <Label>Unique Client Code</Label>
+            <Input
+              value={formData.unique_client_code || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, unique_client_code: e.target.value })
+              }
+              placeholder="e.g., XYZ98765"
+              required
+            />
+          </div>
+          <div>
+            <Label>DP ID</Label>
+            <Input
+              value={formData.dp_id || ""}
+              onChange={(e) => setFormData({ ...formData, dp_id: e.target.value })}
+              placeholder="e.g., IN301234"
+              required
+            />
+          </div>
+          <div>
+            <Label>Account Type</Label>
+            <Select
+              value={formData.account_type || ""}
+              onValueChange={(value) =>
+                setFormData({ ...formData, account_type: value })
+              }
+              required
             >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Individual">Individual</SelectItem>
+                <SelectItem value="Joint">Joint</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Bank Account</Label>
+            <Select
+              value={formData.bank_account || ""}
+              onValueChange={(value) =>
+                setFormData({ ...formData, bank_account: value })
+              }
+              required
             >
-              {isSubmitting ? 'Updating...' : 'Update'}
-            </Button>
-          </DialogFooter>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a bank account" />
+              </SelectTrigger>
+              <SelectContent>
+                {banks.map((bank) => (
+                  <SelectItem key={bank.id} value={bank.id.toString()}>
+                    {bank.account_holder_name} - {bank.account_number}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Linked Mobile</Label>
+            <Input
+              value={formData.linked_mobile || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, linked_mobile: e.target.value })
+              }
+              placeholder="e.g., 9123456789"
+              required
+            />
+          </div>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!isDematFormValid() || loading}
+            className="w-full"
+          >
+            {loading ? "Updating..." : "Update"}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
   );
-};
-
-export default EditContactDialog;
+}

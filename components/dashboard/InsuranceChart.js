@@ -1,5 +1,4 @@
 "use client";
-
 import { PlusCircle } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
@@ -14,7 +13,6 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Button } from "@/components/ui/button";
-
 // Sample data for the insurance chart
 const chartData = [
   { insuranceType: "Life Ins", coverage: 50 },
@@ -23,7 +21,6 @@ const chartData = [
   { insuranceType: "Property Ins", coverage: 65 },
   { insuranceType: "Travel Ins", coverage: 85 },
 ];
-
 // Chart configuration with labels and colors
 const chartConfig = {
   coverage: {
@@ -31,14 +28,11 @@ const chartConfig = {
     color: "#3B82F6", // Blue, matching FinancialDetailsChart
   },
 };
-
 // Custom Active Dot component to draw a line from X-axis to the dot
 const CustomActiveDot = (props) => {
-  const { cx, cy, value, chartHeight } = props; // cx, cy are dot coordinates, value is coverage
-
+  const { cx, cy, chartHeight } = props; // Removed unused 'value' variable
   // Calculate the Y position of the X-axis (bottom of the chart)
   const xAxisY = chartHeight - 30; // Adjust based on margin.bottom (20) + tick margin
-
   return (
     <g>
       {/* Vertical line from X-axis to dot */}
@@ -62,13 +56,11 @@ const CustomActiveDot = (props) => {
     </g>
   );
 };
-
 export default function InsuranceChart() {
   // Custom function to format coverage amount (in lakhs)
   const formatToLakhs = (value) => {
     return `${value}L`; // Format with "L"
   };
-
   return (
     <Card className="rounded-lg shadow-sm h-full">
       <CardHeader className="border-b flex items-center flex-row justify-between p-3 h-16">

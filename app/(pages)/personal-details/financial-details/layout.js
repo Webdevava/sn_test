@@ -7,7 +7,6 @@ export default function FinancialDetailsLayout({ children }) {
   const router = useRouter()
   const pathname = usePathname()
   
-  // Map routes to tab values
   const tabRoutes = {
     'bank': '/personal-details/financial-details/bank',
     'loan': '/personal-details/financial-details/loan',
@@ -17,25 +16,23 @@ export default function FinancialDetailsLayout({ children }) {
     'mutual': '/personal-details/financial-details/mutual-funds'
   }
   
-  // Determine active tab based on current pathname
-  const getActiveTab = () => {
-    if (pathname.includes('/bank')) return 'bank'
-    if (pathname.includes('/loan')) return 'loan'
-    if (pathname.includes('/fd-rd')) return 'fdrd'  // Fixed this line to match the actual URL
-    if (pathname.includes('/demat-account')) return 'demat'
-    if (pathname.includes('/stocks')) return 'stocks'
-    if (pathname.includes('/mutual-funds')) return 'mutual'
-    return 'bank' // Default tab
-  }
+  const [activeTab, setActiveTab] = useState('bank')
   
-  const [activeTab, setActiveTab] = useState(getActiveTab())
-  
-  // Sync tab with URL on mount and when pathname changes
   useEffect(() => {
-    setActiveTab(getActiveTab())
+    // Determine active tab based on current pathname
+    const determineActiveTab = () => {
+      if (pathname.includes('/bank')) return 'bank'
+      if (pathname.includes('/loan')) return 'loan'
+      if (pathname.includes('/fd-rd')) return 'fdrd'
+      if (pathname.includes('/demat-account')) return 'demat'
+      if (pathname.includes('/stocks')) return 'stocks'
+      if (pathname.includes('/mutual-funds')) return 'mutual'
+      return 'bank' // Default tab
+    }
+    
+    setActiveTab(determineActiveTab())
   }, [pathname])
   
-  // Handle tab change and redirect
   const handleTabChange = (value) => {
     setActiveTab(value)
     router.push(tabRoutes[value])
@@ -89,7 +86,6 @@ export default function FinancialDetailsLayout({ children }) {
               </TabsTrigger>
             </TabsList>
           </div>
-          {/* Content area - renders children regardless of tab */}
           <div className="h-full rounded-lg">
             {children}
           </div>
