@@ -25,7 +25,7 @@ const EditPropertyDialog = ({ open, onOpenChange, insurance, onSuccess }) => {
   });
   const [errors, setErrors] = useState({});
 
-  const policyTypes = ["HOME", "OFFICE", "SHOP", "SHOWROOM", "WAREHOUSE", "PLOT", "LAND", "OTHER"];
+  const policyTypes = ["Home", "Office", "Shop", "Showroom", "Warehouse", "Plot", "Land", "Other"];
 
   useEffect(() => {
     if (insurance) {

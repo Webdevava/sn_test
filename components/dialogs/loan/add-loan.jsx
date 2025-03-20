@@ -22,16 +22,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   createSecuredLoan,
   createUnsecuredLoan,
-  uploadSecuredLoanDocument,
-  uploadUnsecuredLoanDocument,
 } from "@/lib/loan-api";
 import { listBanks } from "@/lib/bank-api";
 import { toast } from "sonner";
 
 const AddLoanDialog = ({ open, onOpenChange, onSuccess }) => {
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1);
-  const [loanId, setLoanId] = useState(null);
   const [loanType, setLoanType] = useState("Secured");
   const [formData, setFormData] = useState({
     loan_type: "",
@@ -54,7 +50,6 @@ const AddLoanDialog = ({ open, onOpenChange, onSuccess }) => {
     remaining_balance: "",
     repayment_frequency: "",
   });
-  const [file, setFile] = useState(null);
   const [errors, setErrors] = useState({});
   const [banks, setBanks] = useState([]);
 
@@ -72,8 +67,8 @@ const AddLoanDialog = ({ open, onOpenChange, onSuccess }) => {
   };
 
   useEffect(() => {
-    if (open && step === 1) fetchBanks();
-  }, [open, step]);
+    if (open) fetchBanks();
+  }, [open]);
 
   const validateLoan = () => {
     const newErrors = {};
@@ -111,17 +106,8 @@ const AddLoanDialog = ({ open, onOpenChange, onSuccess }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const validateFile = () => {
-    const newErrors = {};
-    if (!file) newErrors.file = "Please select a PDF file";
-    else if (file.type !== "application/pdf") newErrors.file = "Only PDF files are allowed";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleInputChange = (e) => {
     const { id, value, type, checked } = e.target;
-    console.log(`Changing ${id}:`, { value, checked, type }); // Debug log
     setFormData((prev) => ({
       ...prev,
       [id]: type === "checkbox" ? checked : value,
@@ -136,11 +122,6 @@ const AddLoanDialog = ({ open, onOpenChange, onSuccess }) => {
       setFormData((prev) => ({ ...prev, [field]: value }));
     }
     setErrors((prev) => ({ ...prev, [field]: "" }));
-  };
-
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-    setErrors((prev) => ({ ...prev, file: "" }));
   };
 
   const handleLoanSubmit = async (e) => {
@@ -186,37 +167,13 @@ const AddLoanDialog = ({ open, onOpenChange, onSuccess }) => {
       }
       if (response.status) {
         toast.success("Loan created successfully");
-        setLoanId(response.data.id);
-        setStep(2);
+        onSuccess();
+        handleClose();
       } else {
         throw new Error(response.message || "Failed to create loan");
       }
     } catch (error) {
       toast.error(error.message || "Failed to create loan");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFileSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateFile()) return;
-
-    setLoading(true);
-    try {
-      const response =
-        loanType === "Secured"
-          ? await uploadSecuredLoanDocument(loanId, file)
-          : await uploadUnsecuredLoanDocument(loanId, file);
-      if (response.status) {
-        toast.success("Document uploaded successfully");
-        onSuccess();
-        handleClose();
-      } else {
-        throw new Error(response.message || "Failed to upload document");
-      }
-    } catch (error) {
-      toast.error(error.message || "Failed to upload document");
     } finally {
       setLoading(false);
     }
@@ -244,9 +201,6 @@ const AddLoanDialog = ({ open, onOpenChange, onSuccess }) => {
       remaining_balance: "",
       repayment_frequency: "",
     });
-    setFile(null);
-    setLoanId(null);
-    setStep(1);
     setLoanType("Secured");
     setErrors({});
     setBanks([]);
@@ -257,227 +211,300 @@ const AddLoanDialog = ({ open, onOpenChange, onSuccess }) => {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] p-0 h-[85vh] flex flex-col">
         <DialogHeader className="p-4 border-b">
-          <DialogTitle>{step === 1 ? "Add Loan" : "Upload Document"}</DialogTitle>
+          <DialogTitle>Add Loan</DialogTitle>
         </DialogHeader>
 
-        {step === 1 ? (
-          <form onSubmit={handleLoanSubmit} className="flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto p-4 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="loanType">Loan Type</Label>
-                  <Select value={loanType} onValueChange={handleSelectChange("loanType")} required>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Secured">Secured</SelectItem>
-                      <SelectItem value="Unsecured">Unsecured</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="lender_name">Lender Name</Label>
-                  <Input
-                    id="lender_name"
-                    value={formData.lender_name}
-                    onChange={handleInputChange}
-                    required
-                    minLength={2}
-                    placeholder="Min 2 characters"
-                  />
-                  {errors.lender_name && <p className="text-red-500 text-sm">{errors.lender_name}</p>}
-                </div>
+        <form onSubmit={handleLoanSubmit} className="flex flex-col h-full">
+          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="loanType">Loan Type</Label>
+                <Select value={loanType} onValueChange={handleSelectChange("loanType")} required>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Secured">Secured</SelectItem>
+                    <SelectItem value="Unsecured">Unsecured</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="loan_amount">Loan Amount (₹)</Label>
-                  <Input
-                    id="loan_amount"
-                    type="number"
-                    step="0.01"
-                    value={formData.loan_amount}
-                    onChange={handleInputChange}
-                    required
-                    min={1}
-                    placeholder="Positive amount"
-                  />
-                  {errors.loan_amount && <p className="text-red-500 text-sm">{errors.loan_amount}</p>}
-                </div>
-                <div>
-                  <Label htmlFor="interest_rate">Interest Rate (%)</Label>
-                  <Input
-                    id="interest_rate"
-                    type="number"
-                    step="0.01"
-                    value={formData.interest_rate}
-                    onChange={handleInputChange}
-                    required
-                    min={0}
-                    placeholder="Non-negative"
-                  />
-                  {errors.interest_rate && <p className="text-red-500 text-sm">{errors.interest_rate}</p>}
-                </div>
+              <div>
+                <Label htmlFor="lender_name">Lender Name</Label>
+                <Input
+                  id="lender_name"
+                  value={formData.lender_name}
+                  onChange={handleInputChange}
+                  required
+                  minLength={2}
+                  placeholder="Min 2 characters"
+                />
+                {errors.lender_name && <p className="text-red-500 text-sm">{errors.lender_name}</p>}
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="loan_start_date">Start Date</Label>
-                  <Input
-                    id="loan_start_date"
-                    type="date"
-                    value={formData.loan_start_date}
-                    onChange={handleInputChange}
-                    max={today}
-                    required
-                  />
-                  {errors.loan_start_date && <p className="text-red-500 text-sm">{errors.loan_start_date}</p>}
-                </div>
-                {loanType === "Secured" ? (
-                  <div>
-                    <Label htmlFor="loan_end_date">End Date</Label>
-                    <Input
-                      id="loan_end_date"
-                      type="date"
-                      value={formData.loan_end_date}
-                      onChange={handleInputChange}
-                      min={formData.loan_start_date || today}
-                      required
-                    />
-                    {errors.loan_end_date && <p className="text-red-500 text-sm">{errors.loan_end_date}</p>}
-                  </div>
-                ) : (
-                  <div>
-                    <Label htmlFor="agreed_repayment_date">Repayment Date</Label>
-                    <Input
-                      id="agreed_repayment_date"
-                      type="date"
-                      value={formData.agreed_repayment_date}
-                      onChange={handleInputChange}
-                      min={formData.loan_start_date || today}
-                      required
-                    />
-                    {errors.agreed_repayment_date && <p className="text-red-500 text-sm">{errors.agreed_repayment_date}</p>}
-                  </div>
-                )}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="loan_amount">Loan Amount (₹)</Label>
+                <Input
+                  id="loan_amount"
+                  type="number"
+                  step="0.01"
+                  value={formData.loan_amount}
+                  onChange={handleInputChange}
+                  required
+                  min={1}
+                  placeholder="Positive amount"
+                />
+                {errors.loan_amount && <p className="text-red-500 text-sm">{errors.loan_amount}</p>}
               </div>
-
+              <div>
+                <Label htmlFor="interest_rate">Interest Rate (%)</Label>
+                <Input
+                  id="interest_rate"
+                  type="number"
+                  step="0.01"
+                  value={formData.interest_rate}
+                  onChange={handleInputChange}
+                  required
+                  min={0}
+                  placeholder="Non-negative"
+                />
+                {errors.interest_rate && <p className="text-red-500 text-sm">{errors.interest_rate}</p>}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="loan_start_date">Start Date</Label>
+                <Input
+                  id="loan_start_date"
+                  type="date"
+                  value={formData.loan_start_date}
+                  onChange={handleInputChange}
+                  max={today}
+                  required
+                />
+                {errors.loan_start_date && <p className="text-red-500 text-sm">{errors.loan_start_date}</p>}
+              </div>
               {loanType === "Secured" ? (
-                <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="loan_type">Loan Type</Label>
-                      <Input
-                        id="loan_type"
-                        value={formData.loan_type}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., Home Loan"
-                      />
-                      {errors.loan_type && <p className="text-red-500 text-sm">{errors.loan_type}</p>}
-                    </div>
-                    <div>
-                      <Label htmlFor="loan_account_number">Account Number</Label>
-                      <Input
-                        id="loan_account_number"
-                        value={formData.loan_account_number}
-                        onChange={(e) => {
-                          if (/^[0-9]*$/.test(e.target.value)) {
-                            handleInputChange(e);
-                          }
-                        }}
-                        required
-                        placeholder="Numbers only"
-                      />
-                      {errors.loan_account_number && <p className="text-red-500 text-sm">{errors.loan_account_number}</p>}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="emi_amount">EMI Amount (₹)</Label>
-                      <Input
-                        id="emi_amount"
-                        type="number"
-                        step="0.01"
-                        value={formData.emi_amount}
-                        onChange={handleInputChange}
-                        required
-                        min={1}
-                        placeholder="Positive amount"
-                      />
-                      {errors.emi_amount && <p className="text-red-500 text-sm">{errors.emi_amount}</p>}
-                    </div>
-                    <div>
-                      <Label htmlFor="remaining_loan_balance">Remaining Balance (₹)</Label>
-                      <Input
-                        id="remaining_loan_balance"
-                        type="number"
-                        step="0.01"
-                        value={formData.remaining_loan_balance}
-                        onChange={handleInputChange}
-                        required
-                        min={0}
-                        placeholder="Non-negative"
-                      />
-                      {errors.remaining_loan_balance && <p className="text-red-500 text-sm">{errors.remaining_loan_balance}</p>}
-                    </div>
-                  </div>
+                <div>
+                  <Label htmlFor="loan_end_date">End Date</Label>
+                  <Input
+                    id="loan_end_date"
+                    type="date"
+                    value={formData.loan_end_date}
+                    onChange={handleInputChange}
+                    min={formData.loan_start_date || today}
+                    required
+                  />
+                  {errors.loan_end_date && <p className="text-red-500 text-sm">{errors.loan_end_date}</p>}
+                </div>
+              ) : (
+                <div>
+                  <Label htmlFor="agreed_repayment_date">Repayment Date</Label>
+                  <Input
+                    id="agreed_repayment_date"
+                    type="date"
+                    value={formData.agreed_repayment_date}
+                    onChange={handleInputChange}
+                    min={formData.loan_start_date || today}
+                    required
+                  />
+                  {errors.agreed_repayment_date && <p className="text-red-500 text-sm">{errors.agreed_repayment_date}</p>}
+                </div>
+              )}
+            </div>
+
+            {loanType === "Secured" ? (
+              <>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="collateral_details">Collateral Details</Label>
+                    <Label htmlFor="loan_type">Loan Type</Label>
                     <Input
-                      id="collateral_details"
-                      value={formData.collateral_details}
+                      id="loan_type"
+                      value={formData.loan_type}
                       onChange={handleInputChange}
                       required
-                      placeholder="e.g., Property details"
+                      placeholder="e.g., Home Loan"
                     />
-                    {errors.collateral_details && <p className="text-red-500 text-sm">{errors.collateral_details}</p>}
+                    {errors.loan_type && <p className="text-red-500 text-sm">{errors.loan_type}</p>}
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="guarantor">Guarantor (Optional)</Label>
-                      <Input id="guarantor" value={formData.guarantor} onChange={handleInputChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="linked_bank_account">Linked Bank Account</Label>
-                      <Select
-                        value={formData.linked_bank_account}
-                        onValueChange={handleSelectChange("linked_bank_account")}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a bank account" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {banks.map((bank) => (
-                            <SelectItem key={bank.id} value={bank.id.toString()}>
-                              {bank.account_holder_name} - {bank.account_number}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="insurance">Insurance ID (Optional)</Label>
-                      <Input
-                        id="insurance"
-                        type="number"
-                        value={formData.insurance}
-                        onChange={handleInputChange}
-                        min={1}
-                      />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="nominee_awareness"
-                        checked={formData.nominee_awareness}
-                        onCheckedChange={(checked) =>
-                          handleInputChange({
-                            target: { id: "nominee_awareness", type: "checkbox", checked },
-                          })
+                  <div>
+                    <Label htmlFor="loan_account_number">Account Number</Label>
+                    <Input
+                      id="loan_account_number"
+                      value={formData.loan_account_number}
+                      onChange={(e) => {
+                        if (/^[0-9]*$/.test(e.target.value)) {
+                          handleInputChange(e);
                         }
-                      />
-                      <Label htmlFor="nominee_awareness">Nominee Awareness</Label>
-                    </div>
+                      }}
+                      required
+                      placeholder="Numbers only"
+                    />
+                    {errors.loan_account_number && <p className="text-red-500 text-sm">{errors.loan_account_number}</p>}
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="emi_amount">EMI Amount (₹)</Label>
+                    <Input
+                      id="emi_amount"
+                      type="number"
+                      step="0.01"
+                      value={formData.emi_amount}
+                      onChange={handleInputChange}
+                      required
+                      min={1}
+                      placeholder="Positive amount"
+                    />
+                    {errors.emi_amount && <p className="text-red-500 text-sm">{errors.emi_amount}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="remaining_loan_balance">Remaining Balance (₹)</Label>
+                    <Input
+                      id="remaining_loan_balance"
+                      type="number"
+                      step="0.01"
+                      value={formData.remaining_loan_balance}
+                      onChange={handleInputChange}
+                      required
+                      min={0}
+                      placeholder="Non-negative"
+                    />
+                    {errors.remaining_loan_balance && <p className="text-red-500 text-sm">{errors.remaining_loan_balance}</p>}
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="collateral_details">Collateral Details</Label>
+                  <Input
+                    id="collateral_details"
+                    value={formData.collateral_details}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="e.g., Property details"
+                  />
+                  {errors.collateral_details && <p className="text-red-500 text-sm">{errors.collateral_details}</p>}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="guarantor">Guarantor (Optional)</Label>
+                    <Input id="guarantor" value={formData.guarantor} onChange={handleInputChange} />
+                  </div>
+                  <div>
+                    <Label htmlFor="linked_bank_account">Linked Bank Account</Label>
+                    <Select
+                      value={formData.linked_bank_account}
+                      onValueChange={handleSelectChange("linked_bank_account")}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a bank account" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {banks.map((bank) => (
+                          <SelectItem key={bank.id} value={bank.id.toString()}>
+                            {bank.account_holder_name} - {bank.account_number}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="insurance">Insurance ID (Optional)</Label>
+                    <Input
+                      id="insurance"
+                      type="number"
+                      value={formData.insurance}
+                      onChange={handleInputChange}
+                      min={1}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="nominee_awareness"
+                      checked={formData.nominee_awareness}
+                      onCheckedChange={(checked) =>
+                        handleInputChange({
+                          target: { id: "nominee_awareness", type: "checkbox", checked },
+                        })
+                      }
+                    />
+                    <Label htmlFor="nominee_awareness">Nominee Awareness</Label>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="notes">Notes (Optional)</Label>
+                  <Input
+                    id="notes"
+                    value={formData.notes}
+                    onChange={handleInputChange}
+                    maxLength={200}
+                    placeholder="Max 200 characters"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="payment_mode">Payment Mode</Label>
+                    <Select value={formData.payment_mode} onValueChange={handleSelectChange("payment_mode")} required>
+                      <SelectTrigger><SelectValue placeholder="Select mode" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Cash">Cash</SelectItem>
+                        <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                        <SelectItem value="Cheque">Cheque</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.payment_mode && <p className="text-red-500 text-sm">{errors.payment_mode}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="repayment_frequency">Repayment Frequency</Label>
+                    <Select value={formData.repayment_frequency} onValueChange={handleSelectChange("repayment_frequency")} required>
+                      <SelectTrigger><SelectValue placeholder="Select frequency" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Monthly">Monthly</SelectItem>
+                        <SelectItem value="Quarterly">Quarterly</SelectItem>
+                        <SelectItem value="Annually">Annually</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.repayment_frequency && <p className="text-red-500 text-sm">{errors.repayment_frequency}</p>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="remaining_balance">Remaining Balance (₹)</Label>
+                    <Input
+                      id="remaining_balance"
+                      type="number"
+                      step="0.01"
+                      value={formData.remaining_balance}
+                      onChange={handleInputChange}
+                      required
+                      min={0}
+                      placeholder="Non-negative"
+                    />
+                    {errors.remaining_balance && <p className="text-red-500 text-sm">{errors.remaining_balance}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="linked_bank_account">Linked Bank Account</Label>
+                    <Select
+                      value={formData.linked_bank_account}
+                      onValueChange={handleSelectChange("linked_bank_account")}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a bank account" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {banks.map((bank) => (
+                          <SelectItem key={bank.id} value={bank.id.toString()}>
+                            {bank.account_holder_name} - {bank.account_number}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="notes">Notes (Optional)</Label>
                     <Input
@@ -488,127 +515,31 @@ const AddLoanDialog = ({ open, onOpenChange, onSuccess }) => {
                       placeholder="Max 200 characters"
                     />
                   </div>
-                </>
-              ) : (
-                <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="payment_mode">Payment Mode</Label>
-                      <Select value={formData.payment_mode} onValueChange={handleSelectChange("payment_mode")} required>
-                        <SelectTrigger><SelectValue placeholder="Select mode" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Cash">Cash</SelectItem>
-                          <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                          <SelectItem value="Cheque">Cheque</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors.payment_mode && <p className="text-red-500 text-sm">{errors.payment_mode}</p>}
-                    </div>
-                    <div>
-                      <Label htmlFor="repayment_frequency">Repayment Frequency</Label>
-                      <Select value={formData.repayment_frequency} onValueChange={handleSelectChange("repayment_frequency")} required>
-                        <SelectTrigger><SelectValue placeholder="Select frequency" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Monthly">Monthly</SelectItem>
-                          <SelectItem value="Quarterly">Quarterly</SelectItem>
-                          <SelectItem value="Annually">Annually</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors.repayment_frequency && <p className="text-red-500 text-sm">{errors.repayment_frequency}</p>}
-                    </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="nominee_awareness"
+                      checked={formData.nominee_awareness}
+                      onCheckedChange={(checked) =>
+                        handleInputChange({
+                          target: { id: "nominee_awareness", type: "checkbox", checked },
+                        })
+                      }
+                    />
+                    <Label htmlFor="nominee_awareness">Nominee Awareness</Label>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="remaining_balance">Remaining Balance (₹)</Label>
-                      <Input
-                        id="remaining_balance"
-                        type="number"
-                        step="0.01"
-                        value={formData.remaining_balance}
-                        onChange={handleInputChange}
-                        required
-                        min={0}
-                        placeholder="Non-negative"
-                      />
-                      {errors.remaining_balance && <p className="text-red-500 text-sm">{errors.remaining_balance}</p>}
-                    </div>
-                    <div>
-                      <Label htmlFor="linked_bank_account">Linked Bank Account</Label>
-                      <Select
-                        value={formData.linked_bank_account}
-                        onValueChange={handleSelectChange("linked_bank_account")}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a bank account" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {banks.map((bank) => (
-                            <SelectItem key={bank.id} value={bank.id.toString()}>
-                              {bank.account_holder_name} - {bank.account_number}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="notes">Notes (Optional)</Label>
-                      <Input
-                        id="notes"
-                        value={formData.notes}
-                        onChange={handleInputChange}
-                        maxLength={200}
-                        placeholder="Max 200 characters"
-                      />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="nominee_awareness"
-                        checked={formData.nominee_awareness}
-                        onCheckedChange={(checked) =>
-                          handleInputChange({
-                            target: { id: "nominee_awareness", type: "checkbox", checked },
-                          })
-                        }
-                      />
-                      <Label htmlFor="nominee_awareness">Nominee Awareness</Label>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-            <DialogFooter className="border-t p-4">
-              <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Next"}
-              </Button>
-            </DialogFooter>
-          </form>
-        ) : (
-          <form onSubmit={handleFileSubmit} className="flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto p-4">
-              <div className="grid gap-4">
-                <div>
-                  <Label htmlFor="file">Upload PDF Document</Label>
-                  <Input id="file" type="file" accept="application/pdf" onChange={handleFileChange} />
-                  {errors.file && <p className="text-red-500 text-sm">{errors.file}</p>}
-                  <p className="text-sm text-gray-500">Upload a PDF document related to the loan.</p>
                 </div>
-              </div>
-            </div>
-            <DialogFooter className="border-t p-4">
-              <Button type="button" variant="outline" onClick={() => setStep(1)} disabled={loading}>
-                Back
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Uploading..." : "Upload"}
-              </Button>
-            </DialogFooter>
-          </form>
-        )}
+              </>
+            )}
+          </div>
+          <DialogFooter className="border-t p-4">
+            <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

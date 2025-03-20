@@ -132,7 +132,7 @@ const MutualFundsPage = () => {
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {mutualFunds.map((fund) => (
-            <Card key={fund.id} className={`p-0 transition-all hover:shadow-lg hover:-translate-y-1 ${fund.mutual_fund_category === "Recurring" ? "bg-blue-50 border-blue-200" : "bg-green-50 border-green-200"}`}>
+            <Card key={fund.id} className={`p-0 transition-all hover:shadow-lg hover:-translate-y-1`}>
               <CardHeader className="p-6 pb-0">
                 <CardTitle className="flex justify-between items-center">
                   {fund.fund_name}

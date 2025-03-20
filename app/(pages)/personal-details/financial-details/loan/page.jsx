@@ -132,9 +132,9 @@ const LoansPage = () => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1  gap-6">
           {loans.map((loan) => (
-            <Card key={loan.id} className={`p-0 transition-all hover:shadow-lg hover:-translate-y-1 ${loan.type === "Secured" ? "bg-blue-50 border-blue-200" : "bg-green-50 border-green-200"}`}>
+            <Card key={loan.id} className={`p-0 transition-all hover:shadow-lg hover:-translate-y-1 `}>
               <CardHeader className="p-6 pb-0">
                 <CardTitle className="flex justify-between items-center">
                   {loan.lender_name}

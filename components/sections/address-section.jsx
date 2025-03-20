@@ -600,7 +600,7 @@ export default function AddressesPage() {
             <CardHeader className="flex flex-row items-center justify-between pb-0 p-3">
               <CardTitle className="text-sm font-bold">Addresses</CardTitle>
             </CardHeader>
-            <CardContent className="p-3 pt-0 overflow-auto max-h-44">
+            <CardContent className="p-3 pt-0 overflow-auto max-h-96">
               <ul className="space-y-2">
                 {addresses.map((address, index) => (
                   <li 
