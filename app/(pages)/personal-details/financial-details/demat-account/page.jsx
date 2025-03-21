@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { listDematAccounts, deleteDematAccount } from "@/lib/demat-account-api";
 import { Toaster, toast } from "sonner";
 import AddDematDialog from "@/components/dialogs/demat/add-demat";
 import DematCard from "@/components/cards/demat-card";
-import { Bank as BankIcon, Plus } from "@phosphor-icons/react";
+import { Bank as BankIcon } from "@phosphor-icons/react"; // Keeping BankIcon as per original
+import { listDematAccounts, deleteDematAccount } from "@/lib/demat-account-api";
 
 export default function DematAccountPage() {
   const [dematAccounts, setDematAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
 
   const fetchDematAccounts = async () => {
     try {
@@ -46,52 +46,68 @@ export default function DematAccountPage() {
 
   if (loading) {
     return (
-      <div className="text-center py-20 animate-pulse">
+      <div className="flex justify-center items-center h-[60vh] animate-pulse">
         <BankIcon size={48} className="mx-auto mb-4 text-gray-400" />
-        <p className="text-gray-500">Loading demat accounts...</p>
+        <p className="text-gray-500 text-sm sm:text-base">Loading demat accounts...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-20 bg-gray-50 rounded-lg">
-        <BankIcon size={48} className="mx-auto mb-4 text-red-400" />
-        <p className="text-red-500 text-lg">{error}</p>
-        <p className="text-gray-400 mt-2">
+      <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
+        <BankIcon size={36} className="mb-4 text-red-400 sm:size-48" />
+        <p className="text-red-500 text-base sm:text-lg">{error}</p>
+        <p className="text-gray-400 mt-2 text-sm sm:text-base">
           Something went wrong. Try adding a demat account or refresh the page.
         </p>
         <div className="mt-4">
-          <AddDematDialog onDematAdded={fetchDematAccounts} />
+          <AddDematDialog
+            openAddDialog={openAddDialog}
+            setOpenAddDialog={setOpenAddDialog}
+            onDematAdded={fetchDematAccounts}
+          />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto py-6 px-4 sm:py-12 sm:px-6 lg:px-8 relative">
       <Toaster richColors />
-      <div className="flex justify-between items-center mb-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
         <div className="flex items-center gap-3">
-          {/* <BankIcon size={32} className="text-primary" /> */}
-          <h1 className="text-xl font-bold">Demat Accounts ({dematAccounts.length})</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">
+            Demat Accounts ({dematAccounts.length})
+          </h1>
         </div>
-        <AddDematDialog onDematAdded={fetchDematAccounts} />
+        <div className="hidden sm:block">
+          <AddDematDialog
+            openAddDialog={openAddDialog}
+            setOpenAddDialog={setOpenAddDialog}
+            onDematAdded={fetchDematAccounts}
+          />
+        </div>
       </div>
 
       {dematAccounts.length === 0 ? (
-        <div className="text-center py-20 bg-gray-50 rounded-lg">
-          <BankIcon size={48} className="mx-auto mb-4 text-gray-400" />
-          <p className="text-gray-500 text-lg">No demat accounts found</p>
-          <p className="text-gray-400 mt-2">
+        <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
+          <BankIcon size={36} className="mb-4 text-gray-400 sm:size-48" />
+          <p className="text-gray-500 text-base sm:text-lg">No demat accounts found</p>
+          <p className="text-gray-400 mt-2 text-sm sm:text-base">
             Click below to create your first demat account
           </p>
           <div className="mt-4">
-            <AddDematDialog onDematAdded={fetchDematAccounts} />
+            <AddDematDialog
+              openAddDialog={openAddDialog}
+              setOpenAddDialog={setOpenAddDialog}
+              onDematAdded={fetchDematAccounts}
+            />
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6 pb-16 sm:pb-0">
           {dematAccounts.map((account) => (
             <DematCard
               key={account.id}
@@ -102,6 +118,17 @@ export default function DematAccountPage() {
           ))}
         </div>
       )}
+
+      {/* Fixed Add Button for Mobile */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t sm:hidden w-full">
+        <div className="flex items-center justify-center">
+          <AddDematDialog
+            openAddDialog={openAddDialog}
+            setOpenAddDialog={setOpenAddDialog}
+            onDematAdded={fetchDematAccounts}
+          />
+        </div>
+      </div>
     </div>
   );
 }

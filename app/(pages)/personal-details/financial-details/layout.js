@@ -38,55 +38,85 @@ export default function FinancialDetailsLayout({ children }) {
     router.push(tabRoutes[value])
   }
   
+  // Scroll to active tab when tab changes
+  useEffect(() => {
+    const activeElement = document.querySelector(`[data-state="active"]`)
+    if (activeElement) {
+      // Ensure the active tab is visible by scrolling to it
+      const tabsList = document.querySelector('[role="tablist"]')
+      if (tabsList) {
+        const tabsRect = tabsList.getBoundingClientRect()
+        const activeRect = activeElement.getBoundingClientRect()
+        
+        // Calculate the scroll position to center the active tab
+        const scrollPos = activeElement.offsetLeft - tabsList.offsetLeft - (tabsRect.width / 2) + (activeRect.width / 2)
+        
+        tabsList.scrollLeft = Math.max(0, scrollPos)
+      }
+    }
+  }, [activeTab])
+  
   return (
     <div className="flex w-full h-full overflow-hidden">
-      <main className="flex-1 overflow-auto p-4">
+      <main className="flex-1 p-4">
         <Tabs
           value={activeTab}
           onValueChange={handleTabChange}
           className="w-full h-full flex flex-col"
         >
-          <div className="rounded-lg p-2">
-            <TabsList className="bg-popover w-fit">
+          <div className="rounded-lg p-2 overflow-hidden">
+            <TabsList className="bg-popover w-full overflow-x-auto flex no-scrollbar whitespace-nowrap">
               <TabsTrigger
                 value="bank"
-                className="data-[state=active]:bg-foreground data-[state=active]:text-background w-fit min-w-24"
+                className="data-[state=active]:bg-foreground data-[state=active]:text-background min-w-16 sm:min-w-24 flex-shrink-0"
               >
                 Bank
               </TabsTrigger>
               <TabsTrigger
                 value="loan"
-                className="data-[state=active]:bg-foreground data-[state=active]:text-background w-fit min-w-24"
+                className="data-[state=active]:bg-foreground data-[state=active]:text-background min-w-16 sm:min-w-24 flex-shrink-0"
               >
                 Loan
               </TabsTrigger>
               <TabsTrigger
                 value="fdrd"
-                className="data-[state=active]:bg-foreground data-[state=active]:text-background w-fit min-w-24"
+                className="data-[state=active]:bg-foreground data-[state=active]:text-background min-w-16 sm:min-w-24 flex-shrink-0"
               >
                 FDRD
               </TabsTrigger>
               <TabsTrigger
                 value="demat"
-                className="data-[state=active]:bg-foreground data-[state=active]:text-background w-fit min-w-24"
+                className="data-[state=active]:bg-foreground data-[state=active]:text-background min-w-16 sm:min-w-24 flex-shrink-0"
               >
                 Demat
               </TabsTrigger>
               <TabsTrigger
                 value="stocks"
-                className="data-[state=active]:bg-foreground data-[state=active]:text-background w-fit min-w-24"
+                className="data-[state=active]:bg-foreground data-[state=active]:text-background min-w-16 sm:min-w-24 flex-shrink-0"
               >
                 Stocks
               </TabsTrigger>
               <TabsTrigger
                 value="mutual"
-                className="data-[state=active]:bg-foreground data-[state=active]:text-background w-fit min-w-24"
+                className="data-[state=active]:bg-foreground data-[state=active]:text-background min-w-16 sm:min-w-24 flex-shrink-0"
               >
                 Mutual
               </TabsTrigger>
             </TabsList>
           </div>
-          <div className="h-full rounded-lg">
+          
+          {/* Add custom scrollbar hiding styles */}
+          <style jsx global>{`
+            .no-scrollbar {
+              -ms-overflow-style: none;  /* IE and Edge */
+              scrollbar-width: none;  /* Firefox */
+            }
+            .no-scrollbar::-webkit-scrollbar {
+              display: none;  /* Chrome, Safari and Opera */
+            }
+          `}</style>
+          
+          <div className="h-full overflow-auto rounded-lg">
             {children}
           </div>
         </Tabs>

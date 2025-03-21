@@ -62,7 +62,7 @@ const MainTopbar = () => {
       <div className="flex items-center gap-4">
         <div className="relative w-32 h-10">
           <Image
-            src="/logos/logo_lg.png"
+            src="/logos/logo_white_lg.png"
             alt="Logo"
             fill
             className="object-contain"

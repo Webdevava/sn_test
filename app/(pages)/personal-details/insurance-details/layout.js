@@ -9,11 +9,11 @@ export default function InsuranceDetailsLayout({ children }) {
   const pathname = usePathname()
   
   const tabRoutes = {
-    'health': '/personal-details/insurance-details/health',
     'life': '/personal-details/insurance-details/life',
-    'property': '/personal-details/insurance-details/property',
+    'health': '/personal-details/insurance-details/health',
     'travel': '/personal-details/insurance-details/travel',
-    'vehicle': '/personal-details/insurance-details/vehicle'
+    'vehicle': '/personal-details/insurance-details/vehicle',
+    'property': '/personal-details/insurance-details/property',
   }
 
   const [activeTab, setActiveTab] = useState('health')
@@ -39,7 +39,7 @@ export default function InsuranceDetailsLayout({ children }) {
 
   return (
     <div className="flex w-full h-full overflow-hidden">
-      <main className="flex-1 overflow-auto p-4">
+      <main className="flex-1  p-4">
         <Tabs 
           value={activeTab} 
           onValueChange={handleTabChange}
@@ -47,12 +47,7 @@ export default function InsuranceDetailsLayout({ children }) {
         >
           <div className="rounded-lg p-2">
             <TabsList className="bg-popover w-fit">
-              <TabsTrigger
-                value="health"
-                className="data-[state=active]:bg-foreground data-[state=active]:text-background min-w-24"
-              >
-                Health
-              </TabsTrigger>
+
               <TabsTrigger
                 value="life"
                 className="data-[state=active]:bg-foreground data-[state=active]:text-background min-w-24"
@@ -60,11 +55,12 @@ export default function InsuranceDetailsLayout({ children }) {
                 Life
               </TabsTrigger>
               <TabsTrigger
-                value="property"
+                value="health"
                 className="data-[state=active]:bg-foreground data-[state=active]:text-background min-w-24"
               >
-                Property
+                Health
               </TabsTrigger>
+
               <TabsTrigger
                 value="travel"
                 className="data-[state=active]:bg-foreground data-[state=active]:text-background min-w-24"
@@ -77,10 +73,17 @@ export default function InsuranceDetailsLayout({ children }) {
               >
                 Vehicle
               </TabsTrigger>
+
+              <TabsTrigger
+                value="property"
+                className="data-[state=active]:bg-foreground data-[state=active]:text-background min-w-24"
+              >
+                Property
+              </TabsTrigger>
             </TabsList>
           </div>
           
-          <div className="h-full bg-background rounded-lg">
+          <div className="h-full rounded-lg overflow-auto">
             {children}
           </div>
         </Tabs>

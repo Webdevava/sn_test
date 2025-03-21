@@ -58,7 +58,7 @@ export default function Navbar() {
         opacity: progress * 0.8,
         blur: progress * 12,
         background: `rgba(249, 250, 251, ${progress * 0.95})`,
-        shadow: progress > 0.5 ? "shadow-md" : "shadow-none",
+        // shadow: progress > 0.5 ? "shadow-md" : "shadow-none",
       };
     }
   };
@@ -84,25 +84,33 @@ export default function Navbar() {
             : "bg-transparent w-full"
         }`}
       >
-        <div className=" px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-2 sm:gap-4 md:gap-10 h-16 md:h-20">
             <Link href="/" className="flex items-center space-x-2">
               <div className="flex items-center justify-center">
                 <img
-                  src="/logos/logo_lg.png"
+                  src={
+                    scrollY > 20
+                      ? "/logos/logo_lg.png"
+                      : "/logos/logo_white_lg.png"
+                  }
                   alt="Logo"
                   className="h-8 block md:hidden"
                 />
                 <img
                   src={
-                    scrollY > 20 ? "/logos/logo_sm.png" : "/logos/logo_md.png"
+                    scrollY > 20
+                      ? "/logos/logo_sm.png"
+                      : "/logos/logo_white_md.png"
                   }
                   alt="Logo"
                   className="h-8 hidden md:block lg:hidden"
                 />
                 <img
                   src={
-                    scrollY > 20 ? "/logos/logo_sm.png" : "/logos/logo_lg.png"
+                    scrollY > 20
+                      ? "/logos/logo_sm.png"
+                      : "/logos/logo_white_lg.png"
                   }
                   alt="Logo"
                   className="h-8 hidden lg:block"
@@ -110,7 +118,7 @@ export default function Navbar() {
               </div>
             </Link>
 
-            <nav className="hidden md:flex items-center space-x-4 ">
+            <nav className="hidden md:flex items-center space-x-4">
               {[
                 { name: "Home", href: "#home", id: "home" },
                 { name: "About Us", href: "#about-us", id: "about-us" },
@@ -127,10 +135,9 @@ export default function Navbar() {
                   key={item.name}
                   href={item.href}
                   onClick={(e) => handleSmoothScroll(e, item.id)}
-                  //   className="text-white font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap"
                   className={`${
                     scrollY > 20
-                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap" +
+                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap " +
                         navStyles.shadow
                       : "text-white font-medium hover:text-foreground text-sm lg:text-sm cursor-pointer text-nowrap"
                   }`}
@@ -147,7 +154,7 @@ export default function Navbar() {
                   size="sm"
                   className={`${
                     scrollY > 20
-                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap" +
+                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap " +
                         navStyles.shadow
                       : "text-white font-medium hover:text-foreground text-sm lg:text-sm cursor-pointer text-nowrap"
                   }`}
@@ -199,20 +206,20 @@ export default function Navbar() {
               <a
                 key={item.name}
                 href={`#${item.id}`}
-                className="block py-2 px-4 text-slate-700 font-medium border-b border-slate-100 text-sm"
+                className="block py-2 px-4 text-slate-700 font-medium text-sm"
                 onClick={(e) => handleSmoothScroll(e, item.id)}
               >
                 {item.name}
               </a>
             ))}
             <div className="flex flex-col space-y-2 pt-3">
-            <AuthDialog type="login">
+              <AuthDialog type="login">
                 <Button
                   variant="ghost"
                   size="sm"
                   className={`${
                     scrollY > 20
-                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap" +
+                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap " +
                         navStyles.shadow
                       : "text-white font-medium hover:text-foreground text-sm lg:text-sm cursor-pointer text-nowrap"
                   }`}

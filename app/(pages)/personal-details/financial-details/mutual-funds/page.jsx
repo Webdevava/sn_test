@@ -80,36 +80,42 @@ const MutualFundsPage = () => {
 
   if (loading && !mutualFunds.length) {
     return (
-      <div className="text-center py-20 animate-pulse">
+      <div className="flex justify-center items-center h-[60vh] animate-pulse">
         <FundIcon size={48} className="mx-auto mb-4 text-gray-400" />
-        <p className="text-gray-500">Loading mutual funds...</p>
+        <p className="text-gray-500 text-sm sm:text-base">Loading mutual funds...</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto py-6 px-4 sm:py-12 sm:px-6 lg:px-8 relative">
       <Toaster richColors />
-      <div className="flex justify-between items-center mb-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
         <div className="flex items-center gap-3">
-          {/* <FundIcon size={32} className="text-primary" /> */}
-          <h1 className="text-xl font-bold">Mutual Funds ({mutualFunds.length})</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">
+            Mutual Funds ({mutualFunds.length})
+          </h1>
         </div>
-        <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
-          <FundIcon size={20} />
-          Add Mutual Fund
-        </Button>
+        <div className="hidden sm:block">
+          <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
+            <FundIcon size={20} />
+            Add Mutual Fund
+          </Button>
+        </div>
       </div>
 
-      {/* Always render dialogs regardless of state */}
+      {/* Always render dialogs */}
       <AddMutualFundDialog open={openAddDialog} onOpenChange={setOpenAddDialog} onSuccess={handleSuccess} />
       <EditMutualFundDialog open={openEditDialog} onOpenChange={setOpenEditDialog} mutualFund={selectedFund} onSuccess={handleSuccess} />
 
       {error ? (
-        <div className="text-center py-20 bg-gray-50 rounded-lg">
-          <FundIcon size={48} className="mx-auto mb-4 text-red-400" />
-          <p className="text-red-500 text-lg">{error}</p>
-          <p className="text-gray-400 mt-2">Something went wrong. Try adding a mutual fund or refresh the page.</p>
+        <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
+          <FundIcon size={36} className="mb-4 text-red-400 sm:size-48" />
+          <p className="text-red-500 text-base sm:text-lg">{error}</p>
+          <p className="text-gray-400 mt-2 text-sm sm:text-base">
+            Something went wrong. Try adding a mutual fund or refresh the page.
+          </p>
           <div className="mt-4">
             <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
               <FundIcon size={20} />
@@ -118,10 +124,12 @@ const MutualFundsPage = () => {
           </div>
         </div>
       ) : mutualFunds.length === 0 ? (
-        <div className="text-center py-20 bg-gray-50 rounded-lg">
-          <FundIcon size={48} className="mx-auto mb-4 text-gray-400" />
-          <p className="text-gray-500 text-lg">No mutual funds found</p>
-          <p className="text-gray-400 mt-2">Click below to add your first mutual fund</p>
+        <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
+          <FundIcon size={36} className="mb-4 text-gray-400 sm:size-48" />
+          <p className="text-gray-500 text-base sm:text-lg">No mutual funds found</p>
+          <p className="text-gray-400 mt-2 text-sm sm:text-base">
+            Click below to add your first mutual fund
+          </p>
           <div className="mt-4">
             <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
               <FundIcon size={20} />
@@ -130,59 +138,59 @@ const MutualFundsPage = () => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6 pb-16 sm:pb-0">
           {mutualFunds.map((fund) => (
-            <Card key={fund.id} className={`p-0 transition-all hover:shadow-lg hover:-translate-y-1`}>
-              <CardHeader className="p-6 pb-0">
-                <CardTitle className="flex justify-between items-center">
+            <Card key={fund.id} className="p-0 transition-all hover:shadow-lg hover:-translate-y-1">
+              <CardHeader className="p-4 sm:p-6 pb-0">
+                <CardTitle className="flex justify-between items-center text-base sm:text-lg">
                   {fund.fund_name}
                   <Badge className={fund.mutual_fund_category === "Recurring" ? "bg-blue-500" : "bg-green-500"}>{fund.mutual_fund_category}</Badge>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <CardContent className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <div className="bg-popover p-2 rounded-lg">
                     <p className="text-xs text-muted-foreground">Fund Type</p>
-                    <p className="font-semibold mt-2 truncate">{fund.fund_type || "N/A"}</p>
+                    <p className="font-semibold mt-1 sm:mt-2 truncate">{fund.fund_type || "N/A"}</p>
                   </div>
                   <div className="bg-popover p-2 rounded-lg">
                     <p className="text-xs text-muted-foreground">Units</p>
-                    <p className="font-semibold mt-2 truncate">{fund.units || "0"}</p>
+                    <p className="font-semibold mt-1 sm:mt-2 truncate">{fund.units || "0"}</p>
                   </div>
                   {fund.invested_amount && fund.invested_amount !== "None" && (
                     <div className="bg-popover p-2 rounded-lg">
                       <p className="text-xs text-muted-foreground">Invested Amount</p>
-                      <p className="font-semibold mt-2 truncate">₹{fund.invested_amount || "0"}</p>
+                      <p className="font-semibold mt-1 sm:mt-2 truncate">₹{fund.invested_amount || "0"}</p>
                     </div>
                   )}
                   {fund.folio_number && (
                     <div className="bg-popover p-2 rounded-lg">
                       <p className="text-xs text-muted-foreground">Folio Number</p>
-                      <p className="font-semibold mt-2 truncate">{fund.folio_number || "N/A"}</p>
+                      <p className="font-semibold mt-1 sm:mt-2 truncate">{fund.folio_number || "N/A"}</p>
                     </div>
                   )}
                   {fund.mutual_fund_category === "Recurring" && (
                     <>
                       <div className="bg-popover p-2 rounded-lg">
                         <p className="text-xs text-muted-foreground">SIP Amount</p>
-                        <p className="font-semibold mt-2 truncate">₹{fund.sip_amount || "0"}</p>
+                        <p className="font-semibold mt-1 sm:mt-2 truncate">₹{fund.sip_amount || "0"}</p>
                       </div>
                       <div className="bg-popover p-2 rounded-lg">
                         <p className="text-xs text-muted-foreground">SIP Frequency</p>
-                        <p className="font-semibold mt-2 truncate">{fund.sip_frequency || "N/A"}</p>
+                        <p className="font-semibold mt-1 sm:mt-2 truncate">{fund.sip_frequency || "N/A"}</p>
                       </div>
                       <div className="bg-popover p-2 rounded-lg">
                         <p className="text-xs text-muted-foreground">SIP Day</p>
-                        <p className="font-semibold mt-2 truncate">{fund.sip_date || "N/A"}</p>
+                        <p className="font-semibold mt-1 sm:mt-2 truncate">{fund.sip_date || "N/A"}</p>
                       </div>
                     </>
                   )}
                 </div>
               </CardContent>
-              <CardFooter className="border-t p-2 justify-between">
-                <div className="bg-background/85 text-xs p-2 rounded-lg flex gap-3 items-center w-60 justify-between">
+              <CardFooter className="border-t p-2 sm:p-4 justify-between flex-col sm:flex-row gap-2 sm:gap-0">
+                <div className="bg-background/85 text-xs p-2 rounded-lg flex gap-2 sm:gap-3 items-center w-full sm:w-60 justify-between">
                   <span className="truncate">{fund.document?.split("/").pop() || "Document"}</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     <Button variant="ghost" size="icon" onClick={() => handleView(fund)}>
                       <Eye className="h-4 w-4 text-primary" />
                     </Button>
@@ -191,11 +199,18 @@ const MutualFundsPage = () => {
                     </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
                   <Button variant="outline" size="icon" onClick={() => handleEdit(fund)}>
                     <PenLine className="h-4 w-4 text-foreground" />
                   </Button>
-                  <Button variant="outline" size="icon" onClick={() => { setSelectedDeleteId(fund.id); setDeleteDialogOpen(true); }}>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      setSelectedDeleteId(fund.id);
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
                     <Trash className="h-4 w-4 text-foreground" />
                   </Button>
                 </div>
@@ -204,6 +219,16 @@ const MutualFundsPage = () => {
           ))}
         </div>
       )}
+
+      {/* Fixed Add Button for Mobile */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t sm:hidden w-full">
+        <div className="flex items-center justify-center">
+          <Button onClick={() => setOpenAddDialog(true)} className="gap-2 w-full">
+            <FundIcon size={20} />
+            Add Mutual Fund
+          </Button>
+        </div>
+      </div>
 
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="sm:max-w-[90%] sm:max-h-[90%]">

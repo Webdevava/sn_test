@@ -94,14 +94,15 @@ export default function AuthDialog({ children, type: initialType = "login" }) {
   };
 
   const validateSignUpStep1 = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return (
       formData.firstName &&
       formData.lastName &&
       formData.phoneNumber.length === 10 &&
-      formData.email.includes("@")
+      formData.email &&
+      emailRegex.test(formData.email)
     );
   };
-
   const validateSignUpStep2 = () => {
     return (
       formData.password.length >= 8 &&

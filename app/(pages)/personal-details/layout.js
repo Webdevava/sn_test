@@ -95,7 +95,7 @@ export default function PersonalDetailsLayout({ children }) {
                 </TabsList>
               </div>
               
-              <div className="h-full bg-popover rounded-lg mt-4">
+              <div className="h-full bg-popover overflow-auto rounded-lg mt-4">
                 {children}
               </div>
             </Tabs>

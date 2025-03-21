@@ -272,7 +272,8 @@ export default function FamilyPage() {
       )}
 
       {/* Fixed Add Button for Mobile */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t sm:hidden">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t sm:hidden w-full ">
+        <div className="flex items-center justify-center">
         <AddFamilyDialog
           openAddDialog={openAddDialog}
           setOpenAddDialog={setOpenAddDialog}
@@ -282,6 +283,7 @@ export default function FamilyPage() {
           setCustomRelationship={setCustomRelationship}
           handleAddFamilyMember={handleAddFamilyMember}
         />
+        </div>
       </div>
 
       <EditFamilyDialog
