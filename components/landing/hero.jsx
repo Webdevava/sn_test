@@ -38,10 +38,10 @@ export default function Hero() {
             variants={fadeInUp}
             className="space-y-6 md:space-y-8 text-center lg:text-left max-w-lg mx-auto lg:max-w-none lg:mx-0"
           >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-foreground">
+            <h1 className="text-3xl sm:text-4xl md:text-4xl lg:text-6xl font-bold leading-tight text-foreground">
               <span className="block text-white">Your Life. Your Legacy.</span>
-              <span className="block text-white">Protected</span>
-              <span className="block text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold"> & Shared Only When It Matters.</span>
+              {/* <span className="block text-white">Protected</span> */}
+              <span className="block text-xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold">Protected & Shared Only When It Matters.</span>
             </h1>
             <p className="text-base sm:text-lg md:text-lg text-foreground">
             Your hard-earned assets, your hidden investments, and your responsibilities should never be lost or forgotten. Store them securely and ensure they reach your loved ones at the right time, in the right way.
@@ -50,7 +50,7 @@ export default function Hero() {
               <AuthDialog type="signup">
                 <Button
                   size="lg"
-                  className="bg-primary text-white hover:bg-primary/90 px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
+                  className="bg-blue-700 text-white hover:bg-primary/90 px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
                 >
                   Get Started Today
                 </Button>
@@ -73,10 +73,10 @@ export default function Hero() {
                 { value: "99.9%", text: "Uptime Guarantee" },
               ].map((metric, index) => (
                 <div key={index} className="flex flex-col items-center lg:items-start">
-                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-secondary">
                     {metric.value}
                   </p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">{metric.text}</p>
+                  <p className="text-xs sm:text-sm ">{metric.text}</p>
                 </div>
               ))}
             </motion.div>

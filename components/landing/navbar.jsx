@@ -177,9 +177,9 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? (
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5 text-background" />
               ) : (
-                <MenuIcon className="h-5 w-5" />
+                <MenuIcon className="h-5 w-5 text-background" />
               )}
             </button>
           </div>
