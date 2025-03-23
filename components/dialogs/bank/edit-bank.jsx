@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -205,233 +206,249 @@ export default function EditBankDialog({ bank, onBankUpdated }) {
           Edit
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[600px] p-0 h-[85vh] flex flex-col">
+        <DialogHeader className="p-4 border-b">
           <DialogTitle>
             {step === 1 ? "Edit Bank Account" : step === 2 ? "Add Nominees" : "Upload Passbook"}
           </DialogTitle>
         </DialogHeader>
-        <div className="flex items-center justify-between mb-4">
-          <span className={`text-sm ${step === 1 ? "font-bold" : ""}`}>1. Bank Details</span>
-          <span className={`text-sm ${step === 2 ? "font-bold" : ""}`}>2. Nominees</span>
-          <span className={`text-sm ${step === 3 ? "font-bold" : ""}`}>3. Passbook</span>
-        </div>
 
-        {step === 1 && (
-          <form className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Account Holder Name</Label>
-                <Input
-                  value={formData.account_holder_name}
-                  onChange={(e) => setFormData({ ...formData, account_holder_name: e.target.value })}
-                  required
-                  minLength={2}
-                  placeholder="Min 2 characters"
-                />
-              </div>
-              <div>
-                <Label>Account Number</Label>
-                <Input
-                  value={formData.account_number}
-                  onChange={(e) => {
-                    if (/^[0-9]*$/.test(e.target.value)) {
-                      setFormData({ ...formData, account_number: e.target.value });
-                    }
-                  }}
-                  required
-                  placeholder="Numbers only"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>IFSC Code</Label>
-                <Input
-                  value={formData.ifsc_code}
-                  onChange={handleIfscChange}
-                  required
-                  maxLength={11}
-                  placeholder="11 characters"
-                />
-              </div>
-              <div>
-                <Label>Bank Name</Label>
-                <Input value={formData.bank_name} disabled />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Branch Name</Label>
-                <Input value={formData.branch_name} disabled />
-              </div>
-              <div>
-                <Label>Account Type</Label>
-                <Select
-                  value={formData.account_type}
-                  onValueChange={(value) => setFormData({ ...formData, account_type: value })}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Savings">Savings</SelectItem>
-                    <SelectItem value="Current">Current</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Mobile Number</Label>
-                <Input
-                  value={formData.linked_mobile_number}
-                  onChange={(e) => {
-                    if (/^[0-9]*$/.test(e.target.value)) {
-                      setFormData({ ...formData, linked_mobile_number: e.target.value.slice(0, 10) });
-                    }
-                  }}
-                  maxLength={10}
-                  placeholder="10 digits only"
-                />
-              </div>
-              <div>
-                <Label>Balance</Label>
-                <Input
-                  type="number"
-                  value={formData.account_balance}
-                  onChange={(e) => setFormData({ ...formData, account_balance: e.target.value })}
-                  required
-                  min={0}
-                  step="0.01"
-                  placeholder="Amount"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Opening Date</Label>
-                <Input
-                  type="date"
-                  value={formData.account_opening_date}
-                  onChange={(e) => setFormData({ ...formData, account_opening_date: e.target.value })}
-                  max={today}
-                  required
-                />
-              </div>
-              <div>
-                <Label>Status</Label>
-                <Select
-                  value={formData.account_status}
-                  onValueChange={(value) => setFormData({ ...formData, account_status: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <Label>Notes</Label>
-              <Input
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                maxLength={200}
-                placeholder="Max 200 characters"
-              />
-            </div>
-            <Button
-              type="button"
-              onClick={handleNext}
-              disabled={!isBankFormValid() || loading}
-              className="w-full"
-            >
-              {loading ? "Updating..." : "Next"}
-              <ArrowRight size={20} className="ml-2" />
-            </Button>
-          </form>
-        )}
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between p-4 border-b">
+            <span className={`text-sm ${step === 1 ? "font-bold" : ""}`}>1. Bank Details</span>
+            <span className={`text-sm ${step === 2 ? "font-bold" : ""}`}>2. Nominees</span>
+            <span className={`text-sm ${step === 3 ? "font-bold" : ""}`}>3. Passbook</span>
+          </div>
 
-        {step === 2 && (
-          <div className="space-y-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Select</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Relationship</TableHead>
-                  <TableHead>Percentage</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {familyMembers.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedNominees[member.id] !== undefined}
-                        onCheckedChange={(checked) =>
-                          handleNomineeChange(member.id, checked, selectedNominees[member.id])
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>{`${member.first_name} ${member.last_name}`}</TableCell>
-                    <TableCell>{member.relationship}</TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={selectedNominees[member.id] || ""}
-                        onChange={(e) => handlePercentageChange(member.id, e.target.value)}
-                        disabled={selectedNominees[member.id] === undefined}
-                        className="w-20"
-                      />
-                    </TableCell>
+          {step === 1 && (
+            <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="flex-1 overflow-y-auto p-4 space-y-6 max-h-[65vh]">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Account Holder Name</Label>
+                  <Input
+                    value={formData.account_holder_name}
+                    onChange={(e) => setFormData({ ...formData, account_holder_name: e.target.value })}
+                    required
+                    minLength={2}
+                    placeholder="e.g., John Doe"
+                  />
+                </div>
+                <div>
+                  <Label>Account Number</Label>
+                  <Input
+                    value={formData.account_number}
+                    onChange={(e) => {
+                      if (/^[0-9]*$/.test(e.target.value)) {
+                        setFormData({ ...formData, account_number: e.target.value });
+                      }
+                    }}
+                    required
+                    placeholder="e.g., 123456789012"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>IFSC Code</Label>
+                  <Input
+                    value={formData.ifsc_code}
+                    onChange={handleIfscChange}
+                    required
+                    maxLength={11}
+                    placeholder="e.g., HDFC0000123"
+                  />
+                </div>
+                <div>
+                  <Label>Bank Name</Label>
+                  <Input value={formData.bank_name} disabled placeholder="e.g., HDFC Bank" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Branch Name</Label>
+                  <Input value={formData.branch_name} disabled placeholder="e.g., Mumbai Main" />
+                </div>
+                <div>
+                  <Label>Account Type</Label>
+                  <Select
+                    value={formData.account_type}
+                    onValueChange={(value) => setFormData({ ...formData, account_type: value })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Savings">Savings</SelectItem>
+                      <SelectItem value="Current">Current</SelectItem>
+                      <SelectItem value="Salary">Salary</SelectItem>
+                      <SelectItem value="NRE">NRE</SelectItem>
+                      <SelectItem value="NRO">NRO</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Mobile Number</Label>
+                  <Input
+                    value={formData.linked_mobile_number}
+                    onChange={(e) => {
+                      if (/^[0-9]*$/.test(e.target.value)) {
+                        setFormData({ ...formData, linked_mobile_number: e.target.value.slice(0, 10) });
+                      }
+                    }}
+                    maxLength={10}
+                    placeholder="e.g., 9876543210"
+                  />
+                </div>
+                <div>
+                  <Label>Balance (₹)</Label>
+                  <Input
+                    type="number"
+                    value={formData.account_balance}
+                    onChange={(e) => setFormData({ ...formData, account_balance: e.target.value })}
+                    required
+                    min={0}
+                    step="0.01"
+                    placeholder="e.g., 50000"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Opening Date</Label>
+                  <Input
+                    type="date"
+                    value={formData.account_opening_date}
+                    onChange={(e) => setFormData({ ...formData, account_opening_date: e.target.value })}
+                    max={today}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Select
+                    value={formData.account_status}
+                    onValueChange={(value) => setFormData({ ...formData, account_status: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Dormant">Dormant</SelectItem>
+                      <SelectItem value="Closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label>Notes</Label>
+                <Input
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  maxLength={200}
+                  placeholder="e.g., Primary savings account"
+                />
+              </div>
+            </form>
+          )}
+
+          {step === 2 && (
+            <div className="flex-1 overflow-y-auto p-4 space-y-6 max-h-[70vh]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Select</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Relationship</TableHead>
+                    <TableHead>Percentage</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={handleBack} className="gap-2">
-                <ArrowLeft size={20} />
-                Back
-              </Button>
-              <Button
-                onClick={handleNext}
-                disabled={loading || Object.keys(selectedNominees).length === 0}
-                className="gap-2"
-              >
-                {loading ? "Adding..." : "Next"}
-                <ArrowRight size={20} />
-              </Button>
+                </TableHeader>
+                <TableBody>
+                  {familyMembers.map((member) => (
+                    <TableRow key={member.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedNominees[member.id] !== undefined}
+                          onCheckedChange={(checked) =>
+                            handleNomineeChange(member.id, checked, selectedNominees[member.id])
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>{`${member.first_name} ${member.last_name}`}</TableCell>
+                      <TableCell>{member.relationship}</TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={selectedNominees[member.id] || ""}
+                          onChange={(e) => handlePercentageChange(member.id, e.target.value)}
+                          disabled={selectedNominees[member.id] === undefined}
+                          className="w-20"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-          </div>
-        )}
+          )}
 
-        {step === 3 && (
-          <div className="space-y-4">
-            <div>
-              <Label>Upload Passbook (PDF only)</Label>
-              <Input type="file" accept="application/pdf" onChange={handlePassbookUpload} />
+          {step === 3 && (
+            <div className="flex-1 overflow-y-auto p-4 space-y-6 max-h-[70vh]">
+              <div>
+                <Label>Upload Passbook (PDF only)</Label>
+                <Input type="file" accept="application/pdf" onChange={handlePassbookUpload} />
+              </div>
+              {passbook && <p>Uploaded: {passbook.name}</p>}
             </div>
-            {passbook && <p>Uploaded: {passbook.name}</p>}
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={handleBack} className="gap-2">
-                <ArrowLeft size={20} />
-                Back
-              </Button>
-              <Button onClick={handleFinish} className="gap-2">
-                Finish
-                <ArrowRight size={20} />
-              </Button>
-            </div>
-          </div>
-        )}
+          )}
+
+          <DialogFooter className="border-t p-4">
+            {step === 1 && (
+              <>
+                <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+                  Cancel
+                </Button>
+                <Button type="submit" onClick={handleNext} disabled={!isBankFormValid() || loading}>
+                  {loading ? "Updating..." : "Next"}
+                  <ArrowRight size={20} className="ml-2" />
+                </Button>
+              </>
+            )}
+            {step === 2 && (
+              <>
+                <Button variant="outline" onClick={handleBack} className="gap-2" disabled={loading}>
+                  <ArrowLeft size={20} />
+                  Back
+                </Button>
+                <Button
+                  onClick={handleNext}
+                  disabled={loading || Object.keys(selectedNominees).length === 0}
+                  className="gap-2"
+                >
+                  {loading ? "Adding..." : "Next"}
+                  <ArrowRight size={20} />
+                </Button>
+              </>
+            )}
+            {step === 3 && (
+              <>
+                <Button variant="outline" onClick={handleBack} className="gap-2" disabled={loading}>
+                  <ArrowLeft size={20} />
+                  Back
+                </Button>
+                <Button onClick={handleFinish} className="gap-2" disabled={loading}>
+                  Finish
+                  <ArrowRight size={20} />
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

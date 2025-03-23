@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { MenuIcon, X, ChevronDown } from "lucide-react";
+import { MenuIcon, X } from "lucide-react";
 import AuthDialog from "../dialogs/auth/auth-dialog";
 
 export default function Navbar() {
@@ -58,7 +58,6 @@ export default function Navbar() {
         opacity: progress * 0.8,
         blur: progress * 12,
         background: `rgba(249, 250, 251, ${progress * 0.95})`,
-        // shadow: progress > 0.5 ? "shadow-md" : "shadow-none",
       };
     }
   };
@@ -79,8 +78,7 @@ export default function Navbar() {
         }}
         className={`fixed top-0 left-0 right-0 z-50 ${
           scrollY > 20
-            ? "rounded-b-xl lg:rounded-full w-full lg:w-auto lg:max-w-4xl lg:mx-auto lg:mt-2 border border-slate-200 " +
-              navStyles.shadow
+            ? "rounded-b-xl lg:rounded-full w-full lg:w-auto lg:max-w-4xl lg:mx-auto lg:mt-2 shadow-[-10px_-10px_30px_4px_rgba(0,0,0,0.1),_10px_10px_30px_4px_rgba(45,78,255,0.15)]"
             : "bg-transparent w-full"
         }`}
       >
@@ -91,29 +89,11 @@ export default function Navbar() {
                 <img
                   src={
                     scrollY > 20
-                      ? "/logos/logo_lg.png"
-                      : "/logos/logo_white_lg.png"
-                  }
-                  alt="Logo"
-                  className="h-8 block md:hidden"
-                />
-                <img
-                  src={
-                    scrollY > 20
                       ? "/logos/logo_sm.png"
-                      : "/logos/logo_white_md.png"
+                      : "/logos/logo_white_sm.png"
                   }
                   alt="Logo"
-                  className="h-8 hidden md:block lg:hidden"
-                />
-                <img
-                  src={
-                    scrollY > 20
-                      ? "/logos/logo_sm.png"
-                      : "/logos/logo_white_lg.png"
-                  }
-                  alt="Logo"
-                  className="h-8 hidden lg:block"
+                  className="h-7 sm:h-8 md:h-9 lg:h-10"
                 />
               </div>
             </Link>
@@ -137,8 +117,7 @@ export default function Navbar() {
                   onClick={(e) => handleSmoothScroll(e, item.id)}
                   className={`${
                     scrollY > 20
-                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap " +
-                        navStyles.shadow
+                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap "
                       : "text-white font-medium hover:text-foreground text-sm lg:text-sm cursor-pointer text-nowrap"
                   }`}
                 >
@@ -154,8 +133,7 @@ export default function Navbar() {
                   size="sm"
                   className={`${
                     scrollY > 20
-                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap " +
-                        navStyles.shadow
+                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap "
                       : "text-white font-medium hover:text-foreground text-sm lg:text-sm cursor-pointer text-nowrap"
                   }`}
                 >
@@ -173,13 +151,21 @@ export default function Navbar() {
             </div>
 
             <button
-              className="md:hidden text-slate-700"
+              className="md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? (
-                <X className="h-5 w-5 text-background" />
+                <X
+                  className={`h-5 w-5 ${
+                    scrollY > 20 ? "text-black" : "text-background"
+                  }`}
+                />
               ) : (
-                <MenuIcon className="h-5 w-5 text-background" />
+                <MenuIcon
+                  className={`h-5 w-5 ${
+                    scrollY > 20 ? "text-black" : "text-background"
+                  }`}
+                />
               )}
             </button>
           </div>
@@ -219,8 +205,7 @@ export default function Navbar() {
                   size="sm"
                   className={`${
                     scrollY > 20
-                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap " +
-                        navStyles.shadow
+                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap "
                       : "text-white font-medium hover:text-foreground text-sm lg:text-sm cursor-pointer text-nowrap"
                   }`}
                 >

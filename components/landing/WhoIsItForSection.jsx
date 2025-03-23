@@ -81,13 +81,13 @@ export default function AudienceSection() {
   return (
     <section
       ref={sectionRef}
-      className="bg-background py-12 md:py-16 lg:py-20 relative overflow-hidden"
+      className="py-12 md:py-16 lg:py-20 relative overflow-hidden"
       id="audience"
     >
       {/* Subtle Radial Background */}
-      <div className="absolute inset-0 z-0">
+      {/* <div className="absolute inset-0 z-0">
         <div className="w-full h-full bg-gradient-radial from-primary/5 via-background to-background" />
-      </div>
+      </div> */}
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Heading */}
@@ -106,7 +106,7 @@ export default function AudienceSection() {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-foreground">
             Who Is This For?
           </h1>
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
+          <p className="text-base md:text-lg text-muted-foreground">
             Smart Nominee was designed with everyone in mind. No matter your situation, we have solutions to protect what matters most to you.
           </p>
         </motion.div>

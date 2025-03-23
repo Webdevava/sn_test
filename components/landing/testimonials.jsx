@@ -43,7 +43,7 @@ export default function TestimonialSection() {
   return (
     <section
       ref={sectionRef}
-      className="bg-background py-12 md:py-16 lg:py-20 min-h-[48rem]"
+      className="py-12 md:py-16 lg:py-20 min-h-[48rem]"
       id="testimonials"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

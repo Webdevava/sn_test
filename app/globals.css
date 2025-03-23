@@ -151,8 +151,8 @@ body {
 
 
 @font-face {
-  font-family: Sora;
-  src: url('/fonts/Sora.ttf');
+  font-family: onest;
+  src: url('/fonts/onest.ttf');
 }
 
 @font-face {
@@ -161,7 +161,7 @@ body {
 }
 
 body{
-  font-family: Sora,'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: onest,'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 h1,h2,h3,h4,h5,h6{

@@ -82,7 +82,7 @@ export default function PricingSection() {
   return (
     <section
       ref={sectionRef}
-      className="bg-background py-8 md:py-12 lg:py-16"
+      className="py-8 md:py-12 lg:py-16"
       id="pricing"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

@@ -24,7 +24,7 @@ export default function AboutSection() {
   return (
     <section
       ref={sectionRef}
-      className="bg-background flex items-center py-12 md:py-16 lg:py-20"
+      className="flex items-center py-12 md:py-16 lg:py-20"
       id="about-us"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

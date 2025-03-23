@@ -25,7 +25,28 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-primary via-primary to-background flex flex-col justify-between pt-20 pb-0">
+    <section className="relative min-h-screen w-full overflow-hidden flex flex-col justify-between pt-20 pb-0" id="home">
+      {/* Bold gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-primary via-blue-600 to-background z-0" />
+      
+      {/* Prominent decorative elements */}
+      <div className="absolute top-0 left-0 w-full h-full z-0">
+        
+        {/* Wave pattern */}
+        <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-background to-transparent z-10" />
+        <div className="absolute bottom-0 left-0 w-full">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full h-auto opacity-20">
+            <path fill="#246" fillOpacity="0.3" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+          </svg>
+        </div>
+        
+        {/* Dot pattern overlay */}
+        {/* <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px)",
+          backgroundSize: "20px 20px"
+        }} /> */}
+      </div>
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex-grow flex items-center">
         <motion.div
           className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center w-full"
@@ -73,7 +94,7 @@ export default function Hero() {
                 { value: "99.9%", text: "Uptime Guarantee" },
               ].map((metric, index) => (
                 <div key={index} className="flex flex-col items-center lg:items-start">
-                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-secondary">
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-card">
                     {metric.value}
                   </p>
                   <p className="text-xs sm:text-sm ">{metric.text}</p>
@@ -108,8 +129,9 @@ export default function Hero() {
         </div>
       </motion.div>
 
-      {/* Subtle Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent z-0" />
+      {/* Light effect overlays */}
+      {/* <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-primary to-transparent opacity-60 z-0" />
+      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-background to-transparent z-0" /> */}
     </section>
   );
 }

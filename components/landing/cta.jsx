@@ -28,7 +28,7 @@ export default function CTASection() {
     >
       {/* Split background */}
       <div className="absolute inset-0">
-        <div className="h-1/2 bg-background"></div>
+        <div className="h-1/2 bg-transparent"></div>
         <div className="h-1/2 bg-gray-900"></div>
       </div>
       

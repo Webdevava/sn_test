@@ -81,11 +81,11 @@ export default function WhyChooseUsSection() {
   return (
     <section
       ref={sectionRef}
-      className="bg-background py-12 md:py-16 lg:py-20 relative overflow-hidden"
+      className="py-12 md:py-16 lg:py-20 relative overflow-hidden"
       id="why-choose-us"
     >
       {/* Subtle Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-background z-0" />
+      {/* <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-background z-0" /> */}
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Heading */}
@@ -104,7 +104,7 @@ export default function WhyChooseUsSection() {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-foreground">
             Why We Stand Out
           </h1>
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl ">
+          <p className="text-base md:text-lg text-muted-foreground ">
             We’re more than a tool—we’re your partner in securing your legacy with unmatched care and control.
           </p>
         </motion.div>

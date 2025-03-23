@@ -211,13 +211,13 @@ export default function Footer() {
                 <div className="h-8 w-8 bg-primary/20 rounded-full flex items-center justify-center">
                   <Phone size={16} className="text-primary" />
                 </div>
-                <span className="text-gray-400">+1 800 555 1234</span>
+                <span className="text-gray-400">+91 8788335151</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 bg-primary/20 rounded-full flex items-center justify-center">
                   <MapPin size={16} className="text-primary" />
                 </div>
-                <span className="text-gray-400">123 Legacy Lane, Secure City</span>
+                <span className="text-gray-400">6th Fr, Business Arcade, Pune</span>
               </div>
             </div>
           </div>

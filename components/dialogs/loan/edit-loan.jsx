@@ -232,7 +232,7 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
           <DialogTitle>Edit Loan</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 space-y-6 max-h-[70vh]">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="lender_name">Lender Name</Label>
@@ -242,7 +242,7 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                   onChange={handleInputChange}
                   required
                   minLength={2}
-                  placeholder="Min 2 characters"
+                  placeholder="e.g., HDFC Bank"
                 />
                 {errors.lender_name && <p className="text-red-500 text-sm">{errors.lender_name}</p>}
               </div>
@@ -256,7 +256,7 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                   onChange={handleInputChange}
                   required
                   min={1}
-                  placeholder="Positive amount"
+                  placeholder="e.g., 500000"
                 />
                 {errors.loan_amount && <p className="text-red-500 text-sm">{errors.loan_amount}</p>}
               </div>
@@ -272,7 +272,7 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                   onChange={handleInputChange}
                   required
                   min={0}
-                  placeholder="Non-negative"
+                  placeholder="e.g., 8.5"
                 />
                 {errors.interest_rate && <p className="text-red-500 text-sm">{errors.interest_rate}</p>}
               </div>
@@ -315,7 +315,7 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                         }
                       }}
                       required
-                      placeholder="Numbers only"
+                      placeholder="e.g., 1234567890"
                     />
                     {errors.loan_account_number && <p className="text-red-500 text-sm">{errors.loan_account_number}</p>}
                   </div>
@@ -331,7 +331,7 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       onChange={handleInputChange}
                       required
                       min={1}
-                      placeholder="Positive amount"
+                      placeholder="e.g., 25000"
                     />
                     {errors.emi_amount && <p className="text-red-500 text-sm">{errors.emi_amount}</p>}
                   </div>
@@ -359,13 +359,18 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       onChange={handleInputChange}
                       required
                       min={0}
-                      placeholder="Non-negative"
+                      placeholder="e.g., 300000"
                     />
                     {errors.remaining_loan_balance && <p className="text-red-500 text-sm">{errors.remaining_loan_balance}</p>}
                   </div>
                   <div>
                     <Label htmlFor="guarantor">Guarantor (Optional)</Label>
-                    <Input id="guarantor" value={formData.guarantor} onChange={handleInputChange} />
+                    <Input 
+                      id="guarantor" 
+                      value={formData.guarantor} 
+                      onChange={handleInputChange}
+                      placeholder="e.g., John Doe"
+                    />
                   </div>
                 </div>
                 <div>
@@ -375,7 +380,7 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                     value={formData.collateral_details}
                     onChange={handleInputChange}
                     required
-                    placeholder="e.g., Property details"
+                    placeholder="e.g., Flat No. 101, Mumbai"
                   />
                   {errors.collateral_details && <p className="text-red-500 text-sm">{errors.collateral_details}</p>}
                 </div>
@@ -406,6 +411,7 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       value={formData.insurance}
                       onChange={handleInputChange}
                       min={1}
+                      placeholder="e.g., 98765"
                     />
                   </div>
                 </div>
@@ -417,7 +423,7 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       value={formData.notes}
                       onChange={handleInputChange}
                       maxLength={200}
-                      placeholder="Max 200 characters"
+                      placeholder="e.g., Loan for home renovation"
                     />
                   </div>
                   <div className="flex items-center space-x-2">
@@ -473,7 +479,7 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       onChange={handleInputChange}
                       required
                       min={0}
-                      placeholder="Non-negative"
+                      placeholder="e.g., 150000"
                     />
                     {errors.remaining_balance && <p className="text-red-500 text-sm">{errors.remaining_balance}</p>}
                   </div>
@@ -516,7 +522,7 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       value={formData.notes}
                       onChange={handleInputChange}
                       maxLength={200}
-                      placeholder="Max 200 characters"
+                      placeholder="e.g., Personal loan from friend"
                     />
                   </div>
                 </div>

@@ -1,37 +1,31 @@
 "use client";
 
+import { useRef } from "react";
 import { motion } from "framer-motion";
 import {
   Bell,
   CheckCircle,
-} from "@phosphor-icons/react/dist/ssr";
+  SlidersHorizontal,
+  CaretRight,
+  EnvelopeSimple,
+  ChatText,
+  Phone,
+  BellSimple
+} from "@phosphor-icons/react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { SlidersHorizontal } from "@phosphor-icons/react";
-import { useRef } from "react";
 
 export default function NotificationsVerificationSection() {
   const sectionRef = useRef(null);
 
+  // Simplified animations with reduced motion
   const sectionVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 10 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
+        duration: 0.4,
         ease: "easeOut",
       },
     },
@@ -39,48 +33,42 @@ export default function NotificationsVerificationSection() {
 
   return (
     <section
-    ref={sectionRef}
-    className="bg-background py-12 md:py-16 lg:py-20 relative overflow-hidden"
-    id="verification"
-  >
+      ref={sectionRef}
+      className="py-12 md:py-16 lg:py-20 relative overflow-hidden"
+      id="verification"
+    >
       <div className="container mx-auto px-6">
         <motion.div
           variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
-          className=" space-y-12"
+          className="space-y-12"
         >
           {/* Heading */}
           <motion.div
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          className="space-y-6 md:space-y-8 mb-10 md:mb-14 text-left"
-        >
-          <div className="bg-gradient-to-r from-primary/35 via-primary/15 to-transparent w-fit px-3 py-1 rounded-md">
-            <h2 className="text-sm md:text-base font-medium text-primary tracking-wide">
-              Verification
-            </h2>
-          </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-foreground">
-            Notifications & Final Verification
-          </h1>
-        </motion.div>
+            variants={sectionVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            className="space-y-6 md:space-y-8 mb-10 md:mb-14 text-left"
+          >
+            <div className="bg-gradient-to-r from-primary/35 via-primary/15 to-transparent w-fit px-3 py-1 rounded-md">
+              <h2 className="text-sm md:text-base font-medium text-primary tracking-wide">
+                Verification
+              </h2>
+            </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-foreground">
+              Notifications & Final Verification
+            </h1>
+          </motion.div>
 
           {/* Main content */}
-          <motion.div 
-            variants={itemVariants}
-            className="grid md:grid-cols-2 gap-8"
-          >
+          <div className="grid md:grid-cols-2 gap-8">
             {/* Left column with cards */}
             <div className="space-y-8 grid">
               {/* No Immediate Notification */}
-              <motion.div 
-                whileHover={{ y: -5 }}
-                className="bg-card p-6 rounded-xl border border-border hover:border-primary/50 shadow-sm hover:shadow-md transition-all"
-              >
+              <div className="bg-card p-6 rounded-xl border border-border hover:border-primary/50 shadow-sm transition-all">
                 <div className="flex items-start gap-4">
                   <Bell 
                     size={32} 
@@ -99,13 +87,10 @@ export default function NotificationsVerificationSection() {
                     </p>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* Final Confirmation Step */}
-              <motion.div 
-                whileHover={{ y: -5 }}
-                className="bg-card p-6 rounded-xl border border-border hover:border-primary/50 shadow-sm hover:shadow-md transition-all"
-              >
+              <div className="bg-card p-6 rounded-xl border border-border hover:border-primary/50 shadow-sm transition-all">
                 <div className="flex items-start gap-4">
                   <CheckCircle 
                     size={32} 
@@ -121,13 +106,10 @@ export default function NotificationsVerificationSection() {
                     </p>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* Absolute Control */}
-              <motion.div 
-                whileHover={{ y: -5 }}
-                className="bg-card p-6 rounded-xl border border-border hover:border-primary/50 shadow-sm hover:shadow-md transition-all"
-              >
+              <div className="bg-card p-6 rounded-xl border border-border hover:border-primary/50 shadow-sm transition-all">
                 <div className="flex items-start gap-4">
                   <SlidersHorizontal
                     size={32} 
@@ -143,47 +125,83 @@ export default function NotificationsVerificationSection() {
                     </p>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
 
-            {/* Right column with illustration and emphasis */}
+            {/* Right column with redesigned illustration and emphasis */}
             <div className="flex flex-col justify-center">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.5 }}
-                className="relative p-10 bg-primary/5 rounded-2xl border border-primary/20"
-              >
-                {/* Decorative elements */}
-                {/* <div className="absolute -top-4 -right-4 w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-                  <Bell size={24} className="text-primary" weight="fill" />
-                </div>
-                <div className="absolute -bottom-4 -left-4 w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-                  <CheckCircle size={24} className="text-primary" weight="fill" />
-                </div> */}
-
-                {/* Verification illustration */}
-                <div className="flex flex-col items-center space-y-4 mb-8">
-                  <div className="w-32 h-32 bg-primary/10 rounded-full flex items-center justify-center">
-                    <div
-                      className="w-24 h-24 border-2 border-primary/30 border-dashed rounded-full flex items-center justify-center"
-                    >
-                      <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
-                        <Bell size={32} className="text-primary" weight="duotone" />
+              <div className="p-8 bg-primary/5 rounded-xl border border-primary/20">
+                {/* Verification illustration - redesigned with a better notification visualization */}
+                <div className="mb-8">
+                  <div className="bg-card p-5 rounded-lg border border-border">
+                    <h4 className="font-medium text-foreground mb-4 flex items-center">
+                      <Bell weight="duotone" className="text-primary mr-2" size={20} />
+                      Notification Channels
+                    </h4>
+                    
+                    <div className="flex flex-wrap items-center justify-center gap-3">
+                      <div className="flex items-center bg-primary/10 px-4 py-2 rounded-full">
+                        <EnvelopeSimple size={18} className="text-primary mr-2" weight="duotone" />
+                        <span className="text-sm font-medium text-primary">Email</span>
+                      </div>
+                      
+                      <div className="flex items-center bg-primary/10 px-4 py-2 rounded-full">
+                        <ChatText size={18} className="text-primary mr-2" weight="duotone" />
+                        <span className="text-sm font-medium text-primary">SMS</span>
+                      </div>
+                      
+                      <div className="flex items-center bg-primary/10 px-4 py-2 rounded-full">
+                        <Phone size={18} className="text-primary mr-2" weight="duotone" />
+                        <span className="text-sm font-medium text-primary">Call</span>
+                      </div>
+                      
+                      <div className="flex items-center bg-primary/10 px-4 py-2 rounded-full">
+                        <BellSimple size={18} className="text-primary mr-2" weight="duotone" />
+                        <span className="text-sm font-medium text-primary">In-App</span>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2 my-4">
-                    <Badge className="bg-primary/20 text-primary hover:bg-primary/30">Email</Badge>
-                    <Badge className="bg-primary/20 text-primary hover:bg-primary/30">SMS</Badge>
-                    <Badge className="bg-primary/20 text-primary hover:bg-primary/30">Call</Badge>
-                    <Badge className="bg-primary/20 text-primary hover:bg-primary/30">In-App</Badge>
+                    
                   </div>
                 </div>
 
-                {/* Quote */}
-                <Alert className="bg-primary/10 border-primary/20">
+
+
+                {/* Verification Timeline - redesigned to match card style */}
+                <div className="my-8 bg-card p-5 rounded-lg border border-border">
+                  <h4 className="font-medium text-foreground mb-4 flex items-center">
+                    <CheckCircle weight="duotone" className="text-primary mr-2" size={20} />
+                    Verification Process
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mr-3">
+                        <CaretRight size={14} className="text-primary" weight="bold" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">First notification sent</p>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mr-3">
+                        <CaretRight size={14} className="text-primary" weight="bold" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">Follow-up check</p>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mr-3">
+                        <CaretRight size={14} className="text-primary" weight="bold" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">Final verification</p>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center mr-3">
+                        <CheckCircle size={14} className="text-white" weight="fill" />
+                      </div>
+                      <p className="text-sm font-medium text-primary">Nominee notification</p>
+                    </div>
+                  </div>
+                </div>
+
+                                {/* Quote */}
+                                <Alert className="bg-primary/10 border-primary/20">
                   <AlertTitle className="text-foreground font-semibold text-lg">
                     Your Peace of Mind
                   </AlertTitle>
@@ -191,34 +209,9 @@ export default function NotificationsVerificationSection() {
                     "You are always in control, even when you're not around."
                   </AlertDescription>
                 </Alert>
-
-                {/* Verification Timeline */}
-                <div className="mt-8">
-                  <div className="relative pl-8  space-y-4">
-                    <div className="relative">
-                      <div className="absolute -left-10 top-1 w-4 h-4 bg-primary rounded-full"></div>
-                      <div className="w-0.5 h-8 bg-primary/20 absolute -left-[2.05rem] top-2"></div>
-                      <p className="text-sm text-muted-foreground">First notification sent</p>
-                    </div>
-                    <div className="relative">
-                      <div className="absolute -left-10 top-1 w-4 h-4 bg-primary rounded-full"></div>
-                      <div className="w-0.5 h-8 bg-primary/20 absolute -left-[2.05rem] top-2"></div>
-                      <p className="text-sm text-muted-foreground">Follow-up check</p>
-                    </div>
-                    <div className="relative">
-                      <div className="absolute -left-10 top-1 w-4 h-4 bg-primary rounded-full"></div>
-                      <div className="w-0.5 h-8 bg-primary/20 absolute -left-[2.05rem] top-2"></div>
-                      <p className="text-sm text-muted-foreground">Final verification</p>
-                    </div>
-                    <div className="relative">
-                      <div className="absolute -left-10 top-1 w-4 h-4 bg-primary/40 rounded-full border-2 border-primary"></div>
-                      <p className="text-sm font-medium text-primary">Nominee notification</p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
+              </div>
             </div>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
     </section>
