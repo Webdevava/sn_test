@@ -21,11 +21,7 @@ export default function CTASection() {
   };
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative"
-      id="cta"
-    >
+    <section ref={sectionRef} className="relative" id="cta">
       {/* Split background */}
       <div className="absolute inset-0">
         <div className="h-1/2 bg-transparent"></div>
@@ -60,7 +56,7 @@ export default function CTASection() {
               <AuthDialog type="signup">
                 <Button
                   size="lg"
-                  className="bg-primary text-white hover:bg-primary/90 w-full sm:w-auto py-6 px-8 rounded-lg font-medium flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
+                  className="bg-primary text-white hover:bg-primary/90 w-full sm:w-64 py-6 px-8 rounded-lg font-medium flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
                 >
                   <span>Sign Up Here</span>
                   <ArrowRight size={18} weight="bold" />
@@ -70,7 +66,7 @@ export default function CTASection() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full sm:w-auto py-6 px-8 rounded-lg font-medium flex items-center justify-center gap-2 border-primary/30 text-primary hover:bg-primary/10 transition-all"
+                  className="w-full sm:w-64 py-6 px-8 rounded-lg font-medium flex items-center justify-center gap-2 border-primary/30 text-primary hover:bg-primary/10 transition-all"
                 >
                   <span>See How It Works</span>
                   <ArrowRight size={18} weight="bold" />

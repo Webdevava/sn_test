@@ -32,7 +32,6 @@ const BankCard = ({ bank, onEdit, onDelete }) => {
   const [nominees, setNominees] = useState([]);
   const [loadingNominees, setLoadingNominees] = useState(true);
 
-  // Fetch nominee details
   useEffect(() => {
     const fetchNomineeDetails = async () => {
       try {
@@ -50,13 +49,45 @@ const BankCard = ({ bank, onEdit, onDelete }) => {
     fetchNomineeDetails();
   }, [bank.id]);
 
-  const handleDownload = () => {
-    const link = document.createElement("a");
-    link.href = bank.passbook_or_statement || "#";
-    link.download = bank.passbook_or_statement?.split("/").pop() || "document";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async () => {
+    try {
+      // Fetch the file with proper response handling
+      const response = await fetch(bank.passbook_or_statement, {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'omit',
+        headers: {
+          'Accept': 'application/pdf',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Get the blob
+      const blob = await response.blob();
+      const filename = bank.passbook_or_statement.split("/").pop() || "document.pdf";
+
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("Document downloaded successfully");
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast.error("Failed to download document: " + error.message);
+    }
   };
 
   const handleView = () => {
@@ -79,7 +110,6 @@ const BankCard = ({ bank, onEdit, onDelete }) => {
     try {
       const response = await deleteNominee("bank", selectedNominee.id);
       if (response.status) {
-        // Update nominees list
         setNominees(nominees.filter(item => item.id !== selectedNominee.id));
         toast.success("Nominee deleted successfully");
       } else {
@@ -93,8 +123,6 @@ const BankCard = ({ bank, onEdit, onDelete }) => {
       setSelectedNominee(null);
     }
   };
-
-  const isImage = bank.passbook_or_statement?.match(/\.(jpeg|jpg|png)$/i);
 
   return (
     <>
@@ -130,11 +158,10 @@ const BankCard = ({ bank, onEdit, onDelete }) => {
             </div>
             <div className="bg-popover p-2 rounded-lg">
               <p className="text-xs text-muted-foreground">Balance</p>
-              <p className="font-semibold mt-2 truncate">₹{bank.account_balance	 || "0"}</p>
+              <p className="font-semibold mt-2 truncate">₹{bank.account_balance || "0"}</p>
             </div>
           </div>
           
-          {/* Nominee Table Section */}
           {loadingNominees ? (
             <div className="mt-4">
               <p className="text-sm">Loading nominees...</p>
@@ -215,7 +242,6 @@ const BankCard = ({ bank, onEdit, onDelete }) => {
         </CardFooter>
       </Card>
 
-      {/* Passbook/Statement View Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="sm:max-w-[90%] sm:max-h-[90%]">
           <DialogHeader>
@@ -223,28 +249,21 @@ const BankCard = ({ bank, onEdit, onDelete }) => {
           </DialogHeader>
           <div className="w-full h-full overflow-auto">
             {bank.passbook_or_statement && (
-              <>
-                {isImage ? (
-                  <img
-                    src={bank.passbook_or_statement}
-                    alt="Passbook/Statement"
-                    className="w-full h-auto"
-                  />
-                ) : (
-                  <iframe
-                    src={bank.passbook_or_statement}
-                    width="100%"
-                    height="600px"
-                    title="Passbook/Statement"
-                  />
-                )}
-              </>
+              <object
+                data={bank.passbook_or_statement}
+                type="application/pdf"
+                width="100%"
+                height="600px"
+              >
+                <p>
+                  Your browser cannot display the PDF. Please use the download button instead.
+                </p>
+              </object>
             )}
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Bank Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -270,7 +289,6 @@ const BankCard = ({ bank, onEdit, onDelete }) => {
         </DialogContent>
       </Dialog>
 
-      {/* Nominee Delete Confirmation Dialog */}
       <Dialog open={deleteNomineeDialogOpen} onOpenChange={setDeleteNomineeDialogOpen}>
         <DialogContent>
           <DialogHeader>

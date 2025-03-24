@@ -19,37 +19,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { validateIfsc, updateBank, addPassbook } from "@/lib/bank-api";
-import { listFamilyMembers } from "@/lib/family-api";
-import { createNominee } from "@/lib/nominee-api";
+import { validateIfsc, updateBank } from "@/lib/bank-api";
 import { toast } from "sonner";
-import { PencilSimple, Upload, ArrowRight, ArrowLeft } from "@phosphor-icons/react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
+import { PencilSimple } from "@phosphor-icons/react";
 
 export default function EditBankDialog({ bank, onBankUpdated }) {
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState(bank);
   const [isValidIfsc, setIsValidIfsc] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [familyMembers, setFamilyMembers] = useState([]);
-  const [selectedNominees, setSelectedNominees] = useState({});
-  const [passbook, setPassbook] = useState(null);
 
   const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
     setFormData(bank);
     setIsValidIfsc(true);
-    setPassbook(bank.passbook_or_statement ? { name: "Existing Passbook" } : null);
   }, [bank]);
 
   const isBankFormValid = () => {
@@ -100,102 +84,26 @@ export default function EditBankDialog({ bank, onBankUpdated }) {
     }
   };
 
-  const fetchFamilyMembers = async () => {
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!isBankFormValid()) return;
+
     try {
-      const response = await listFamilyMembers();
+      setLoading(true);
+      const response = await updateBank(bank.id, {
+        ...formData,
+        account_balance: parseFloat(formData.account_balance),
+      });
       if (response.status) {
-        setFamilyMembers(response.data);
+        toast.success("Bank account updated successfully");
+        setOpen(false);
+        onBankUpdated();
       }
     } catch (error) {
-      toast.error("Failed to fetch family members");
+      toast.error("Failed to update bank account");
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleNext = async () => {
-    if (step === 1) {
-      try {
-        setLoading(true);
-        const response = await updateBank(bank.id, {
-          ...formData,
-          account_balance: parseFloat(formData.account_balance),
-        });
-        if (response.status) {
-          await fetchFamilyMembers();
-          setStep(2);
-          toast.success("Bank account updated successfully");
-        }
-      } catch (error) {
-        toast.error("Failed to update bank account");
-      } finally {
-        setLoading(false);
-      }
-    } else if (step === 2) {
-      try {
-        setLoading(true);
-        const nomineePromises = Object.entries(selectedNominees)
-          .filter(([, percentage]) => percentage > 0)
-          .map(([nomineeId, percentage]) =>
-            createNominee("bank", {
-              nominee_id: parseInt(nomineeId),
-              percentage: parseInt(percentage),
-              asset_id: bank.id,
-            })
-          );
-        await Promise.all(nomineePromises);
-        toast.success("Nominees added successfully");
-        setStep(3);
-      } catch (error) {
-        toast.error("Failed to add nominees");
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const handleBack = () => {
-    if (step > 1) setStep(step - 1);
-  };
-
-  const handleNomineeChange = (memberId, checked, percentage) => {
-    setSelectedNominees((prev) => ({
-      ...prev,
-      [memberId]: checked ? (percentage || 0) : undefined,
-    }));
-  };
-
-  const handlePercentageChange = (memberId, value) => {
-    const percentage = Math.min(100, Math.max(0, parseInt(value) || 0));
-    setSelectedNominees((prev) => ({
-      ...prev,
-      [memberId]: percentage,
-    }));
-  };
-
-  const handlePassbookUpload = async (e) => {
-    const file = e.target.files[0];
-    if (file && file.type === "application/pdf") {
-      try {
-        setLoading(true);
-        const response = await addPassbook(bank.id, file);
-        if (response.status) {
-          setPassbook(file);
-          toast.success("Passbook uploaded successfully");
-        }
-      } catch (error) {
-        toast.error("Failed to upload passbook");
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      toast.error("Please upload a PDF file");
-    }
-  };
-
-  const handleFinish = () => {
-    setOpen(false);
-    onBankUpdated();
-    setStep(1);
-    setSelectedNominees({});
   };
 
   return (
@@ -208,245 +116,159 @@ export default function EditBankDialog({ bank, onBankUpdated }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] p-0 h-[85vh] flex flex-col">
         <DialogHeader className="p-4 border-b">
-          <DialogTitle>
-            {step === 1 ? "Edit Bank Account" : step === 2 ? "Add Nominees" : "Upload Passbook"}
-          </DialogTitle>
+          <DialogTitle>Edit Bank Account</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4 border-b">
-            <span className={`text-sm ${step === 1 ? "font-bold" : ""}`}>1. Bank Details</span>
-            <span className={`text-sm ${step === 2 ? "font-bold" : ""}`}>2. Nominees</span>
-            <span className={`text-sm ${step === 3 ? "font-bold" : ""}`}>3. Passbook</span>
-          </div>
-
-          {step === 1 && (
-            <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="flex-1 overflow-y-auto p-4 space-y-6 max-h-[65vh]">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Account Holder Name</Label>
-                  <Input
-                    value={formData.account_holder_name}
-                    onChange={(e) => setFormData({ ...formData, account_holder_name: e.target.value })}
-                    required
-                    minLength={2}
-                    placeholder="e.g., John Doe"
-                  />
-                </div>
-                <div>
-                  <Label>Account Number</Label>
-                  <Input
-                    value={formData.account_number}
-                    onChange={(e) => {
-                      if (/^[0-9]*$/.test(e.target.value)) {
-                        setFormData({ ...formData, account_number: e.target.value });
-                      }
-                    }}
-                    required
-                    placeholder="e.g., 123456789012"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>IFSC Code</Label>
-                  <Input
-                    value={formData.ifsc_code}
-                    onChange={handleIfscChange}
-                    required
-                    maxLength={11}
-                    placeholder="e.g., HDFC0000123"
-                  />
-                </div>
-                <div>
-                  <Label>Bank Name</Label>
-                  <Input value={formData.bank_name} disabled placeholder="e.g., HDFC Bank" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Branch Name</Label>
-                  <Input value={formData.branch_name} disabled placeholder="e.g., Mumbai Main" />
-                </div>
-                <div>
-                  <Label>Account Type</Label>
-                  <Select
-                    value={formData.account_type}
-                    onValueChange={(value) => setFormData({ ...formData, account_type: value })}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Savings">Savings</SelectItem>
-                      <SelectItem value="Current">Current</SelectItem>
-                      <SelectItem value="Salary">Salary</SelectItem>
-                      <SelectItem value="NRE">NRE</SelectItem>
-                      <SelectItem value="NRO">NRO</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Mobile Number</Label>
-                  <Input
-                    value={formData.linked_mobile_number}
-                    onChange={(e) => {
-                      if (/^[0-9]*$/.test(e.target.value)) {
-                        setFormData({ ...formData, linked_mobile_number: e.target.value.slice(0, 10) });
-                      }
-                    }}
-                    maxLength={10}
-                    placeholder="e.g., 9876543210"
-                  />
-                </div>
-                <div>
-                  <Label>Balance (₹)</Label>
-                  <Input
-                    type="number"
-                    value={formData.account_balance}
-                    onChange={(e) => setFormData({ ...formData, account_balance: e.target.value })}
-                    required
-                    min={0}
-                    step="0.01"
-                    placeholder="e.g., 50000"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Opening Date</Label>
-                  <Input
-                    type="date"
-                    value={formData.account_opening_date}
-                    onChange={(e) => setFormData({ ...formData, account_opening_date: e.target.value })}
-                    max={today}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label>Status</Label>
-                  <Select
-                    value={formData.account_status}
-                    onValueChange={(value) => setFormData({ ...formData, account_status: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Active">Active</SelectItem>
-                      <SelectItem value="Dormant">Dormant</SelectItem>
-                      <SelectItem value="Closed">Closed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+          <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-4 space-y-6 max-h-[75vh]">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Notes</Label>
+                <Label>Account Holder Name</Label>
                 <Input
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  maxLength={200}
-                  placeholder="e.g., Primary savings account"
+                  value={formData.account_holder_name}
+                  onChange={(e) => setFormData({ ...formData, account_holder_name: e.target.value })}
+                  required
+                  minLength={2}
+                  placeholder="e.g., John Doe"
                 />
               </div>
-            </form>
-          )}
-
-          {step === 2 && (
-            <div className="flex-1 overflow-y-auto p-4 space-y-6 max-h-[70vh]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Select</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Relationship</TableHead>
-                    <TableHead>Percentage</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {familyMembers.map((member) => (
-                    <TableRow key={member.id}>
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedNominees[member.id] !== undefined}
-                          onCheckedChange={(checked) =>
-                            handleNomineeChange(member.id, checked, selectedNominees[member.id])
-                          }
-                        />
-                      </TableCell>
-                      <TableCell>{`${member.first_name} ${member.last_name}`}</TableCell>
-                      <TableCell>{member.relationship}</TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={selectedNominees[member.id] || ""}
-                          onChange={(e) => handlePercentageChange(member.id, e.target.value)}
-                          disabled={selectedNominees[member.id] === undefined}
-                          className="w-20"
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="flex-1 overflow-y-auto p-4 space-y-6 max-h-[70vh]">
               <div>
-                <Label>Upload Passbook (PDF only)</Label>
-                <Input type="file" accept="application/pdf" onChange={handlePassbookUpload} />
+                <Label>Account Number</Label>
+                <Input
+                  value={formData.account_number}
+                  onChange={(e) => {
+                    if (/^[0-9]*$/.test(e.target.value)) {
+                      setFormData({ ...formData, account_number: e.target.value });
+                    }
+                  }}
+                  required
+                  placeholder="e.g., 123456789012"
+                />
               </div>
-              {passbook && <p>Uploaded: {passbook.name}</p>}
             </div>
-          )}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>IFSC Code</Label>
+                <Input
+                  value={formData.ifsc_code}
+                  onChange={handleIfscChange}
+                  required
+                  maxLength={11}
+                  placeholder="e.g., HDFC0000123"
+                />
+              </div>
+              <div>
+                <Label>Bank Name</Label>
+                <Input value={formData.bank_name} disabled placeholder="e.g., HDFC Bank" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Branch Name</Label>
+                <Input value={formData.branch_name} disabled placeholder="e.g., Mumbai Main" />
+              </div>
+              <div>
+                <Label>Account Type</Label>
+                <Select
+                  value={formData.account_type}
+                  onValueChange={(value) => setFormData({ ...formData, account_type: value })}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Savings">Savings</SelectItem>
+                    <SelectItem value="Current">Current</SelectItem>
+                    <SelectItem value="Salary">Salary</SelectItem>
+                    <SelectItem value="NRE">NRE</SelectItem>
+                    <SelectItem value="NRO">NRO</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Mobile Number</Label>
+                <Input
+                  value={formData.linked_mobile_number}
+                  onChange={(e) => {
+                    if (/^[0-9]*$/.test(e.target.value)) {
+                      setFormData({ ...formData, linked_mobile_number: e.target.value.slice(0, 10) });
+                    }
+                  }}
+                  maxLength={10}
+                  placeholder="e.g., 9876543210"
+                />
+              </div>
+              <div>
+                <Label>Balance (₹)</Label>
+                <Input
+                  type="number"
+                  value={formData.account_balance}
+                  onChange={(e) => setFormData({ ...formData, account_balance: e.target.value })}
+                  required
+                  min={0}
+                  step="0.01"
+                  placeholder="e.g., 50000"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Opening Date</Label>
+                <Input
+                  type="date"
+                  value={formData.account_opening_date}
+                  onChange={(e) => setFormData({ ...formData, account_opening_date: e.target.value })}
+                  max={today}
+                  required
+                />
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select
+                  value={formData.account_status}
+                  onValueChange={(value) => setFormData({ ...formData, account_status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Dormant">Dormant</SelectItem>
+                    <SelectItem value="Closed">Closed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label>Notes</Label>
+              <Input
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                maxLength={200}
+                placeholder="e.g., Primary savings account"
+              />
+            </div>
+          </form>
 
           <DialogFooter className="border-t p-4">
-            {step === 1 && (
-              <>
-                <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
-                  Cancel
-                </Button>
-                <Button type="submit" onClick={handleNext} disabled={!isBankFormValid() || loading}>
-                  {loading ? "Updating..." : "Next"}
-                  <ArrowRight size={20} className="ml-2" />
-                </Button>
-              </>
-            )}
-            {step === 2 && (
-              <>
-                <Button variant="outline" onClick={handleBack} className="gap-2" disabled={loading}>
-                  <ArrowLeft size={20} />
-                  Back
-                </Button>
-                <Button
-                  onClick={handleNext}
-                  disabled={loading || Object.keys(selectedNominees).length === 0}
-                  className="gap-2"
-                >
-                  {loading ? "Adding..." : "Next"}
-                  <ArrowRight size={20} />
-                </Button>
-              </>
-            )}
-            {step === 3 && (
-              <>
-                <Button variant="outline" onClick={handleBack} className="gap-2" disabled={loading}>
-                  <ArrowLeft size={20} />
-                  Back
-                </Button>
-                <Button onClick={handleFinish} className="gap-2" disabled={loading}>
-                  Finish
-                  <ArrowRight size={20} />
-                </Button>
-              </>
-            )}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              onClick={handleSave}
+              disabled={!isBankFormValid() || loading}
+            >
+              {loading ? "Saving..." : "Save"}
+            </Button>
           </DialogFooter>
         </div>
       </DialogContent>

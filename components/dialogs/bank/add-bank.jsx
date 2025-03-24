@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,27 @@ import { createNominee, deleteNominee } from "@/lib/nominee-api";
 import { listFamilyMembers } from "@/lib/family-api";
 import { addPassbook } from "@/lib/bank-api";
 import { toast } from "sonner";
-import { Plus, Trash } from "@phosphor-icons/react";
+import { Plus, Trash, Check } from "@phosphor-icons/react";
+
+const StepIndicator = ({ number, isCompleted, isCurrent }) => {
+  if (isCompleted) {
+    return (
+      <div className="rounded-full w-6 h-6 flex items-center justify-center bg-primary text-white">
+        <Check className="h-4 w-4" />
+      </div>
+    );
+  }
+  if (isCurrent) {
+    return (
+      <div className="rounded-full w-6 h-6 flex items-center justify-center border-2 border-primary bg-transparent relative">
+        <div className="rounded-full w-2 h-2 bg-primary absolute" />
+      </div>
+    );
+  }
+  return (
+    <div className="rounded-full w-6 h-6 flex items-center justify-center border-2 border-muted-foreground" />
+  );
+};
 
 export default function AddBankDialog({ onBankAdded }) {
   const [open, setOpen] = useState(false);
@@ -51,6 +71,12 @@ export default function AddBankDialog({ onBankAdded }) {
   const [passbookFile, setPassbookFile] = useState(null);
 
   const today = new Date().toISOString().split("T")[0];
+
+  const steps = [
+    { number: 1, title: "Bank Details" },
+    { number: 2, title: "Add Nominee" },
+    { number: 3, title: "Upload Passbook" },
+  ];
 
   useEffect(() => {
     if (open && step === 2) {
@@ -235,10 +261,35 @@ export default function AddBankDialog({ onBankAdded }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] p-0 h-[85vh] flex flex-col">
         <DialogHeader className="p-4 border-b">
-          <DialogTitle>
-            Add New Bank Account - Step {step} of 3
-          </DialogTitle>
+          <DialogTitle>Add New Bank Account</DialogTitle>
         </DialogHeader>
+
+        <div className="px-4 py-3 border-b">
+          <div className="flex justify-between items-center">
+            {steps.map((s, index) => (
+              <React.Fragment key={s.number}>
+                <div className={`flex items-center ${s.number > step ? "opacity-50" : ""}`}>
+                  <StepIndicator
+                    number={s.number}
+                    isCompleted={step > s.number}
+                    isCurrent={step === s.number}
+                  />
+                  <div className="ml-2">
+                    <div className="text-xs text-gray-500">STEP {s.number}</div>
+                    <div className="text-sm font-medium">{s.title}</div>
+                  </div>
+                </div>
+                {index < steps.length - 1 && (
+                  <div
+                    className={`flex-1 mx-4 h-px ${
+                      step > index + 1 ? "bg-primary" : "bg-gray-200"
+                    }`}
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-6 max-h-[70vh]">
           {step === 1 && (
@@ -457,8 +508,9 @@ export default function AddBankDialog({ onBankAdded }) {
               variant="outline"
               onClick={() => setStep(step - 1)}
               disabled={loading}
+              className="w-32 bg-popover border-foreground"
             >
-              Previous
+              Back
             </Button>
           )}
           {step < 3 && (
@@ -466,6 +518,7 @@ export default function AddBankDialog({ onBankAdded }) {
               type="button"
               onClick={() => step === 1 ? handleCreateBank({ preventDefault: () => {} }) : setStep(step + 1)}
               disabled={step === 1 ? !isBankFormValid() || loading : loading}
+              className="w-32"
             >
               Next
             </Button>
@@ -478,11 +531,12 @@ export default function AddBankDialog({ onBankAdded }) {
                 setOpen(false);
               }}
               disabled={loading}
+              className="w-32"
             >
               Finish
             </Button>
           )}
-          <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+          <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading} className="w-32 bg-popover border-foreground">
             Cancel
           </Button>
         </DialogFooter>

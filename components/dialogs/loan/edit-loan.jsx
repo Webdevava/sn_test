@@ -98,31 +98,49 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
       newErrors.lender_name = "Lender name must be at least 2 characters";
     if (!formData.loan_amount || parseFloat(formData.loan_amount) <= 0)
       newErrors.loan_amount = "Loan amount must be positive";
-    if (!formData.loan_start_date) newErrors.loan_start_date = "Start date is required";
-    else if (formData.loan_start_date > today) newErrors.loan_start_date = "Start date cannot be in the future";
+    if (!formData.loan_start_date)
+      newErrors.loan_start_date = "Start date is required";
+    else if (formData.loan_start_date > today)
+      newErrors.loan_start_date = "Start date cannot be in the future";
     if (!formData.interest_rate || parseFloat(formData.interest_rate) < 0)
       newErrors.interest_rate = "Interest rate must be non-negative";
 
     if (loan?.type === "Secured") {
       if (!formData.loan_type) newErrors.loan_type = "Loan type is required";
-      if (!formData.loan_account_number || !/^[0-9]+$/.test(formData.loan_account_number))
+      if (
+        !formData.loan_account_number ||
+        !/^[0-9]+$/.test(formData.loan_account_number)
+      )
         newErrors.loan_account_number = "Account number must be numeric";
       if (!formData.emi_amount || parseFloat(formData.emi_amount) <= 0)
         newErrors.emi_amount = "EMI amount must be positive";
-      if (!formData.loan_end_date) newErrors.loan_end_date = "End date is required";
+      if (!formData.loan_end_date)
+        newErrors.loan_end_date = "End date is required";
       else if (formData.loan_end_date <= formData.loan_start_date)
         newErrors.loan_end_date = "End date must be after start date";
-      if (!formData.remaining_loan_balance || parseFloat(formData.remaining_loan_balance) < 0)
-        newErrors.remaining_loan_balance = "Remaining balance must be non-negative";
-      if (!formData.collateral_details) newErrors.collateral_details = "Collateral details are required";
+      if (
+        !formData.remaining_loan_balance ||
+        parseFloat(formData.remaining_loan_balance) < 0
+      )
+        newErrors.remaining_loan_balance =
+          "Remaining balance must be non-negative";
+      if (!formData.collateral_details)
+        newErrors.collateral_details = "Collateral details are required";
     } else {
-      if (!formData.agreed_repayment_date) newErrors.agreed_repayment_date = "Repayment date is required";
+      if (!formData.agreed_repayment_date)
+        newErrors.agreed_repayment_date = "Repayment date is required";
       else if (formData.agreed_repayment_date <= formData.loan_start_date)
-        newErrors.agreed_repayment_date = "Repayment date must be after start date";
-      if (!formData.payment_mode) newErrors.payment_mode = "Payment mode is required";
-      if (!formData.remaining_balance || parseFloat(formData.remaining_balance) < 0)
+        newErrors.agreed_repayment_date =
+          "Repayment date must be after start date";
+      if (!formData.payment_mode)
+        newErrors.payment_mode = "Payment mode is required";
+      if (
+        !formData.remaining_balance ||
+        parseFloat(formData.remaining_balance) < 0
+      )
         newErrors.remaining_balance = "Remaining balance must be non-negative";
-      if (!formData.repayment_frequency) newErrors.repayment_frequency = "Repayment frequency is required";
+      if (!formData.repayment_frequency)
+        newErrors.repayment_frequency = "Repayment frequency is required";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -130,7 +148,6 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
 
   const handleInputChange = (e) => {
     const { id, value, type, checked } = e.target;
-    console.log(`Changing ${id}:`, { value, checked, type }); // Debug log
     setFormData((prev) => ({
       ...prev,
       [id]: type === "checkbox" ? checked : value,
@@ -165,7 +182,9 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
           nominee_awareness: formData.nominee_awareness,
           guarantor: formData.guarantor || null,
           notes: formData.notes || null,
-          linked_bank_account: formData.linked_bank_account ? parseInt(formData.linked_bank_account) : null,
+          linked_bank_account: formData.linked_bank_account
+            ? parseInt(formData.linked_bank_account)
+            : null,
           insurance: formData.insurance ? parseInt(formData.insurance) : null,
         };
         response = await updateSecuredLoan(loan.id, payload);
@@ -244,7 +263,9 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                   minLength={2}
                   placeholder="e.g., HDFC Bank"
                 />
-                {errors.lender_name && <p className="text-red-500 text-sm">{errors.lender_name}</p>}
+                {errors.lender_name && (
+                  <p className="text-red-500 text-sm">{errors.lender_name}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="loan_amount">Loan Amount (₹)</Label>
@@ -258,7 +279,9 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                   min={1}
                   placeholder="e.g., 500000"
                 />
-                {errors.loan_amount && <p className="text-red-500 text-sm">{errors.loan_amount}</p>}
+                {errors.loan_amount && (
+                  <p className="text-red-500 text-sm">{errors.loan_amount}</p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -274,7 +297,9 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                   min={0}
                   placeholder="e.g., 8.5"
                 />
-                {errors.interest_rate && <p className="text-red-500 text-sm">{errors.interest_rate}</p>}
+                {errors.interest_rate && (
+                  <p className="text-red-500 text-sm">{errors.interest_rate}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="loan_start_date">Start Date</Label>
@@ -286,7 +311,11 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                   max={today}
                   required
                 />
-                {errors.loan_start_date && <p className="text-red-500 text-sm">{errors.loan_start_date}</p>}
+                {errors.loan_start_date && (
+                  <p className="text-red-500 text-sm">
+                    {errors.loan_start_date}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -294,15 +323,47 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="loan_type">Loan Type</Label>
-                    <Input
-                      id="loan_type"
+                    <Label htmlFor="loan_type">Specific Loan Type</Label>
+                    <Select
                       value={formData.loan_type}
-                      onChange={handleInputChange}
+                      onValueChange={handleSelectChange("loan_type")}
                       required
-                      placeholder="e.g., Home Loan"
-                    />
-                    {errors.loan_type && <p className="text-red-500 text-sm">{errors.loan_type}</p>}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select loan type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Home Loan">Home Loan</SelectItem>
+                        <SelectItem value="Personal Loan">
+                          Personal Loan
+                        </SelectItem>
+                        <SelectItem value="Vehicle Loan">
+                          Vehicle Loan
+                        </SelectItem>
+                        <SelectItem value="Education Loan">
+                          Education Loan
+                        </SelectItem>
+                        <SelectItem value="Business Loan">
+                          Business Loan
+                        </SelectItem>
+                        <SelectItem value="Gold Loan">Gold Loan</SelectItem>
+                        <SelectItem value="Loan Against Property">
+                          Loan Against Property
+                        </SelectItem>
+                        <SelectItem value="Loan Against Fixed Deposit">
+                          Loan Against Fixed Deposit
+                        </SelectItem>
+                        <SelectItem value="Mortgage Loan">
+                          Mortgage Loan
+                        </SelectItem>
+                        <SelectItem value="Any Other Secured Loan">
+                          Any Other Secured Loan
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.loan_type && (
+                      <p className="text-red-500 text-sm">{errors.loan_type}</p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="loan_account_number">Account Number</Label>
@@ -317,7 +378,11 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       required
                       placeholder="e.g., 1234567890"
                     />
-                    {errors.loan_account_number && <p className="text-red-500 text-sm">{errors.loan_account_number}</p>}
+                    {errors.loan_account_number && (
+                      <p className="text-red-500 text-sm">
+                        {errors.loan_account_number}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -333,7 +398,11 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       min={1}
                       placeholder="e.g., 25000"
                     />
-                    {errors.emi_amount && <p className="text-red-500 text-sm">{errors.emi_amount}</p>}
+                    {errors.emi_amount && (
+                      <p className="text-red-500 text-sm">
+                        {errors.emi_amount}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="loan_end_date">End Date</Label>
@@ -345,12 +414,18 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       min={formData.loan_start_date || today}
                       required
                     />
-                    {errors.loan_end_date && <p className="text-red-500 text-sm">{errors.loan_end_date}</p>}
+                    {errors.loan_end_date && (
+                      <p className="text-red-500 text-sm">
+                        {errors.loan_end_date}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="remaining_loan_balance">Remaining Balance (₹)</Label>
+                    <Label htmlFor="remaining_loan_balance">
+                      Remaining Balance (₹)
+                    </Label>
                     <Input
                       id="remaining_loan_balance"
                       type="number"
@@ -361,13 +436,17 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       min={0}
                       placeholder="e.g., 300000"
                     />
-                    {errors.remaining_loan_balance && <p className="text-red-500 text-sm">{errors.remaining_loan_balance}</p>}
+                    {errors.remaining_loan_balance && (
+                      <p className="text-red-500 text-sm">
+                        {errors.remaining_loan_balance}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="guarantor">Guarantor (Optional)</Label>
-                    <Input 
-                      id="guarantor" 
-                      value={formData.guarantor} 
+                    <Input
+                      id="guarantor"
+                      value={formData.guarantor}
                       onChange={handleInputChange}
                       placeholder="e.g., John Doe"
                     />
@@ -382,11 +461,17 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                     required
                     placeholder="e.g., Flat No. 101, Mumbai"
                   />
-                  {errors.collateral_details && <p className="text-red-500 text-sm">{errors.collateral_details}</p>}
+                  {errors.collateral_details && (
+                    <p className="text-red-500 text-sm">
+                      {errors.collateral_details}
+                    </p>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="linked_bank_account">Linked Bank Account</Label>
+                    <Label htmlFor="linked_bank_account">
+                      Linked Bank Account
+                    </Label>
                     <Select
                       value={formData.linked_bank_account}
                       onValueChange={handleSelectChange("linked_bank_account")}
@@ -432,7 +517,11 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       checked={formData.nominee_awareness}
                       onCheckedChange={(checked) =>
                         handleInputChange({
-                          target: { id: "nominee_awareness", type: "checkbox", checked },
+                          target: {
+                            id: "nominee_awareness",
+                            type: "checkbox",
+                            checked,
+                          },
                         })
                       }
                     />
@@ -444,7 +533,9 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="agreed_repayment_date">Repayment Date</Label>
+                    <Label htmlFor="agreed_repayment_date">
+                      Repayment Date
+                    </Label>
                     <Input
                       id="agreed_repayment_date"
                       type="date"
@@ -453,24 +544,41 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       min={formData.loan_start_date || today}
                       required
                     />
-                    {errors.agreed_repayment_date && <p className="text-red-500 text-sm">{errors.agreed_repayment_date}</p>}
+                    {errors.agreed_repayment_date && (
+                      <p className="text-red-500 text-sm">
+                        {errors.agreed_repayment_date}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="payment_mode">Payment Mode</Label>
-                    <Select value={formData.payment_mode} onValueChange={handleSelectChange("payment_mode")} required>
-                      <SelectTrigger><SelectValue placeholder="Select mode" /></SelectTrigger>
+                    <Select
+                      value={formData.payment_mode}
+                      onValueChange={handleSelectChange("payment_mode")}
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select mode" />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Cash">Cash</SelectItem>
-                        <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                        <SelectItem value="Cheque">Cheque</SelectItem>
+                        <SelectItem value="Bank Transfer">
+                          Bank Transfer
+                        </SelectItem>
                       </SelectContent>
                     </Select>
-                    {errors.payment_mode && <p className="text-red-500 text-sm">{errors.payment_mode}</p>}
+                    {errors.payment_mode && (
+                      <p className="text-red-500 text-sm">
+                        {errors.payment_mode}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="remaining_balance">Remaining Balance (₹)</Label>
+                    <Label htmlFor="remaining_balance">
+                      Remaining Balance (₹)
+                    </Label>
                     <Input
                       id="remaining_balance"
                       type="number"
@@ -481,40 +589,38 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       min={0}
                       placeholder="e.g., 150000"
                     />
-                    {errors.remaining_balance && <p className="text-red-500 text-sm">{errors.remaining_balance}</p>}
+                    {errors.remaining_balance && (
+                      <p className="text-red-500 text-sm">
+                        {errors.remaining_balance}
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <Label htmlFor="repayment_frequency">Repayment Frequency</Label>
-                    <Select value={formData.repayment_frequency} onValueChange={handleSelectChange("repayment_frequency")} required>
-                      <SelectTrigger><SelectValue placeholder="Select frequency" /></SelectTrigger>
+                    <Label htmlFor="repayment_frequency">
+                      Repayment Frequency
+                    </Label>
+                    <Select
+                      value={formData.repayment_frequency}
+                      onValueChange={handleSelectChange("repayment_frequency")}
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Monthly">Monthly</SelectItem>
                         <SelectItem value="Quarterly">Quarterly</SelectItem>
-                        <SelectItem value="Annually">Annually</SelectItem>
+                        <SelectItem value="Lump sum">Lump sum</SelectItem>
                       </SelectContent>
                     </Select>
-                    {errors.repayment_frequency && <p className="text-red-500 text-sm">{errors.repayment_frequency}</p>}
+                    {errors.repayment_frequency && (
+                      <p className="text-red-500 text-sm">
+                        {errors.repayment_frequency}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="linked_bank_account">Linked Bank Account</Label>
-                    <Select
-                      value={formData.linked_bank_account}
-                      onValueChange={handleSelectChange("linked_bank_account")}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a bank account" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {banks.map((bank) => (
-                          <SelectItem key={bank.id} value={bank.id.toString()}>
-                            {bank.account_holder_name} - {bank.account_number}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
                   <div>
                     <Label htmlFor="notes">Notes (Optional)</Label>
                     <Input
@@ -525,24 +631,33 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                       placeholder="e.g., Personal loan from friend"
                     />
                   </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="nominee_awareness"
-                    checked={formData.nominee_awareness}
-                    onCheckedChange={(checked) =>
-                      handleInputChange({
-                        target: { id: "nominee_awareness", type: "checkbox", checked },
-                      })
-                    }
-                  />
-                  <Label htmlFor="nominee_awareness">Nominee Awareness</Label>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="nominee_awareness"
+                      checked={formData.nominee_awareness}
+                      onCheckedChange={(checked) =>
+                        handleInputChange({
+                          target: {
+                            id: "nominee_awareness",
+                            type: "checkbox",
+                            checked,
+                          },
+                        })
+                      }
+                    />
+                    <Label htmlFor="nominee_awareness">Nominee Awareness</Label>
+                  </div>
                 </div>
               </>
             )}
           </div>
           <DialogFooter className="border-t p-4">
-            <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
