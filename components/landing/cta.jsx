@@ -1,77 +1,64 @@
 "use client";
 import { motion } from "framer-motion";
-import { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import AuthDialog from "../dialogs/auth/auth-dialog";
+import { ArrowRight } from "@phosphor-icons/react";
 
 export default function CTASection() {
-  const sectionRef = useRef(null);
-  const sectionVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut",
-      },
-    },
-  };
-
   return (
-    <section ref={sectionRef} className="relative" id="cta">
+    <section className="relative  ">
       {/* Split background */}
       <div className="absolute inset-0">
         <div className="h-1/2 bg-transparent"></div>
         <div className="h-1/2 bg-gray-900"></div>
       </div>
-      
+
       <div className="container mx-auto px-4 relative">
-        <motion.div
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           viewport={{ once: true, amount: 0.2 }}
-          className="max-w-7xl mx-auto bg-popover rounded-lg border border-primary/20 shadow-lg p-6 md:p-8 lg:p-10"
+          className="max-w-6xl mx-auto bg-white rounded-2xl border border-primary/20 shadow-2xl overflow-hidden"
         >
-          <div className="text-center space-y-6 md:space-y-8">
-            {/* Heading */}
-            <div className="space-y-4">
-              <div className="bg-gradient-to-r from-primary/35 via-primary/15 to-transparent w-fit mx-auto px-3 py-1 rounded-md">
-                <h2 className="text-sm md:text-base font-medium text-primary tracking-wide">
-                  Take Control
-                </h2>
-              </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-foreground">
-                Your Wealth, Your Decisions, Your Control
-              </h1>
-              <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-                Take charge of your financial legacy today. Keep your information safe, and ensure it reaches the right hands at the right time.
-              </p>
+          <div className="p-8 md:p-12 lg:p-16 text-center">
+            <div className="inline-block bg-primary/10 text-primary px-4 py-1.5 rounded-full mb-4 text-sm font-medium">
+              Take Control
             </div>
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6">
+            
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
+              Your Wealth, Your Decisions, Your Control
+            </h2>
+            
+            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+              Take charge of your financial legacy today. Keep your information safe, and ensure it reaches the right hands at the right time.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
               <AuthDialog type="signup">
-                <Button
-                  size="lg"
-                  className="bg-primary text-white hover:bg-primary/90 w-full sm:w-64 py-6 px-8 rounded-lg font-medium flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
+                <Button 
+                  size="lg" 
+                  className="bg-primary text-white hover:bg-primary/90 px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
                 >
-                  <span>Sign Up Here</span>
-                  <ArrowRight size={18} weight="bold" />
+                  Sign Up Here
+                  <ArrowRight className="w-5 h-5" />
                 </Button>
               </AuthDialog>
-              <Link href="#process">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full sm:w-64 py-6 px-8 rounded-lg font-medium flex items-center justify-center gap-2 border-primary/30 text-primary hover:bg-primary/10 transition-all"
+              
+              <Link href="#process" className="w-full sm:w-auto">
+                <Button 
+                  variant="outline" 
+                  className="w-full sm:w-auto border-primary/30 text-primary hover:bg-primary/10 px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
                 >
-                  <span>See How It Works</span>
-                  <ArrowRight size={18} weight="bold" />
+                  See How It Works
+                  <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
+            </div>
+            
+            <div className="mt-8 text-sm text-gray-500">
+              <p>Secure Your Financial Future with Confidence</p>
             </div>
           </div>
         </motion.div>

@@ -10,7 +10,10 @@ import {
   EnvelopeSimple,
   ChatText,
   Phone,
-  BellSimple
+  BellSimple,
+  ShieldCheck,
+  Clock,
+  UsersFour
 } from "@phosphor-icons/react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -64,7 +67,7 @@ export default function NotificationsVerificationSection() {
           </motion.div>
 
           {/* Main content */}
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-8">
             {/* Left column with cards */}
             <div className="space-y-8 grid">
               {/* No Immediate Notification */}
@@ -129,88 +132,137 @@ export default function NotificationsVerificationSection() {
             </div>
 
             {/* Right column with redesigned illustration and emphasis */}
-            <div className="flex flex-col justify-center">
-              <div className="p-8 bg-primary/5 rounded-xl border border-primary/20">
-                {/* Verification illustration - redesigned with a better notification visualization */}
-                <div className="mb-8">
-                  <div className="bg-card p-5 rounded-lg border border-border">
-                    <h4 className="font-medium text-foreground mb-4 flex items-center">
-                      <Bell weight="duotone" className="text-primary mr-2" size={20} />
-                      Notification Channels
-                    </h4>
-                    
-                    <div className="flex flex-wrap items-center justify-center gap-3">
-                      <div className="flex items-center bg-primary/10 px-4 py-2 rounded-full">
-                        <EnvelopeSimple size={18} className="text-primary mr-2" weight="duotone" />
-                        <span className="text-sm font-medium text-primary">Email</span>
-                      </div>
-                      
-                      <div className="flex items-center bg-primary/10 px-4 py-2 rounded-full">
-                        <ChatText size={18} className="text-primary mr-2" weight="duotone" />
-                        <span className="text-sm font-medium text-primary">SMS</span>
-                      </div>
-                      
-                      <div className="flex items-center bg-primary/10 px-4 py-2 rounded-full">
-                        <Phone size={18} className="text-primary mr-2" weight="duotone" />
-                        <span className="text-sm font-medium text-primary">Call</span>
-                      </div>
-                      
-                      <div className="flex items-center bg-primary/10 px-4 py-2 rounded-full">
-                        <BellSimple size={18} className="text-primary mr-2" weight="duotone" />
-                        <span className="text-sm font-medium text-primary">In-App</span>
-                      </div>
+            <div className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/15 rounded-2xl border border-primary/20 shadow-xl overflow-hidden">
+            
+            
+            <div className="p-8 relative z-10">
+              {/* Background Pattern */}
+              <div className="absolute inset-0 opacity-10 pointer-events-none">
+                <svg
+                  width="100%"
+                  height="100%"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="text-primary"
+                >
+                  <defs>
+                    <pattern id="verification-pattern" patternUnits="userSpaceOnUse" width="100" height="100">
+                      <path 
+                        d="M0 0 L100 0 L0 100 Z" 
+                        fill="currentColor" 
+                        fillOpacity="0.1"
+                      />
+                      <path 
+                        d="M100 0 L0 100 L100 100 Z" 
+                        fill="currentColor" 
+                        fillOpacity="0.1"
+                      />
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#verification-pattern)" />
+                </svg>
+              </div>
+
+              <div className="flex items-center mb-6">
+                    <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mr-4">
+                      <ShieldCheck size={32} weight="duotone" className="text-primary" />
                     </div>
-                    
+                    <h3 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+                      Foolproof Verification
+                    </h3>
+                  </div>
+
+              {/* Content Container */}
+              <div className="relative z-20 grid md:grid-cols-2 gap-8 items-center">
+                {/* Left Column - Detailed Explanation */}
+                <div>
+ 
+
+                  <div className="space-y-4">
+                    {[
+                      {
+                        icon: <Clock size={24} weight="duotone" />,
+                        title: "Multi-Stage Confirmation",
+                        description: "Rigorous 3-stage verification process spanning multiple communication channels."
+                      },
+                      {
+                        icon: <UsersFour size={24} weight="duotone" />,
+                        title: "Nominee Network Protection",
+                        description: "Comprehensive checks to ensure your nominees' identities and intentions."
+                      },
+                      {
+                        icon: <ShieldCheck size={24} weight="duotone" />,
+                        title: "Continuous Monitoring",
+                        description: "Ongoing verification and security checks to maintain data integrity."
+                      }
+                    ].map((item, index) => (
+                      <div 
+                        key={index} 
+                        className="flex items-start gap-4 p-4 bg-background/50 rounded-lg border border-primary/10 hover:shadow-md transition-all duration-300"
+                      >
+                        <div className="text-primary opacity-80">{item.icon}</div>
+                        <div>
+                          <h4 className="text-base font-semibold text-foreground mb-2">{item.title}</h4>
+                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-
-
-                {/* Verification Timeline - redesigned to match card style */}
-                <div className="my-8 bg-card p-5 rounded-lg border border-border">
-                  <h4 className="font-medium text-foreground mb-4 flex items-center">
-                    <CheckCircle weight="duotone" className="text-primary mr-2" size={20} />
-                    Verification Process
+                {/* Right Column - Verification Flow */}
+                <div className="bg-card p-6 rounded-xl border border-border">
+                  <h4 className="text-xl font-semibold text-foreground mb-6 flex items-center">
+                    <CheckCircle weight="duotone" className="text-primary mr-3" size={24} />
+                    Verification Flow
                   </h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mr-3">
-                        <CaretRight size={14} className="text-primary" weight="bold" />
+
+                  <div className="space-y-4">
+                    {[
+                      { 
+                        step: "Initial Trigger", 
+                        description: "Inactivity detected",
+                        status: "pending"
+                      },
+                      { 
+                        step: "Notification Wave", 
+                        description: "Multi-channel alerts",
+                        status: "pending"
+                      },
+                      { 
+                        step: "Response Window", 
+                        description: "Waiting for confirmation",
+                        status: "pending"
+                      },
+                      { 
+                        step: "Final Verification", 
+                        description: "Nominee authentication",
+                        status: "completed"
+                      }
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-center">
+                        <div className={`w-3 h-3 mr-3 rounded-full ${
+                          item.status === 'completed' 
+                            ? 'bg-primary' 
+                            : 'bg-muted-foreground/30'
+                        }`} />
+                        <div>
+                          <p className="font-medium text-foreground text-sm">{item.step}</p>
+                          <p className="text-xs text-muted-foreground">{item.description}</p>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">First notification sent</p>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mr-3">
-                        <CaretRight size={14} className="text-primary" weight="bold" />
-                      </div>
-                      <p className="text-sm text-muted-foreground">Follow-up check</p>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mr-3">
-                        <CaretRight size={14} className="text-primary" weight="bold" />
-                      </div>
-                      <p className="text-sm text-muted-foreground">Final verification</p>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center mr-3">
-                        <CheckCircle size={14} className="text-white" weight="fill" />
-                      </div>
-                      <p className="text-sm font-medium text-primary">Nominee notification</p>
-                    </div>
+                    ))}
                   </div>
                 </div>
+              </div>
 
-                                {/* Quote */}
-                                <Alert className="bg-primary/10 border-primary/20">
-                  <AlertTitle className="text-foreground font-semibold text-lg">
-                    Your Peace of Mind
-                  </AlertTitle>
-                  <AlertDescription className="text-foreground/80 text-lg italic">
-                    "You are always in control, even when you're not around."
-                  </AlertDescription>
-                </Alert>
+              {/* Quote */}
+              <div className="mt-8 text-center">
+                <blockquote className="text-lg md:text-xl font-medium text-foreground italic opacity-80 max-w-2xl mx-auto">
+                  "Security is not a product, but a continuous process of verification and trust."
+                </blockquote>
               </div>
             </div>
+          </div>
           </div>
         </motion.div>
       </div>

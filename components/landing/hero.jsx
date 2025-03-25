@@ -24,6 +24,23 @@ export default function Hero() {
     },
   };
 
+  const handleExploreFeatures = (e) => {
+    e.preventDefault();
+    const featuresSection = document.getElementById('features');
+    if (featuresSection) {
+      const navbarHeight = 80; // Adjust based on your navbar height
+      const targetPosition = 
+        featuresSection.getBoundingClientRect().top + 
+        window.pageYOffset - 
+        navbarHeight;
+      
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <section className="relative min-h-screen w-full overflow-hidden flex flex-col justify-between pt-20 pb-0" id="home">
       {/* Bold gradient background */}
@@ -39,12 +56,6 @@ export default function Hero() {
             <path fill="#246" fillOpacity="0.3" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
           </svg>
         </div>
-        
-        {/* Dot pattern overlay */}
-        {/* <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px)",
-          backgroundSize: "20px 20px"
-        }} /> */}
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex-grow flex items-center">
@@ -61,7 +72,6 @@ export default function Hero() {
           >
             <h1 className="text-3xl sm:text-4xl md:text-4xl lg:text-6xl font-bold leading-tight text-foreground">
               <span className="block text-white">Your Life. Your Legacy.</span>
-              {/* <span className="block text-white">Protected</span> */}
               <span className="block text-xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold">Protected & Shared Only When It Matters.</span>
             </h1>
             <p className="text-base sm:text-lg md:text-lg text-foreground">
@@ -79,6 +89,7 @@ export default function Hero() {
               <Button
                 size="lg"
                 variant="outline"
+                onClick={handleExploreFeatures}
                 className="border-primary/20 text-primary hover:bg-primary/10 px-6 py-3 rounded-lg font-medium transition-all"
               >
                 Explore Features
@@ -128,10 +139,6 @@ export default function Hero() {
           </div>
         </div>
       </motion.div>
-
-      {/* Light effect overlays */}
-      {/* <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-primary to-transparent opacity-60 z-0" />
-      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-background to-transparent z-0" /> */}
     </section>
   );
 }

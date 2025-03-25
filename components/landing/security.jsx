@@ -6,9 +6,11 @@ import {
   LockKey,
   ShieldCheck,
   Gear,
-  Eye,
+  EyeSlash,
   Database,
   UserCircle,
+  CheckCircle,
+  Lock,
 } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -52,7 +54,6 @@ export default function SecuritySection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
-          className=""
         >
           {/* Heading */}
           <motion.div
@@ -135,37 +136,89 @@ export default function SecuritySection() {
             </Card>
           </motion.div>
 
-          {/* Privacy Promises */}
+          {/* Enhanced Privacy Promises */}
           <motion.div
             variants={itemVariants}
-            className="bg-card p-6 md:p-8 rounded-lg border border-primary/10 shadow-md"
+            className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/15 p-6 md:p-8 rounded-2xl border border-primary/20 shadow-xl relative overflow-hidden"
           >
-            <div className="flex items-center justify-center mb-4">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <Eye size={20} weight="duotone" className="text-primary" />
-              </div>
+            {/* Subtle background pattern */}
+            <div className="absolute inset-0 opacity-10 pointer-events-none">
+              <svg
+                width="100%"
+                height="100%"
+                xmlns="http://www.w3.org/2000/svg"
+                className="text-primary"
+              >
+                <defs>
+                  <pattern id="privacy-pattern" patternUnits="userSpaceOnUse" width="100" height="100">
+                    <path 
+                      d="M0 0 L100 0 L0 100 Z" 
+                      fill="currentColor" 
+                      fillOpacity="0.1"
+                    />
+                    <path 
+                      d="M100 0 L0 100 L100 100 Z" 
+                      fill="currentColor" 
+                      fillOpacity="0.1"
+                    />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#privacy-pattern)" />
+              </svg>
             </div>
-            <h3 className="text-xl md:text-2xl font-semibold text-foreground mb-4 text-center">
-              Our Privacy Promise
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              <div className="flex items-start gap-3">
-                <Database size={24} className="text-primary flex-shrink-0 mt-1" weight="duotone" />
-                <p className="text-sm md:text-base text-muted-foreground">
-                  We respect your privacy. Your data remains yours—always.
-                </p>
+
+            {/* Content */}
+            <div className="relative z-10">
+              <div className="flex items-center justify-center mb-6">
+                <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
+                  <EyeSlash size={32} weight="duotone" className="text-primary" />
+                </div>
               </div>
-              <div className="flex items-start gap-3">
-                <UserCircle size={24} className="text-primary flex-shrink-0 mt-1" weight="duotone" />
-                <p className="text-sm md:text-base text-muted-foreground">
-                  Your data is never shared, sold, or accessed without your consent.
-                </p>
+              <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-6 text-center tracking-tight">
+                Our Unbreakable Privacy Commitment
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-6">
+                {[
+                  {
+                    icon: <Database size={28} weight="duotone" />,
+                    title: "Data Sovereignty",
+                    description: "Your data is exclusively yours. We never compromise on ownership or access."
+                  },
+                  {
+                    icon: <UserCircle size={28} weight="duotone" />,
+                    title: "Total Confidentiality",
+                    description: "Zero third-party sharing. Your information remains strictly confidential."
+                  },
+                  {
+                    icon: <Lock size={28} weight="duotone" />,
+                    title: "Consent-First Approach",
+                    description: "Every data interaction requires your explicit, informed consent."
+                  },
+                  {
+                    icon: <CheckCircle size={28} weight="duotone" />,
+                    title: "Transparency Guaranteed",
+                    description: "Full visibility into how, when, and why your data might be used."
+                  }
+                ].map((item, index) => (
+                  <div 
+                    key={index} 
+                    className="bg-background/50 p-4 rounded-lg border border-primary/10 flex items-start gap-4 hover:shadow-md transition-all duration-300"
+                  >
+                    <div className="text-primary opacity-80">{item.icon}</div>
+                    <div>
+                      <h4 className="text-base font-semibold text-foreground mb-2">{item.title}</h4>
+                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-            <div className="mt-6 text-center">
-              <p className="text-base md:text-lg font-medium text-foreground italic">
-                "Security isn't just a feature—it's the foundation of everything we build."
-              </p>
+
+              <div className="text-center">
+                <blockquote className="text-lg md:text-xl font-medium text-foreground italic opacity-80 mx-auto">
+                  "Privacy isn't a feature we add—it's the core principle we never compromise."
+                </blockquote>
+              </div>
             </div>
           </motion.div>
         </motion.div>

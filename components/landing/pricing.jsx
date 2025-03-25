@@ -5,6 +5,7 @@ import { Check, X, CaretUp, Crown, Star, Table, Calendar } from "@phosphor-icons
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React, { useRef, useState } from "react";
+import AuthDialog from "../dialogs/auth/auth-dialog";
 
 export default function PricingSection() {
   const sectionRef = useRef(null);
@@ -359,6 +360,7 @@ export default function PricingSection() {
 
                     {/* CTA Button */}
                     <div className="p-4 sm:p-6 pt-0">
+                      <AuthDialog type="signup">
                       <Button
                         className={`w-full py-3 sm:py-4 rounded-lg font-medium text-xs sm:text-sm
                           ${isActive
@@ -368,7 +370,7 @@ export default function PricingSection() {
                             : "bg-muted text-foreground hover:bg-muted/80"}`}
                       >
                         {index === 0 ? "Sign Up Free" : isActive ? "Get Started Now" : "Select Plan"}
-                      </Button>
+                      </Button></AuthDialog>
                       <p className={`text-center text-xs mt-2 ${index === 1 ? "text-white/80" : "text-muted-foreground"}`}>
                         {index === 0 ? "No payment required" : "No credit card required for 14-day trial"}
                       </p>

@@ -23,18 +23,22 @@ export default function Navbar() {
     e.preventDefault();
     const targetElement = document.getElementById(targetId);
     if (targetElement) {
-      if (mobileMenuOpen) {
-        setMobileMenuOpen(false);
-      }
-      const navbarHeight = 80;
-      const targetPosition =
-        targetElement.getBoundingClientRect().top +
-        window.pageYOffset -
-        navbarHeight;
-      window.scrollTo({
-        top: targetPosition,
-        behavior: "smooth",
-      });
+      // Ensure mobile menu closes when link is clicked
+      setMobileMenuOpen(false);
+      
+      // Use a small timeout to ensure menu closes before scrolling
+      setTimeout(() => {
+        const navbarHeight = 80; // Adjusted navbar height
+        const targetPosition =
+          targetElement.getBoundingClientRect().top +
+          window.pageYOffset -
+          navbarHeight;
+        
+        window.scrollTo({
+          top: targetPosition,
+          behavior: "smooth",
+        });
+      }, 300); // Small delay to allow menu to close
     }
   };
 
@@ -203,11 +207,7 @@ export default function Navbar() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${
-                    scrollY > 20
-                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap "
-                      : "text-white font-medium hover:text-foreground text-sm lg:text-sm cursor-pointer text-nowrap"
-                  }`}
+                  className="text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap"
                 >
                   Log In
                 </Button>
