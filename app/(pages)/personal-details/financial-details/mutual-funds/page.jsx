@@ -138,7 +138,7 @@ const MutualFundsPage = () => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6 pb-16 sm:pb-0">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 pb-16 sm:pb-0">
           {mutualFunds.map((fund) => (
             <Card key={fund.id} className="p-0 transition-all hover:shadow-lg hover:-translate-y-1">
               <CardHeader className="p-4 sm:p-6 pb-0">

@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const ProfilePage = ({ expanded, showTabs, setShowTabs }) => {
+const ProfileCard = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -62,48 +62,27 @@ const ProfilePage = ({ expanded, showTabs, setShowTabs }) => {
   }
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col  p-6 bg-background border shadow-md rounded-lg">
       {error && <div className="text-red-600 p-4 mb-4 rounded w-full">{error}</div>}
 
-      {/* Expanded view (always on small screens, toggleable on larger screens) */}
-      {expanded ? (
-        <>
-          <div className="mb-6">
-            <Avatar className="w-40 h-40">
-              {profile?.profile_picture ? (
-                <AvatarImage src={profile.profile_picture} alt={getFullName()} />
-              ) : null}
-              <AvatarFallback className="text-3xl">{getInitials()}</AvatarFallback>
-            </Avatar>
-          </div>
-          <h2 className="text-2xl font-bold text-center mb-2">
-            {getFullName() || "Not available"}
-          </h2>
-          <p className="text-gray-600 text-lg text-center">{formatDate(profile?.dob)}</p>
-          {/* View More button only on small screens when expanded */}
-          <div className="sm:hidden mt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowTabs(!showTabs)}
-            >
-              {showTabs ? "View Less" : "View More"}
-            </Button>
-          </div>
-        </>
-      ) : (
-        /* Collapsed view (only on larger screens when collapsed) */
-        <div className="flex justify-center">
-          <Avatar className="w-10 h-10">
-            {profile?.profile_picture ? (
-              <AvatarImage src={profile.profile_picture} alt={getFullName()} />
-            ) : null}
-            <AvatarFallback className="text-lg">{getInitials()}</AvatarFallback>
-          </Avatar>
-        </div>
-      )}
+      <div className="mb-6">
+        <Avatar className="w-28 h-28">
+          {profile?.profile_picture ? (
+            <AvatarImage src={profile.profile_picture} alt={getFullName()} />
+          ) : null}
+          <AvatarFallback className="text-3xl">{getInitials()}</AvatarFallback>
+        </Avatar>
+      </div>
+      <h2 className="text-2xl font-bold text-left mb-2">
+        {getFullName() || "Not available"}
+      </h2>
+      <p className="text-gray-600 text-lg text-left">{formatDate(profile?.dob)}</p>
+
+      <Button variant={"outline"} className="mt-4">
+        View More
+      </Button>
     </div>
   );
 };
 
-export default ProfilePage;
+export default ProfileCard;

@@ -5,20 +5,17 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import {
   ChartConfig,
   ChartContainer,
   ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { Plus, User, X } from "@phosphor-icons/react/dist/ssr"
+import { User } from "lucide-react"
 import { getNomineeOverview } from "@/lib/dashboard-api"
 
 // Chart configuration
@@ -62,7 +59,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
       fill="var(--foreground)"
       textAnchor={x > cx ? "start" : "end"}
       dominantBaseline="central"
-      className="text-sm font-medium"
+      className="text-xs sm:text-sm font-medium"
     >
       {`${(percent * 100).toFixed(0)}%`}
     </text>
@@ -72,15 +69,15 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 // Enhanced legend component
 const EnhancedLegend = ({ payload }) => {
   return (
-    <div className="grid grid-cols-2 gap-4 w-full max-w-lg mx-auto mt-6">
+    <div className="grid grid-cols-2 gap-2 sm:gap-4 w-full max-w-lg mx-auto mt-4 sm:mt-6 px-2">
       {payload.map((entry, index) => (
         <div key={`legend-${index}`} className="flex items-center">
           <div 
-            className="w-4 h-4 rounded-full mr-2"
+            className="w-3 h-3 sm:w-4 sm:h-4 rounded-full mr-2"
             style={{ backgroundColor: entry.color }}
           />
-          <span className="text-sm truncate">{entry.value}</span>
-          <span className="ml-auto text-sm text-muted-foreground">{formatPercentage(entry.payload.share)}</span>
+          <span className="text-xs sm:text-sm truncate">{entry.value}</span>
+          <span className="ml-auto text-xs sm:text-sm text-muted-foreground">{formatPercentage(entry.payload.share)}</span>
         </div>
       ))}
     </div>
@@ -91,10 +88,10 @@ const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload
     return (
-      <div className="rounded-lg border bg-background p-3 shadow-lg">
-        <div className="grid gap-2">
-          <p className="font-semibold">{data.name}</p>
-          <p>Share: {formatPercentage(data.share)}</p>
+      <div className="rounded-lg border bg-background p-2 sm:p-3 shadow-lg">
+        <div className="grid gap-1 sm:gap-2">
+          <p className="font-semibold text-xs sm:text-sm">{data.name}</p>
+          <p className="text-xs sm:text-sm">Share: {formatPercentage(data.share)}</p>
         </div>
       </div>
     )
@@ -106,10 +103,10 @@ const CustomTooltip = ({ active, payload }) => {
 const CenterLabel = ({ cx, cy, nominees }) => {
   return (
     <g>
-      <text x={cx} y={cy-15} textAnchor="middle" dominantBaseline="middle" className="text-xl font-semibold">
+      <text x={cx} y={cy-10} textAnchor="middle" dominantBaseline="middle" className="text-base sm:text-xl font-semibold">
         {nominees}
       </text>
-      <text x={cx} y={cy+15} textAnchor="middle" dominantBaseline="middle" className="text-sm text-muted-foreground">
+      <text x={cx} y={cy+10} textAnchor="middle" dominantBaseline="middle" className="text-xs sm:text-sm text-muted-foreground">
         {nominees === 1 ? 'Nominee' : 'Nominees'}
       </text>
     </g>
@@ -155,30 +152,25 @@ function NomineeShareChart() {
     fetchNomineeData()
   }, [])
 
-  const totalShare = chartData.reduce((sum, item) => sum + item.share, 0)
-
   // Empty state component
   const EmptyState = () => (
-    <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-center p-6">
-      <User size={64} className="text-muted-foreground mb-4" />
-      <h3 className="text-lg font-semibold mb-2">No Nominees Found</h3>
-      <p className="text-muted-foreground mb-4">
+    <div className="flex flex-col items-center justify-center h-full min-h-[380px] text-center p-4">
+      <User size={48} className="text-muted-foreground mb-4" />
+      <h3 className="text-base sm:text-lg font-semibold mb-2">No Nominees Found</h3>
+      <p className="text-xs sm:text-sm text-muted-foreground mb-4">
         You haven't added any nominees yet. Add a nominee to see their distribution.
       </p>
-      <Button className="rounded-full px-8">
-        Add Nominee <Plus weight="duotone" />
-      </Button>
     </div>
   )
 
   if (loading) {
     return (
-      <Card className="w-full h-full flex flex-col">
+      <Card className="w-full  mx-auto">
         <CardHeader>
-          <CardTitle className="font-semibold text-xl">Nominee Distribution</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Nominee Distribution</CardTitle>
           <CardDescription>Estate Share Allocation per Nominee</CardDescription>
         </CardHeader>
-        <CardContent className="flex-1 flex items-center justify-center">
+        <CardContent className="flex items-center justify-center min-h-[380px]">
           <p>Loading...</p>
         </CardContent>
       </Card>
@@ -187,12 +179,12 @@ function NomineeShareChart() {
 
   if (error) {
     return (
-      <Card className="w-full h-full flex flex-col">
+      <Card className="w-full  mx-auto">
         <CardHeader>
-          <CardTitle className="font-semibold text-xl">Nominee Distribution</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Nominee Distribution</CardTitle>
           <CardDescription>Estate Share Allocation per Nominee</CardDescription>
         </CardHeader>
-        <CardContent className="flex-1 flex items-center justify-center">
+        <CardContent className="flex items-center justify-center min-h-[380px]">
           <p className="text-red-500">Error: {error}</p>
         </CardContent>
       </Card>
@@ -200,20 +192,20 @@ function NomineeShareChart() {
   }
 
   return (
-    <Card className="w-full h-full flex flex-col">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+    <Card className="w-full  mx-auto">
+      <CardHeader className="p-4">
         <div>
-          <CardTitle className="font-semibold text-xl">Nominee Distribution</CardTitle>
+          <CardTitle className="text-lg sm:text-xl font-semibold">Nominee Distribution</CardTitle>
           <CardDescription>Estate Share Allocation per Nominee</CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 p-0">
+      <CardContent className="p-2 sm:p-4">
         {chartData.length === 0 ? (
           <EmptyState />
         ) : (
           <ChartContainer 
             config={chartConfig} 
-            className="h-full w-full min-h-[400px]"
+            className="h-[250px] sm:h-[350px] md:h-[400px] w-full"
           >
             <PieChart>
               <ChartTooltip content={<CustomTooltip />} />

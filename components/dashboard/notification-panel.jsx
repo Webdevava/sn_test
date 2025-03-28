@@ -1,18 +1,21 @@
-// NotificationsPanel.jsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getNotifications, readNotification } from "@/lib/notification-api";
 
 // Icons component to render the right icon based on notification type
-const NotificationIcon = ({ type }) => {
+const NotificationIcon = ({ type, isRead }) => {
+  const baseClasses = "h-6 w-6 flex items-center justify-center rounded-full";
+  const iconClasses = `h-4 w-4 ${isRead ? 'opacity-50 grayscale' : ''}`;
+
   if (type === "success") {
     return (
-      <div className="h-6 w-6 flex items-center justify-center rounded-full bg-green-100">
+      <div className={`${baseClasses} ${isRead ? 'bg-green-50' : 'bg-green-100'}`}>
         <svg
-          className="h-4 w-4 text-green-500"
+          className={`${iconClasses} text-green-500`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -29,9 +32,9 @@ const NotificationIcon = ({ type }) => {
     );
   } else if (type === "warning") {
     return (
-      <div className="h-6 w-6 flex items-center justify-center rounded-full bg-red-100">
+      <div className={`${baseClasses} ${isRead ? 'bg-red-50' : 'bg-red-100'}`}>
         <svg
-          className="h-4 w-4 text-red-500"
+          className={`${iconClasses} text-red-500`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -51,157 +54,123 @@ const NotificationIcon = ({ type }) => {
   return null;
 };
 
-// Sample data structure for notifications
-const sampleNotifications = [
-  {
-    id: 1,
-    title: "Life Insurance Premium Due",
-    message: "Your LIC policy premium of ₹25,000 is due on 10th Feb 2025. Pay now to avoid late fees!",
-    time: "8hr ago",
-    type: "warning",
-    section: "new"
-  },
-  {
-    id: 2,
-    title: "Family Member Added",
-    message: "You have successfully added Mike Deo (Father) to your Family Details section.",
-    time: "8hr ago",
-    type: "success",
-    section: "earlier"
-  },
-  {
-    id: 3,
-    title: "Mutual Fund SIP Due",
-    message: "Your SIP of ₹5,000 for HDFC Bluechip Fund is due on 5th Feb 2025. Invest now!",
-    time: "8hr ago",
-    type: "warning",
-    section: "earlier"
-  },
-  {
-    id: 4,
-    title: "Family Member Added",
-    message: "You have successfully added Mike Deo (Father) to your Family Details section.",
-    time: "8hr ago",
-    type: "success",
-    section: "earlier"
-  },
-  {
-    id: 5,
-    title: "Mutual Fund SIP Due",
-    message: "Your SIP of ₹5,000 for HDFC Bluechip Fund is due on 5th Feb 2025. Invest now!",
-    time: "8hr ago",
-    type: "warning", 
-    section: "earlier"
-  },
-  {
-    id: 6,
-    title: "Mutual Fund SIP Due",
-    message: "Your SIP of ₹5,000 for HDFC Bluechip Fund is due on 5th Feb 2025. Invest now!",
-    time: "8hr ago",
-    type: "warning",
-    section: "earlier"
-  },
-  {
-    id: 7,
-    title: "Family Member Added",
-    message: "You have successfully added Mike Deo (Father) to your Family Details section.",
-    time: "8hr ago",
-    type: "success",
-    section: "earlier"
-  }
-];
+const NotificationsPanel = ({ className = "" }) => {
+  const [notifications, setNotifications] = useState([]);
+  const [sortedNotifications, setSortedNotifications] = useState([]);
 
-const NotificationsPanel = ({ className }) => {
-  const [notifications, setNotifications] = useState(sampleNotifications);
+  // Fetch notifications on component mount
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await getNotifications();
+        
+        // Transform API response to match our expected format
+        const transformedNotifications = response.data.nootification.map(notification => ({
+          id: notification.id,
+          title: notification.model,
+          message: notification.message,
+          time: formatTime(notification.created_at),
+          type: notification.action === 'Add' ? 'success' : 'warning',
+          read: notification.read,
+          created_at: notification.created_at
+        }));
 
-  // Filter notifications by section
-  const newNotifications = notifications.filter(n => n.section === "new");
-  const earlierNotifications = notifications.filter(n => n.section === "earlier");
+        setNotifications(transformedNotifications);
+      } catch (error) {
+        console.error("Failed to fetch notifications", error);
+      }
+    };
 
-  // Remove a single notification
-  const removeNotification = (id) => {
-    setNotifications(notifications.filter(n => n.id !== id));
+    fetchNotifications();
+  }, []);
+
+  // Sort notifications with unread on top and sorted by date
+  useEffect(() => {
+    const sorted = [...notifications].sort((a, b) => {
+      // Unread notifications first
+      if (a.read !== b.read) {
+        return a.read ? 1 : -1;
+      }
+      // Then sort by most recent
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+    setSortedNotifications(sorted);
+  }, [notifications]);
+
+  // Format time to human-readable format
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.round((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    return `${diffInHours}hr ago`;
   };
-  
-  // Clear all notifications
-  const clearAllNotifications = () => {
-    setNotifications([]);
+
+  // Remove a single notification and mark as read
+  const removeNotification = async (id) => {
+    try {
+      // Call API to mark notification as read
+      await readNotification(id);
+
+      // Update local state
+      const updatedNotifications = notifications.map(n => 
+        n.id === id ? { ...n, read: true } : n
+      );
+
+      setNotifications(updatedNotifications);
+    } catch (error) {
+      console.error("Failed to mark notification as read", error);
+    }
   };
+
+  // Unread notifications count
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className={`w-full max-w-md rounded-lg border bg-card shadow-lg hidden lg:block ${className}`}>
+    <div className={`w-full max-w-md rounded-lg border bg-card shadow-lg hidden lg:block h-[90vh] ${className}`}>
       <div className="flex items-center justify-between border-b p-4">
         <h2 className="text-xl font-bold text-navy-900">Notifications</h2>
-        <Button
-          variant="ghost"
-          onClick={clearAllNotifications}
-        >
-          Clear All
-        </Button>
+        <div className="text-sm text-gray-500">
+          {unreadCount} Unread
+        </div>
       </div>
       
-      <ScrollArea className="h-full">
-        {newNotifications.length > 0 && (
-          <>
-            <div className="px-4 pt-3 pb-1">
-              <h3 className="text-sm text-gray-500 font-medium">New For You</h3>
-            </div>
-            <div>
-              {newNotifications.map((notification) => (
-                <div key={notification.id} className="relative px-4 py-3 border-b">
-                  <div className="flex gap-3">
-                    <NotificationIcon type={notification.type} />
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <h4 className="font-semibold">{notification.title}</h4>
-                        <span className="text-xs text-gray-500 ml-1">{notification.time}</span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                    </div>
+      <ScrollArea className="h-[calc(90vh-60px)]">
+        {sortedNotifications.length > 0 ? (
+          sortedNotifications.map((notification) => (
+            <div 
+              key={notification.id} 
+              className={`relative px-4 py-3 border-b ${!notification.read ? 'bg-popover' : 'bg-muted/30'} transition-all duration-300`}
+            >
+              <div className={`flex gap-3 ${notification.read ? 'opacity-60 grayscale-[30%]' : ''}`}>
+                <NotificationIcon 
+                  type={notification.type} 
+                  isRead={notification.read} 
+                />
+                <div className="flex-1">
+                  <div className="flex items-start justify-between">
+                    <h4 className={`font-semibold ${notification.read ? 'text-gray-600' : 'text-navy-900'}`}>
+                      {notification.title}
+                    </h4>
+                    <span className={`text-xs ${notification.read ? 'text-gray-400' : 'text-gray-500'} ml-1`}>
+                      {notification.time}
+                    </span>
                   </div>
-                  <button
-                    onClick={() => removeNotification(notification.id)}
-                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-                  >
-                    <X size={16} />
-                  </button>
+                  <p className={`text-sm ${notification.read ? 'text-gray-500' : 'text-gray-600'} mt-1`}>
+                    {notification.message}
+                  </p>
                 </div>
-              ))}
+              </div>
+              {!notification.read && (
+                <button
+                  onClick={() => removeNotification(notification.id)}
+                  className="absolute top-2 left-[26rem] hover:bg-red-400 rounded-lg p-1 duration-150 transition-all hover:text-background"
+                >
+                  <X size={16} />
+                </button>
+              )}
             </div>
-          </>
-        )}
-        
-        {earlierNotifications.length > 0 && (
-          <>
-            <div className="px-4 pt-3 pb-1">
-              <h3 className="text-sm text-gray-500 font-medium">EARLIER</h3>
-            </div>
-            <div>
-              {earlierNotifications.map((notification) => (
-                <div key={notification.id} className="relative px-4 py-3 border-b">
-                  <div className="flex gap-3">
-                    <NotificationIcon type={notification.type} />
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <h4 className="font-semibold">{notification.title}</h4>
-                        <span className="text-xs text-gray-500 ml-1">{notification.time}</span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => removeNotification(notification.id)}
-                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-        
-        {notifications.length === 0 && (
+          ))
+        ) : (
           <div className="flex flex-col items-center justify-center h-64">
             <p className="text-gray-500">No notifications</p>
           </div>
@@ -212,4 +181,3 @@ const NotificationsPanel = ({ className }) => {
 };
 
 export default NotificationsPanel;
-

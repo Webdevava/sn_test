@@ -1,8 +1,5 @@
 "use client"
-
-import { PlusCircle } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-
 import {
   Card,
   CardContent,
@@ -14,7 +11,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { Button } from "../ui/button"
 
 // Define the chart data for financial details
 const chartData = [
@@ -55,29 +51,33 @@ export default function FinancialDetailsChart() {
   };
 
   return (
-    <Card className="rounded-lg shadow-sm h-full">
-      <CardHeader className="border-b flex items-center flex-row justify-between p-3 h-16">
-        <CardTitle className="text-xl font-bold">
+    <Card className="rounded-lg shadow-sm w-full  mx-auto">
+      <CardHeader className="border-b p-4">
+        <CardTitle className="text-lg sm:text-xl font-bold">
           Financial Details
         </CardTitle>
-        <Button size="sm">
-          <PlusCircle/>
-          Add
-        </Button>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="h-[400px] w-full">
+      <CardContent className="p-2 sm:p-4">
+        <ChartContainer 
+          config={chartConfig} 
+          className="w-full h-[250px] sm:h-[350px] md:h-[400px]"
+        >
           <BarChart
             accessibilityLayer
             data={chartData}
             layout="vertical"
             margin={{
-              left: 25, // Increased left margin to accommodate Y-axis label
+              left: 10, // Reduced left margin for responsiveness
               top: 20,
               right: 20,
+              bottom: 10
             }}
           >
-            <CartesianGrid horizontal={false} strokeDasharray="3, 3" />
+            <CartesianGrid 
+              horizontal={false} 
+              strokeDasharray="3, 3" 
+              className="opacity-50" 
+            />
             {/* Y-axis with "Financial Assets" label */}
             <YAxis
               dataKey="category"
@@ -85,18 +85,9 @@ export default function FinancialDetailsChart() {
               tickLine={false}
               tickMargin={5}
               axisLine={false}
+              className="text-xs sm:text-sm"
               tickFormatter={(value) => chartConfig[value].label}
-            >
-              <text
-                x={-50} // Position the label to the left of the Y-axis
-                y={150} // Center vertically (adjust as needed)
-                textAnchor="middle"
-                angle={270} // Rotate 270 degrees for vertical text
-                style={{ fontSize: "14px", fill: "#666" }}
-              >
-                Financial Assets
-              </text>
-            </YAxis>
+            />
             {/* X-axis with lakhs formatting */}
             <XAxis
               dataKey="amount"
@@ -104,6 +95,7 @@ export default function FinancialDetailsChart() {
               axisLine={false}
               tickLine={false}
               tickFormatter={formatToLakhs}
+              className="text-xs sm:text-sm"
             />
             <ChartTooltip
               cursor={false}
@@ -114,7 +106,7 @@ export default function FinancialDetailsChart() {
               dataKey="amount"
               layout="vertical"
               radius={5}
-              barSize={50}
+              barSize={40} // Slightly reduced bar size for better responsiveness
             />
           </BarChart>
         </ChartContainer>

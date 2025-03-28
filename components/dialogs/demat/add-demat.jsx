@@ -47,7 +47,7 @@ const StepIndicator = ({ number, isCompleted, isCurrent }) => {
   );
 };
 
-export default function AddDematDialog({ openAddDialog, setOpenAddDialog, onDematAdded }) {
+export default function AddDematDialog({ open, onOpenChange, onDematAdded }) {
   const [step, setStep] = useState(1);
   const [dematId, setDematId] = useState(null);
   const [formData, setFormData] = useState({
@@ -73,11 +73,11 @@ export default function AddDematDialog({ openAddDialog, setOpenAddDialog, onDema
   ];
 
   useEffect(() => {
-    if (openAddDialog) {
+    if (open) {
       fetchBanks();
       if (step === 2) fetchFamilyMembers();
     }
-  }, [openAddDialog, step]);
+  }, [open, step]);
 
   const fetchBanks = async () => {
     try {
@@ -146,13 +146,21 @@ export default function AddDematDialog({ openAddDialog, setOpenAddDialog, onDema
 
     try {
       setLoading(true);
-      const response = await createNominee("demat", {
+      const response = await createNominee("demat_account", {
         nominee_id: newNominee.nominee_id,
         percentage: parseInt(newNominee.percentage),
         asset_id: dematId,
       });
       if (response.status) {
-        setNominees([...nominees, { ...newNominee, id: response.data?.id }]);
+        const selectedMember = familyMembers.find(m => m.id === newNominee.nominee_id);
+        setNominees([...nominees, { 
+          id: response.data?.id, 
+          nominee_id: newNominee.nominee_id,
+          first_name: selectedMember?.first_name,
+          last_name: selectedMember?.last_name,
+          relationship: selectedMember?.relationship,
+          percentage: newNominee.percentage 
+        }]);
         setNewNominee({ nominee_id: "", percentage: "" });
         toast.success("Nominee added successfully");
       }
@@ -213,7 +221,7 @@ export default function AddDematDialog({ openAddDialog, setOpenAddDialog, onDema
     setNewNominee({ nominee_id: "", percentage: "" });
     setDocumentFile(null);
     setStep(1);
-    setOpenAddDialog(false);
+    onOpenChange(false);
   };
 
   const handleNext = () => {
@@ -225,13 +233,7 @@ export default function AddDematDialog({ openAddDialog, setOpenAddDialog, onDema
   };
 
   return (
-    <Dialog open={openAddDialog} onOpenChange={handleClose}>
-      <DialogTrigger asChild>
-        <Button className="gap-2" onClick={() => setOpenAddDialog(true)}>
-          <Plus size={20} />
-          Add Demat Account
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] p-0 h-[85vh] flex flex-col">
         <DialogHeader className="p-4 border-b">
           <DialogTitle>Add New Demat Account</DialogTitle>
@@ -371,21 +373,42 @@ export default function AddDematDialog({ openAddDialog, setOpenAddDialog, onDema
             <div className="space-y-6">
               <div className="space-y-2">
                 <Label>Nominees</Label>
-                {nominees.map((nominee) => (
-                  <div key={nominee.id} className="flex items-center gap-2">
-                    <span>
-                      {familyMembers.find((fm) => fm.id === nominee.nominee_id)?.first_name} - {nominee.percentage}%
-                    </span>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleRemoveNominee(nominee.id)}
-                      disabled={loading}
-                    >
-                      <Trash size={16} />
-                    </Button>
+                {nominees.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-sm">
+                      <thead>
+                        <tr className="bg-muted">
+                          <th className="text-left p-2 font-medium">Nominee Name</th>
+                          <th className="text-left p-2 font-medium">Relationship</th>
+                          <th className="text-left p-2 font-medium">Share (%)</th>
+                          <th className="text-center p-2 font-medium">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {nominees.map((nominee, index) => (
+                          <tr key={index} className={index % 2 === 0 ? "bg-background" : "bg-muted/30"}>
+                            <td className="p-2">{`${nominee.first_name} ${nominee.last_name}`}</td>
+                            <td className="p-2">{nominee.relationship}</td>
+                            <td className="p-2">{nominee.percentage}%</td>
+                            <td className="p-2 text-center">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleRemoveNominee(nominee.id)}
+                                disabled={loading}
+                                className="h-8 w-8"
+                              >
+                                <Trash className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                ))}
+                ) : (
+                  <p className="text-sm text-gray-500">No nominees added yet</p>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

@@ -18,12 +18,13 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import EditDematDialog from "@/components/dialogs/demat/edit-demat";
-import { getDematAccountDetail } from "@/lib/demat-account-api";
+import { Badge } from "@/components/ui/badge";
+import EditStockDialog from "@/components/dialogs/stocks/edit-stock";
+import { getStockDetail } from "@/lib/stock-api"; // Assume this API exists to fetch stock details
 import { deleteNominee } from "@/lib/nominee-api";
 import { toast } from "sonner";
 
-const DematCard = ({ dematAccount, onEdit, onDelete }) => {
+const StockCard = ({ stock, onEdit, onDelete }) => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -32,28 +33,27 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
   const [nominees, setNominees] = useState([]);
   const [documentUrl, setDocumentUrl] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(true);
-  const [detailedAccount, setDetailedAccount] = useState(dematAccount); // New state for full details
+  const [detailedStock, setDetailedStock] = useState(stock);
 
-  // Fetch nominee and document details
   useEffect(() => {
-    const fetchDematDetails = async () => {
+    const fetchStockDetails = async () => {
       try {
         setLoadingDetails(true);
-        const response = await getDematAccountDetail(dematAccount.id);
+        const response = await getStockDetail(stock.id); // Assume this API returns detailed stock info
         if (response.status) {
-          setDetailedAccount(response.data); // Store full response data
-          setNominees(response.data.nominees || []);
+          setDetailedStock(response.data);
+          setNominees(response.data.nominee || []);
           setDocumentUrl(response.data.document || null);
         }
       } catch (error) {
-        console.error("Error fetching demat details:", error);
-        toast.error("Failed to load demat account details");
+        console.error("Error fetching stock details:", error);
+        toast.error("Failed to load stock details");
       } finally {
         setLoadingDetails(false);
       }
     };
-    fetchDematDetails();
-  }, [dematAccount.id]);
+    fetchStockDetails();
+  }, [stock.id]);
 
   const handleDownload = async () => {
     if (!documentUrl) return;
@@ -62,15 +62,9 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
         method: "GET",
         mode: "cors",
         credentials: "omit",
-        headers: {
-          "Accept": "application/pdf,image/*",
-        },
+        headers: { "Accept": "application/pdf,image/*" },
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const blob = await response.blob();
       const filename = documentUrl.split("/").pop() || "document";
       const url = window.URL.createObjectURL(blob);
@@ -89,15 +83,12 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
   };
 
   const handleView = () => {
-    if (documentUrl) {
-      setViewDialogOpen(true);
-    } else {
-      toast.error("No document available to view");
-    }
+    if (documentUrl) setViewDialogOpen(true);
+    else toast.error("No document available to view");
   };
 
   const handleConfirmDelete = () => {
-    onDelete(dematAccount.id);
+    onDelete(stock.id);
     setDeleteDialogOpen(false);
   };
 
@@ -108,9 +99,8 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
 
   const handleConfirmDeleteNominee = async () => {
     if (!selectedNominee) return;
-
     try {
-      const response = await deleteNominee("demat", selectedNominee.id);
+      const response = await deleteNominee("stock", selectedNominee.id);
       if (response.status) {
         setNominees(nominees.filter((item) => item.id !== selectedNominee.id));
         toast.success("Nominee deleted successfully");
@@ -136,39 +126,38 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
   return (
     <>
       <Card className="p-0 transition-all hover:shadow-lg hover:-translate-y-1">
-        <CardHeader className="p-6 pb-0">
-          <CardTitle>{dematAccount.depository_name}</CardTitle>
+        <CardHeader className="p-4 sm:p-6 pb-0">
+          <CardTitle className="flex justify-between items-center text-base sm:text-lg">
+            {detailedStock.stock_name}
+            <Badge variant="default">{detailedStock.stock_exchange}</Badge>
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="bg-popover p-2 rounded-lg">
-              <p className="text-xs text-muted-foreground">Account Number</p>
-              <p className="font-semibold mt-2 truncate">
-                {detailedAccount.account_number || "N/A"}
-              </p>
+              <p className="text-xs text-muted-foreground">Demat Account</p>
+              <p className="font-semibold mt-1 sm:mt-2 truncate">{detailedStock.account_number || "N/A"}</p>
             </div>
             <div className="bg-popover p-2 rounded-lg">
-              <p className="text-xs text-muted-foreground">Unique Client Code</p>
-              <p className="font-semibold mt-2 truncate">
-                {detailedAccount.unique_client_code || "N/A"}
-              </p>
+              <p className="text-xs text-muted-foreground">Quantity</p>
+              <p className="font-semibold mt-1 sm:mt-2 truncate">{detailedStock.quantity || "0"}</p>
             </div>
             <div className="bg-popover p-2 rounded-lg">
-              <p className="text-xs text-muted-foreground">DP ID</p>
-              <p className="font-semibold mt-2 truncate">
-                {detailedAccount.dp_id || "N/A"}
-              </p>
+              <p className="text-xs text-muted-foreground">Purchase Price</p>
+              <p className="font-semibold mt-1 sm:mt-2 truncate">₹{detailedStock.purchase_price || "0"}</p>
             </div>
             <div className="bg-popover p-2 rounded-lg">
-              <p className="text-xs text-muted-foreground">Account Type</p>
-              <p className="font-semibold mt-2 truncate">
-                {detailedAccount.account_type || "N/A"}
-              </p>
+              <p className="text-xs text-muted-foreground">Current Price</p>
+              <p className="font-semibold mt-1 sm:mt-2 truncate">₹{detailedStock.current_price || "0"}</p>
             </div>
             <div className="bg-popover p-2 rounded-lg">
-              <p className="text-xs text-muted-foreground">Linked Bank Account</p>
-              <p className="font-semibold mt-2 truncate">
-                {detailedAccount.bank_account || "N/A"}
+              <p className="text-xs text-muted-foreground">Total Investment</p>
+              <p className="font-semibold mt-1 sm:mt-2 truncate">₹{detailedStock.total_investment || "0"}</p>
+            </div>
+            <div className="bg-popover p-2 rounded-lg">
+              <p className="text-xs text-muted-foreground">Purchase Date</p>
+              <p className="font-semibold mt-1 sm:mt-2 truncate">
+                {detailedStock.purchase_date ? new Date(detailedStock.purchase_date).toLocaleDateString() : "N/A"}
               </p>
             </div>
           </div>
@@ -193,10 +182,7 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
                   </thead>
                   <tbody>
                     {nominees.map((nominee, index) => (
-                      <tr
-                        key={nominee.id || index}
-                        className={index % 2 === 0 ? "bg-background" : "bg-muted/30"}
-                      >
+                      <tr key={nominee.id || index} className={index % 2 === 0 ? "bg-background" : "bg-muted/30"}>
                         <td className="p-2">{`${nominee.first_name} ${nominee.last_name}`}</td>
                         <td className="p-2">{nominee.relationship}</td>
                         <td className="p-2">{nominee.percentage}%</td>
@@ -230,37 +216,19 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
               <span>No file attached</span>
             )}
             <div className="flex items-center gap-1 sm:gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleView}
-                disabled={!documentUrl}
-              >
+              <Button variant="ghost" size="icon" onClick={handleView} disabled={!documentUrl}>
                 <Eye className="h-4 w-4 text-primary" />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleDownload}
-                disabled={!documentUrl}
-              >
+              <Button variant="ghost" size="icon" onClick={handleDownload} disabled={!documentUrl}>
                 <FileDown className="h-4 w-4 text-primary" />
               </Button>
             </div>
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setEditDialogOpen(true)}
-            >
+            <Button variant="outline" size="icon" onClick={() => setEditDialogOpen(true)}>
               <PenLine className="h-4 w-4 text-foreground" />
             </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setDeleteDialogOpen(true)}
-            >
+            <Button variant="outline" size="icon" onClick={() => setDeleteDialogOpen(true)}>
               <Trash className="h-4 w-4 text-foreground" />
             </Button>
           </div>
@@ -277,22 +245,10 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
             {documentUrl && (
               <>
                 {isImage ? (
-                  <img
-                    src={documentUrl}
-                    alt="Demat Document"
-                    className="w-full h-auto"
-                  />
+                  <img src={documentUrl} alt="Stock Document" className="w-full h-auto" />
                 ) : (
-                  <object
-                    data={documentUrl}
-                    type="application/pdf"
-                    width="100%"
-                    height="600px"
-                  >
-                    <p>
-                      Your browser cannot display the PDF. Please use the
-                      download button instead.
-                    </p>
+                  <object data={documentUrl} type="application/pdf" width="100%" height="600px">
+                    <p>Your browser cannot display the PDF. Please use the download button instead.</p>
                   </object>
                 )}
               </>
@@ -301,37 +257,26 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
         </DialogContent>
       </Dialog>
 
-      {/* Demat Delete Confirmation Dialog */}
+      {/* Stock Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the demat account "
-              {dematAccount.depository_name}"? This action cannot be undone.
+              Are you sure you want to delete the stock "{detailedStock.stock_name}"? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleConfirmDelete}>
-              Delete
-            </Button>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>Delete</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Edit Demat Dialog */}
+      {/* Edit Stock Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
-          <EditDematDialog
-            dematAccount={dematAccount}
-            onDematUpdated={handleEditSuccess}
-          />
+          <EditStockDialog stock={detailedStock} onSuccess={handleEditSuccess} />
         </DialogContent>
       </Dialog>
 
@@ -341,9 +286,8 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
           <DialogHeader>
             <DialogTitle>Delete Nominee</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {selectedNominee?.first_name}{" "}
-              {selectedNominee?.last_name} as a nominee? This action cannot be
-              undone.
+              Are you sure you want to delete {selectedNominee?.first_name} {selectedNominee?.last_name} as a nominee?
+              This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -356,12 +300,7 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
             >
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmDeleteNominee}
-            >
-              Delete
-            </Button>
+            <Button variant="destructive" onClick={handleConfirmDeleteNominee}>Delete</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -369,4 +308,4 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
   );
 };
 
-export default DematCard;
+export default StockCard;

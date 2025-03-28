@@ -2,13 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, FileDown, PenLine, Trash } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { listDeposits, getDepositDetail, deleteDeposit } from "@/lib/deposit-api";
 import { toast, Toaster } from "sonner";
 import AddDepositDialog from "@/components/dialogs/deposit/add-deposit";
-import EditDepositDialog from "@/components/dialogs/deposit/edit-deposit";
+import DepositCard from "@/components/cards/deposit-card";
+import { listDeposits } from "@/lib/deposit-api";
 import { Bank } from "@phosphor-icons/react";
 
 const FDRDPage = () => {
@@ -16,12 +13,6 @@ const FDRDPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
-  const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [selectedDeposit, setSelectedDeposit] = useState(null);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedDeleteId, setSelectedDeleteId] = useState(null);
-  const [selectedDeleteType, setSelectedDeleteType] = useState(null);
 
   const fetchDeposits = async () => {
     try {
@@ -41,45 +32,6 @@ const FDRDPage = () => {
   useEffect(() => {
     fetchDeposits();
   }, []);
-
-  const handleDelete = async (depositType, id) => {
-    try {
-      const response = await deleteDeposit(depositType, id);
-      if (response.status) {
-        setDeposits(deposits.filter((dep) => dep.id !== id));
-        toast.success("Deposit deleted successfully");
-      }
-    } catch (error) {
-      toast.error("Failed to delete deposit");
-    }
-    setDeleteDialogOpen(false);
-  };
-
-  const handleEdit = async (depositType, id) => {
-    try {
-      const response = await getDepositDetail(depositType, id);
-      if (response.data) {
-        setSelectedDeposit(response.data);
-        setOpenEditDialog(true);
-      }
-    } catch (error) {
-      toast.error("Failed to fetch deposit details");
-    }
-  };
-
-  const handleView = (deposit) => {
-    setSelectedDeposit(deposit);
-    setViewDialogOpen(true);
-  };
-
-  const handleDownload = (url) => {
-    const link = document.createElement("a");
-    link.href = url || "#";
-    link.download = url?.split("/").pop() || "document";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   const handleSuccess = () => {
     fetchDeposits();
@@ -112,9 +64,7 @@ const FDRDPage = () => {
         </div>
       </div>
 
-      {/* Always render dialogs */}
       <AddDepositDialog open={openAddDialog} onOpenChange={setOpenAddDialog} onSuccess={handleSuccess} />
-      <EditDepositDialog open={openEditDialog} onOpenChange={setOpenEditDialog} deposit={selectedDeposit} onSuccess={handleSuccess} />
 
       {error ? (
         <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
@@ -147,70 +97,11 @@ const FDRDPage = () => {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:gap-6 pb-16 sm:pb-0">
           {deposits.map((deposit) => (
-            <Card key={deposit.id} className="p-0 transition-all hover:shadow-lg hover:-translate-y-1">
-              <CardHeader className="p-4 sm:p-6 pb-0">
-                <CardTitle className="text-base sm:text-lg">{deposit.name} ({deposit.deposit_type})</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                  <div className="bg-popover p-2 rounded-lg">
-                    <p className="text-xs text-muted-foreground">Installment</p>
-                    <p className="font-semibold mt-1 sm:mt-2 truncate">₹{deposit.installment || "0"} ({deposit.installment_type})</p>
-                  </div>
-                  <div className="bg-popover p-2 rounded-lg">
-                    <p className="text-xs text-muted-foreground">Interest Rate</p>
-                    <p className="font-semibold mt-1 sm:mt-2 truncate">{deposit.interest_rate || "0"}%</p>
-                  </div>
-                  <div className="bg-popover p-2 rounded-lg">
-                    <p className="text-xs text-muted-foreground">Tenure</p>
-                    <p className="font-semibold mt-1 sm:mt-2 truncate">{deposit.tenure || "N/A"} months</p>
-                  </div>
-                  <div className="bg-popover p-2 rounded-lg">
-                    <p className="text-xs text-muted-foreground">Maturity Amount</p>
-                    <p className="font-semibold mt-1 sm:mt-2 truncate">₹{deposit.maturity_amount || "0"}</p>
-                  </div>
-                  <div className="bg-popover p-2 rounded-lg">
-                    <p className="text-xs text-muted-foreground">Maturity Date</p>
-                    <p className="font-semibold mt-1 sm:mt-2 truncate">
-                      {deposit.maturity_date ? new Date(deposit.maturity_date).toLocaleDateString() : "N/A"}
-                    </p>
-                  </div>
-                  <div className="bg-popover p-2 rounded-lg">
-                    <p className="text-xs text-muted-foreground">Mobile</p>
-                    <p className="font-semibold mt-1 sm:mt-2 truncate">{deposit.linked_mobile_number || "N/A"}</p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="border-t p-2 sm:p-4 justify-between flex-col sm:flex-row gap-2 sm:gap-0">
-                <div className="bg-background/85 text-xs p-2 rounded-lg flex gap-2 sm:gap-3 items-center w-full sm:w-60 justify-between">
-                  <span className="truncate">{deposit.document?.split("/").pop() || "Document"}</span>
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleView(deposit)}>
-                      <Eye className="h-4 w-4 text-primary" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDownload(deposit.document)} disabled={!deposit.document}>
-                      <FileDown className="h-4 w-4 text-primary" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <Button variant="outline" size="icon" onClick={() => handleEdit(deposit.deposit_type, deposit.id)}>
-                    <PenLine className="h-4 w-4 text-foreground" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => {
-                      setSelectedDeleteId(deposit.id);
-                      setSelectedDeleteType(deposit.deposit_type);
-                      setDeleteDialogOpen(true);
-                    }}
-                  >
-                    <Trash className="h-4 w-4 text-foreground" />
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
+            <DepositCard
+              key={deposit.id}
+              deposit={deposit}
+              onEdit={handleSuccess}
+            />
           ))}
         </div>
       )}
@@ -224,32 +115,6 @@ const FDRDPage = () => {
           </Button>
         </div>
       </div>
-
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="sm:max-w-[90%] sm:max-h-[90%]">
-          <DialogHeader>
-            <DialogTitle>View Document</DialogTitle>
-          </DialogHeader>
-          <div className="w-full h-full overflow-auto">
-            {selectedDeposit?.document && (
-              <iframe src={selectedDeposit.document} width="100%" height="600px" title="Deposit Document" />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>Are you sure you want to delete this deposit? This action cannot be undone.</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => handleDelete(selectedDeleteType, selectedDeleteId)}>Delete</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

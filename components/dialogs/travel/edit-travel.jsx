@@ -1,17 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { updateTravelInsurance } from "@/lib/travel-insurance-api";
 import { toast } from "sonner";
 
 const EditTravelDialog = ({ open, onOpenChange, insurance, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
+    id: "",
     travel_type: "",
     policy_number: "",
     insurer_name: "",
@@ -21,17 +34,15 @@ const EditTravelDialog = ({ open, onOpenChange, insurance, onSuccess }) => {
     policy_expiry_date: "",
     linked_mobile: "",
     coverage_details: "",
-    // installment_type: "Annually",
   });
   const [errors, setErrors] = useState({});
-  const today = new Date().toISOString().split("T")[0]; // Current date for validation
-
+  const today = new Date().toISOString().split("T")[0];
   const travelTypes = ["Domestic", "International", "Other"];
-  const installmentTypes = ["Monthly", "Quarterly", "Annually", "One Time"];
 
   useEffect(() => {
     if (insurance) {
       setFormData({
+        id: insurance.id || "",
         travel_type: insurance.travel_type || "",
         policy_number: insurance.policy_number || "",
         insurer_name: insurance.insurer_name || "",
@@ -40,8 +51,9 @@ const EditTravelDialog = ({ open, onOpenChange, insurance, onSuccess }) => {
         policy_start_date: insurance.policy_start_date || "",
         policy_expiry_date: insurance.policy_expiry_date || "",
         linked_mobile: insurance.linked_mobile || "",
-        coverage_details: insurance.coverage_details?.join(",") || "",
-        // installment_type: insurance.installment_type || "Annually",
+        coverage_details: Array.isArray(insurance.coverage_details)
+          ? insurance.coverage_details.join(",")
+          : insurance.coverage_details || "",
       });
     }
   }, [insurance]);
@@ -87,7 +99,7 @@ const EditTravelDialog = ({ open, onOpenChange, insurance, onSuccess }) => {
 
     setLoading(true);
     try {
-      const response = await updateTravelInsurance(insurance.id, {
+      const response = await updateTravelInsurance(formData.id, {
         ...formData,
         sum_insured: parseFloat(formData.sum_insured),
         premium_amount: parseFloat(formData.premium_amount),
@@ -109,6 +121,7 @@ const EditTravelDialog = ({ open, onOpenChange, insurance, onSuccess }) => {
 
   const handleClose = () => {
     setFormData({
+      id: "",
       travel_type: "",
       policy_number: "",
       insurer_name: "",
@@ -118,7 +131,6 @@ const EditTravelDialog = ({ open, onOpenChange, insurance, onSuccess }) => {
       policy_expiry_date: "",
       linked_mobile: "",
       coverage_details: "",
-      // installment_type: "Annually",
     });
     setErrors({});
     onOpenChange(false);
@@ -140,7 +152,9 @@ const EditTravelDialog = ({ open, onOpenChange, insurance, onSuccess }) => {
                   onValueChange={(value) => handleChange({ target: { id: "travel_type", value } })}
                   required
                 >
-                  <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
                   <SelectContent>
                     {travelTypes.map((type) => (
                       <SelectItem key={type} value={type}>{type}</SelectItem>
@@ -240,26 +254,15 @@ const EditTravelDialog = ({ open, onOpenChange, insurance, onSuccess }) => {
                   placeholder="e.g., Trip Cancellation, Medical Emergency"
                 />
               </div>
-              {/* <div className="grid gap-2">
-                <Label htmlFor="installment_type">Installment Type</Label>
-                <Select
-                  value={formData.installment_type}
-                  onValueChange={(value) => handleChange({ target: { id: "installment_type", value } })}
-                  required
-                >
-                  <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
-                  <SelectContent>
-                    {installmentTypes.map((type) => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div> */}
             </div>
           </div>
           <DialogFooter className="border-t p-4">
-            <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>Cancel</Button>
-            <Button type="submit" disabled={loading}>{loading ? "Updating..." : "Update"}</Button>
+            <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Updating..." : "Update"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

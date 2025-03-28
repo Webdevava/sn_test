@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "sonner";
 import AddDematDialog from "@/components/dialogs/demat/add-demat";
 import DematCard from "@/components/cards/demat-card";
-import { Bank as BankIcon } from "@phosphor-icons/react"; // Keeping BankIcon as per original
+import { Bank as BankIcon } from "@phosphor-icons/react";
 import { listDematAccounts, deleteDematAccount } from "@/lib/demat-account-api";
 
 export default function DematAccountPage() {
@@ -53,25 +54,6 @@ export default function DematAccountPage() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
-        <BankIcon size={36} className="mb-4 text-red-400 sm:size-48" />
-        <p className="text-red-500 text-base sm:text-lg">{error}</p>
-        <p className="text-gray-400 mt-2 text-sm sm:text-base">
-          Something went wrong. Try adding a demat account or refresh the page.
-        </p>
-        <div className="mt-4">
-          <AddDematDialog
-            openAddDialog={openAddDialog}
-            setOpenAddDialog={setOpenAddDialog}
-            onDematAdded={fetchDematAccounts}
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto py-6 px-4 sm:py-12 sm:px-6 lg:px-8 relative">
       <Toaster richColors />
@@ -83,15 +65,34 @@ export default function DematAccountPage() {
           </h1>
         </div>
         <div className="hidden sm:block">
-          <AddDematDialog
-            openAddDialog={openAddDialog}
-            setOpenAddDialog={setOpenAddDialog}
-            onDematAdded={fetchDematAccounts}
-          />
+          <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
+            <BankIcon size={20} />
+            Add Demat Account
+          </Button>
         </div>
       </div>
 
-      {dematAccounts.length === 0 ? (
+      <AddDematDialog
+        open={openAddDialog}
+        onOpenChange={setOpenAddDialog}
+        onDematAdded={fetchDematAccounts}
+      />
+
+      {error ? (
+        <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
+          <BankIcon size={36} className="mb-4 text-red-400 sm:size-48" />
+          <p className="text-red-500 text-base sm:text-lg">{error}</p>
+          <p className="text-gray-400 mt-2 text-sm sm:text-base">
+            Something went wrong. Try adding a demat account or refresh the page.
+          </p>
+          <div className="mt-4">
+            <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
+              <BankIcon size={20} />
+              Add Demat Account
+            </Button>
+          </div>
+        </div>
+      ) : dematAccounts.length === 0 ? (
         <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
           <BankIcon size={36} className="mb-4 text-gray-400 sm:size-48" />
           <p className="text-gray-500 text-base sm:text-lg">No demat accounts found</p>
@@ -99,11 +100,10 @@ export default function DematAccountPage() {
             Click below to create your first demat account
           </p>
           <div className="mt-4">
-            <AddDematDialog
-              openAddDialog={openAddDialog}
-              setOpenAddDialog={setOpenAddDialog}
-              onDematAdded={fetchDematAccounts}
-            />
+            <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
+              <BankIcon size={20} />
+              Add Demat Account
+            </Button>
           </div>
         </div>
       ) : (
@@ -122,11 +122,10 @@ export default function DematAccountPage() {
       {/* Fixed Add Button for Mobile */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t sm:hidden w-full">
         <div className="flex items-center justify-center">
-          <AddDematDialog
-            openAddDialog={openAddDialog}
-            setOpenAddDialog={setOpenAddDialog}
-            onDematAdded={fetchDematAccounts}
-          />
+          <Button onClick={() => setOpenAddDialog(true)} className="gap-2 w-full">
+            <BankIcon size={20} />
+            Add Demat Account
+          </Button>
         </div>
       </div>
     </div>

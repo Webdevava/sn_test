@@ -1,32 +1,30 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from '../ui/button';
-import { FileDown, Eye, Download } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { FileDown, Eye, Download } from "lucide-react";
 
 const DocumentItem = ({ title, numberLabel, number, docName }) => {
   return (
-    <div className='bg-muted p-4 rounded-lg'>
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <div className="flex items-center justify-between p-3 rounded-md">
-        <div>
-          <p className="text-sm text-gray-500 mb-1">{numberLabel}</p>
-          <p className="text-sm">{number}</p>
+    <div className='bg-muted p-3 sm:p-4 rounded-lg'>
+      <h3 className="text-base sm:text-lg font-semibold mb-2">{title}</h3>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 p-3 rounded-md">
+        <div className="w-full sm:w-auto">
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">{numberLabel}</p>
+          <p className="text-xs sm:text-sm">{number}</p>
         </div>
-        
-        <div>
-          <p className="text-sm text-gray-500 mb-1">Document</p>
-          <div className="mr-4 font-semibold flex items-center">
-            <FileDown className='text-red-800' fill='#EF4343' />
-            <span className="ml-2">{docName}</span>
+        <div className="w-full sm:w-auto mt-2 sm:mt-0">
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">Document</p>
+          <div className="flex items-center">
+            <FileDown className='text-red-800 h-4 w-4' fill='#EF4343' />
+            <span className="ml-2 text-xs sm:text-sm font-semibold">{docName}</span>
           </div>
         </div>
-        
-        <div className="flex">
-          <Button size="icon" variant="ghost" className="h-8 w-8">
-            <Eye className="h-4 w-4" />
+        <div className="flex items-center space-x-2 mt-2 sm:mt-0">
+          <Button size="icon" variant="ghost" className="h-7 w-7 sm:h-8 sm:w-8">
+            <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
-          <Button size="icon" variant="ghost" className="h-8 w-8">
-            <Download className="h-4 w-4" />
+          <Button size="icon" variant="ghost" className="h-7 w-7 sm:h-8 sm:w-8">
+            <Download className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
         </div>
       </div>
@@ -63,14 +61,14 @@ const UploadedDocs = () => {
   ];
 
   return (
-    <Card className="shadow-sm h-full">
-      <CardHeader className="border-b flex items-center flex-row justify-between p-3 h-16">
-        <CardTitle className="text-xl font-bold">
+    <Card className="w-full mx-auto shadow-sm">
+      <CardHeader className="border-b p-4">
+        <CardTitle className="text-lg sm:text-xl font-bold">
           Uploaded Documents
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4 max-h-[400px] overflow-y-auto">
-        <div className="space-y-6">
+      <CardContent className="p-2 sm:p-4 max-h-[380px] sm:max-h-[430px] overflow-y-auto">
+        <div className="space-y-4 sm:space-y-6">
           {documents.map((doc, index) => (
             <DocumentItem
               key={index}

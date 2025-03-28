@@ -1,6 +1,5 @@
-// @/components/dialogs/add-document.jsx
 import React, { useState } from "react";
-import { Toaster, toast } from "sonner"; // Import sonner
+import { Toaster, toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -18,10 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createDocument } from "@/lib/document-api";
+import { createDocument, uploadDocumentAttachments } from "@/lib/document-api";
+import { File, X } from "lucide-react";
 
 const AddDocumentDialog = ({ open, onOpenChange, onSuccess }) => {
+  const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdDocumentId, setCreatedDocumentId] = useState(null);
+  const [files, setFiles] = useState([]);
   const [formData, setFormData] = useState({
     document_type: "",
     document_number: "",
@@ -29,7 +32,6 @@ const AddDocumentDialog = ({ open, onOpenChange, onSuccess }) => {
     expiry_date: "",
     extra_data: {},
   });
-  const [extraDataInput, setExtraDataInput] = useState("");
   const [errors, setErrors] = useState({});
 
   const documentTypes = [
@@ -40,10 +42,10 @@ const AddDocumentDialog = ({ open, onOpenChange, onSuccess }) => {
     { label: "Voter ID", value: "Voter ID" },
   ];
 
-  const validateForm = () => {
+  const validateFirstStep = () => {
     const newErrors = {};
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time for comparison
+    today.setHours(0, 0, 0, 0);
 
     if (!formData.document_type) newErrors.document_type = "Document type is required";
     if (!formData.document_number) {
@@ -93,7 +95,7 @@ const AddDocumentDialog = ({ open, onOpenChange, onSuccess }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const upperValue = value.toUpperCase().replace(/\s/g, ""); // Convert to uppercase, remove spaces
+    const upperValue = value.toUpperCase().replace(/\s/g, "");
     setFormData((prev) => ({
       ...prev,
       [name]: upperValue,
@@ -121,39 +123,43 @@ const AddDocumentDialog = ({ open, onOpenChange, onSuccess }) => {
     }
   };
 
-  const handleExtraDataChange = (e) => {
-    const value = e.target.value;
-    setExtraDataInput(value);
-    try {
-      const parsed = value ? JSON.parse(value) : {};
-      if (typeof parsed !== "object" || Array.isArray(parsed)) {
-        throw new Error("Invalid JSON object");
-      }
-      setFormData((prev) => ({
-        ...prev,
-        extra_data: parsed,
-      }));
-      setErrors((prev) => ({ ...prev, extra_data: "" }));
-    } catch (err) {
-      setErrors((prev) => ({
-        ...prev,
-        extra_data: "Please enter a valid JSON object (e.g., {\"key\": \"value\"})",
-      }));
+  const handleFileChange = (e) => {
+    const newFiles = Array.from(e.target.files).filter(file => 
+      file.type === 'application/pdf' && file.size <= 5 * 1024 * 1024 // 5MB limit
+    );
+
+    const invalidFiles = Array.from(e.target.files).filter(file => 
+      file.type !== 'application/pdf' || file.size > 5 * 1024 * 1024
+    );
+
+    if (invalidFiles.length > 0) {
+      toast.error("Only PDF files under 5MB are allowed");
+    }
+
+    setFiles(prevFiles => [...prevFiles, ...newFiles]);
+  };
+
+  const removeFile = (fileToRemove) => {
+    setFiles(prevFiles => prevFiles.filter(file => file !== fileToRemove));
+  };
+
+  const handleFirstStepSubmit = (e) => {
+    // Prevent default form submission
+    e.preventDefault();
+    
+    if (validateFirstStep()) {
+      // Move to next step without page refresh
+      setStep(2);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm() || errors.extra_data) return;
-
+    
     const payload = {
       ...formData,
-      issue_date:
-        ["Aadhaar", "PAN Card"].includes(formData.document_type) ? null : formData.issue_date,
-      expiry_date:
-        ["Aadhaar", "PAN Card", "Voter ID"].includes(formData.document_type)
-          ? null
-          : formData.expiry_date,
+      issue_date: ["Aadhaar", "PAN Card"].includes(formData.document_type) ? null : formData.issue_date,
+      expiry_date: ["Aadhaar", "PAN Card", "Voter ID"].includes(formData.document_type) ? null : formData.expiry_date,
     };
 
     try {
@@ -162,7 +168,15 @@ const AddDocumentDialog = ({ open, onOpenChange, onSuccess }) => {
       console.log("Add Document Response:", response);
 
       if (response.status === true) {
-        toast.success(response.message || "Document added successfully"); // Use sonner
+        const documentId = response.data.id;
+        setCreatedDocumentId(documentId);
+
+        // Upload attachments if files exist
+        if (files.length > 0) {
+          await uploadDocumentAttachments(documentId, files);
+        }
+
+        toast.success(response.message || "Document added successfully");
         resetForm();
         onSuccess();
         onOpenChange(false);
@@ -171,7 +185,7 @@ const AddDocumentDialog = ({ open, onOpenChange, onSuccess }) => {
       }
     } catch (error) {
       console.error("Add Document Error:", error);
-      toast.error(error.detail?.[0]?.msg || error.message || "Failed to add document"); // Use sonner
+      toast.error(error.detail?.[0]?.msg || error.message || "Failed to add document");
     } finally {
       setIsSubmitting(false);
     }
@@ -185,8 +199,9 @@ const AddDocumentDialog = ({ open, onOpenChange, onSuccess }) => {
       expiry_date: "",
       extra_data: {},
     });
-    setExtraDataInput("");
+    setFiles([]);
     setErrors({});
+    setStep(1);
   };
 
   const handleClose = () => {
@@ -194,109 +209,166 @@ const AddDocumentDialog = ({ open, onOpenChange, onSuccess }) => {
     onOpenChange(false);
   };
 
+  const renderFirstStep = () => (
+    <div className="grid gap-4">
+      <div className="grid gap-2">
+        <Label htmlFor="document_type">Document Type</Label>
+        <Select onValueChange={handleDocumentTypeChange} value={formData.document_type}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select document type" />
+          </SelectTrigger>
+          <SelectContent>
+            {documentTypes.map((type) => (
+              <SelectItem key={type.value} value={type.value}>
+                {type.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.document_type && (
+          <p className="text-destructive text-sm">{errors.document_type}</p>
+        )}
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="document_number">Document Number</Label>
+        <Input
+          id="document_number"
+          name="document_number"
+          value={formData.document_number}
+          onChange={handleInputChange}
+          placeholder="Enter document number"
+        />
+        {errors.document_number && (
+          <p className="text-destructive text-sm">{errors.document_number}</p>
+        )}
+      </div>
+      {formData.document_type && !["Aadhaar", "PAN Card"].includes(formData.document_type) && (
+        <div className="grid gap-2">
+          <Label htmlFor="issue_date">Issue Date</Label>
+          <Input
+            id="issue_date"
+            name="issue_date"
+            type="date"
+            value={formData.issue_date}
+            onChange={handleInputChange}
+          />
+          {errors.issue_date && (
+            <p className="text-destructive text-sm">{errors.issue_date}</p>
+          )}
+        </div>
+      )}
+      {formData.document_type && !["Aadhaar", "PAN Card", "Voter ID"].includes(formData.document_type) && (
+        <div className="grid gap-2">
+          <Label htmlFor="expiry_date">Expiry Date</Label>
+          <Input
+            id="expiry_date"
+            name="expiry_date"
+            type="date"
+            value={formData.expiry_date}
+            onChange={handleInputChange}
+          />
+          {errors.expiry_date && (
+            <p className="text-destructive text-sm">{errors.expiry_date}</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderSecondStep = () => (
+    <div className="grid gap-4">
+      <div className="grid gap-2">
+        <Label>Upload Supporting Documents (PDF only)</Label>
+        <div className="border-dashed border-2 border-gray-300 p-4 text-center">
+          <input 
+            type="file" 
+            accept=".pdf" 
+            multiple 
+            onChange={handleFileChange} 
+            className="hidden" 
+            id="file-upload"
+          />
+          <label htmlFor="file-upload" className="cursor-pointer text-blue-500 hover:underline">
+            Click to select PDF files
+          </label>
+          <p className="text-xs text-gray-500 mt-2">Maximum file size: 5MB</p>
+        </div>
+        {files.length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm font-medium mb-2">Selected Files:</p>
+            <div className="space-y-2">
+              {files.map((file, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-center justify-between bg-gray-100 p-2 rounded"
+                >
+                  <div className="flex items-center">
+                    <File className="h-5 w-5 mr-2 text-blue-500" />
+                    <span className="text-sm">{file.name}</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => removeFile(file)}
+                  >
+                    <X className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] p-0 h-[75vh] flex flex-col">
         <DialogHeader className="p-4 border-b">
-          <DialogTitle>Add New Document</DialogTitle>
+          <DialogTitle>
+            {step === 1 ? "Add Document Details" : "Upload Supporting Documents"}
+          </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <div className="flex-1 overflow-y-auto">
-            <div className="grid gap-4 p-4">
-              <div className="grid gap-2">
-                <Label htmlFor="document_type">Document Type</Label>
-                <Select onValueChange={handleDocumentTypeChange} value={formData.document_type}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select document type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {documentTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.document_type && (
-                  <p className="text-destructive text-sm">{errors.document_type}</p>
-                )}
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="document_number">Document Number</Label>
-                <Input
-                  id="document_number"
-                  name="document_number"
-                  value={formData.document_number}
-                  onChange={handleInputChange}
-                  placeholder="Enter document number"
-                />
-                {errors.document_number && (
-                  <p className="text-destructive text-sm">{errors.document_number}</p>
-                )}
-              </div>
-              {formData.document_type && !["Aadhaar", "PAN Card"].includes(formData.document_type) && (
-                <div className="grid gap-2">
-                  <Label htmlFor="issue_date">Issue Date</Label>
-                  <Input
-                    id="issue_date"
-                    name="issue_date"
-                    type="date"
-                    value={formData.issue_date}
-                    onChange={handleInputChange}
-                  />
-                  {errors.issue_date && (
-                    <p className="text-destructive text-sm">{errors.issue_date}</p>
-                  )}
-                </div>
-              )}
-              {formData.document_type &&
-                !["Aadhaar", "PAN Card", "Voter ID"].includes(formData.document_type) && (
-                  <div className="grid gap-2">
-                    <Label htmlFor="expiry_date">Expiry Date</Label>
-                    <Input
-                      id="expiry_date"
-                      name="expiry_date"
-                      type="date"
-                      value={formData.expiry_date}
-                      onChange={handleInputChange}
-                    />
-                    {errors.expiry_date && (
-                      <p className="text-destructive text-sm">{errors.expiry_date}</p>
-                    )}
-                  </div>
-                )}
-              {/* <div className="grid gap-2">
-                <Label htmlFor="extra_data">Additional Information (JSON)</Label>
-                <Input
-                  id="extra_data"
-                  name="extra_data"
-                  value={extraDataInput}
-                  onChange={handleExtraDataChange}
-                  placeholder='e.g., {"key": "value"} (optional)'
-                />
-                {errors.extra_data && (
-                  <p className="text-destructive text-sm">{errors.extra_data}</p>
-                )}
-              </div> */}
-            </div>
+        <form 
+          onSubmit={step === 1 ? handleFirstStepSubmit : handleSubmit} 
+          className="flex flex-col h-full"
+        >
+          <div className="flex-1 overflow-y-auto p-4">
+            {step === 1 ? renderFirstStep() : renderSecondStep()}
           </div>
-          <DialogFooter className="border-t p-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              className="w-32 bg-popover border-foreground"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || errors.extra_data}
-              className="w-32"
-            >
-              {isSubmitting ? "Adding..." : "Add"}
-            </Button>
+          <DialogFooter className="border-t p-4 flex justify-between">
+            {step === 2 && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStep(1)}
+                className="w-32"
+              >
+                Back
+              </Button>
+            )}
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                className="w-32"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-32"
+              >
+                {step === 1 
+                  ? "Next" 
+                  : (isSubmitting ? "Adding..." : "Add Document")
+                }
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

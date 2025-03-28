@@ -18,12 +18,12 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import EditDematDialog from "@/components/dialogs/demat/edit-demat";
-import { getDematAccountDetail } from "@/lib/demat-account-api";
+import EditTermDialog from "@/components/dialogs/term/edit-term";
+import { getTermInsuranceDetail } from "@/lib/term-insurance-api";
 import { deleteNominee } from "@/lib/nominee-api";
 import { toast } from "sonner";
 
-const DematCard = ({ dematAccount, onEdit, onDelete }) => {
+const TermCard = ({ termInsurance, onEdit, onDelete }) => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -32,28 +32,28 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
   const [nominees, setNominees] = useState([]);
   const [documentUrl, setDocumentUrl] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(true);
-  const [detailedAccount, setDetailedAccount] = useState(dematAccount); // New state for full details
+  const [detailedInsurance, setDetailedInsurance] = useState(termInsurance);
 
-  // Fetch nominee and document details
-  useEffect(() => {
-    const fetchDematDetails = async () => {
-      try {
-        setLoadingDetails(true);
-        const response = await getDematAccountDetail(dematAccount.id);
-        if (response.status) {
-          setDetailedAccount(response.data); // Store full response data
-          setNominees(response.data.nominees || []);
-          setDocumentUrl(response.data.document || null);
-        }
-      } catch (error) {
-        console.error("Error fetching demat details:", error);
-        toast.error("Failed to load demat account details");
-      } finally {
-        setLoadingDetails(false);
+  const fetchTermDetails = async () => {
+    try {
+      setLoadingDetails(true);
+      const response = await getTermInsuranceDetail(termInsurance.id);
+      if (response.status) {
+        setDetailedInsurance(response.data);
+        setNominees(response.data.nominee || []);
+        setDocumentUrl(response.data.document || null);
       }
-    };
-    fetchDematDetails();
-  }, [dematAccount.id]);
+    } catch (error) {
+      console.error("Error fetching term insurance details:", error);
+      toast.error("Failed to load term insurance details");
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTermDetails();
+  }, [termInsurance.id]);
 
   const handleDownload = async () => {
     if (!documentUrl) return;
@@ -97,7 +97,7 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
   };
 
   const handleConfirmDelete = () => {
-    onDelete(dematAccount.id);
+    onDelete(termInsurance.id);
     setDeleteDialogOpen(false);
   };
 
@@ -110,7 +110,7 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
     if (!selectedNominee) return;
 
     try {
-      const response = await deleteNominee("demat", selectedNominee.id);
+      const response = await deleteNominee("term", selectedNominee.id);
       if (response.status) {
         setNominees(nominees.filter((item) => item.id !== selectedNominee.id));
         toast.success("Nominee deleted successfully");
@@ -127,7 +127,8 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
   };
 
   const handleEditSuccess = () => {
-    onEdit();
+    fetchTermDetails(); // Refetch details to update the card
+    onEdit(); // Refresh parent list
     setEditDialogOpen(false);
   };
 
@@ -137,43 +138,52 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
     <>
       <Card className="p-0 transition-all hover:shadow-lg hover:-translate-y-1">
         <CardHeader className="p-6 pb-0">
-          <CardTitle>{dematAccount.depository_name}</CardTitle>
+          <CardTitle>{detailedInsurance.policy_name}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-popover p-2 rounded-lg">
-              <p className="text-xs text-muted-foreground">Account Number</p>
+              <p className="text-xs text-muted-foreground">Policy Number</p>
+              <p className="font-semibold mt-2 truncate">{detailedInsurance.policy_number || "N/A"}</p>
+            </div>
+            <div className="bg-popover p-2 rounded-lg">
+              <p className="text-xs text-muted-foreground">Insurer</p>
+              <p className="font-semibold mt-2 truncate">{detailedInsurance.insurer_name || "N/A"}</p>
+            </div>
+            <div className="bg-popover p-2 rounded-lg">
+              <p className="text-xs text-muted-foreground">Sum Assured</p>
+              <p className="font-semibold mt-2 truncate">₹{detailedInsurance.sum_assured || "0"}</p>
+            </div>
+            <div className="bg-popover p-2 rounded-lg">
+              <p className="text-xs text-muted-foreground">Premium</p>
+              <p className="font-semibold mt-2 truncate">₹{detailedInsurance.premium_amount || "0"}</p>
+            </div>
+            <div className="bg-popover p-2 rounded-lg">
+              <p className="text-xs text-muted-foreground">Term</p>
+              <p className="font-semibold mt-2 truncate">{detailedInsurance.policy_term || "N/A"} years</p>
+            </div>
+            <div className="bg-popover p-2 rounded-lg">
+              <p className="text-xs text-muted-foreground">Maturity Date</p>
               <p className="font-semibold mt-2 truncate">
-                {detailedAccount.account_number || "N/A"}
+                {detailedInsurance.maturity_date
+                  ? new Date(detailedInsurance.maturity_date).toLocaleDateString()
+                  : "N/A"}
               </p>
             </div>
             <div className="bg-popover p-2 rounded-lg">
-              <p className="text-xs text-muted-foreground">Unique Client Code</p>
+              <p className="text-xs text-muted-foreground">Start Date</p>
               <p className="font-semibold mt-2 truncate">
-                {detailedAccount.unique_client_code || "N/A"}
+                {detailedInsurance.start_date
+                  ? new Date(detailedInsurance.start_date).toLocaleDateString()
+                  : "N/A"}
               </p>
             </div>
             <div className="bg-popover p-2 rounded-lg">
-              <p className="text-xs text-muted-foreground">DP ID</p>
-              <p className="font-semibold mt-2 truncate">
-                {detailedAccount.dp_id || "N/A"}
-              </p>
-            </div>
-            <div className="bg-popover p-2 rounded-lg">
-              <p className="text-xs text-muted-foreground">Account Type</p>
-              <p className="font-semibold mt-2 truncate">
-                {detailedAccount.account_type || "N/A"}
-              </p>
-            </div>
-            <div className="bg-popover p-2 rounded-lg">
-              <p className="text-xs text-muted-foreground">Linked Bank Account</p>
-              <p className="font-semibold mt-2 truncate">
-                {detailedAccount.bank_account || "N/A"}
-              </p>
+              <p className="text-xs text-muted-foreground">Linked Phone</p>
+              <p className="font-semibold mt-2 truncate">{detailedInsurance.linked_mobile || "N/A"}</p>
             </div>
           </div>
 
-          {/* Nominee Table Section */}
           {loadingDetails ? (
             <div className="mt-4">
               <p className="text-sm">Loading details...</p>
@@ -267,7 +277,6 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
         </CardFooter>
       </Card>
 
-      {/* Document View Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="sm:max-w-[90%] sm:max-h-[90%]">
           <DialogHeader>
@@ -279,7 +288,7 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
                 {isImage ? (
                   <img
                     src={documentUrl}
-                    alt="Demat Document"
+                    alt="Term Insurance Document"
                     className="w-full h-auto"
                   />
                 ) : (
@@ -289,10 +298,7 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
                     width="100%"
                     height="600px"
                   >
-                    <p>
-                      Your browser cannot display the PDF. Please use the
-                      download button instead.
-                    </p>
+                    <p>Your browser cannot display the PDF. Please use the download button instead.</p>
                   </object>
                 )}
               </>
@@ -301,21 +307,16 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
         </DialogContent>
       </Dialog>
 
-      {/* Demat Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the demat account "
-              {dematAccount.depository_name}"? This action cannot be undone.
+              Are you sure you want to delete the term insurance "{detailedInsurance.policy_name}"? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleConfirmDelete}>
@@ -325,25 +326,21 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Demat Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
-          <EditDematDialog
-            dematAccount={dematAccount}
-            onDematUpdated={handleEditSuccess}
+          <EditTermDialog
+            insurance={detailedInsurance}
+            onSuccess={handleEditSuccess}
           />
         </DialogContent>
       </Dialog>
 
-      {/* Delete Nominee Dialog */}
       <Dialog open={deleteNomineeDialogOpen} onOpenChange={setDeleteNomineeDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Nominee</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {selectedNominee?.first_name}{" "}
-              {selectedNominee?.last_name} as a nominee? This action cannot be
-              undone.
+              Are you sure you want to delete {selectedNominee?.first_name} {selectedNominee?.last_name} as a nominee? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -356,10 +353,7 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
             >
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmDeleteNominee}
-            >
+            <Button variant="destructive" onClick={handleConfirmDeleteNominee}>
               Delete
             </Button>
           </DialogFooter>
@@ -369,4 +363,4 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
   );
 };
 
-export default DematCard;
+export default TermCard;
