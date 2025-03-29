@@ -1,5 +1,4 @@
 'use client'
-
 import { Suspense } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,15 +15,14 @@ function TabHandler({ children }) {
 function TabContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
   const currentTab = searchParams.get('tab') || 'General Settings';
-
+  
   const handleTabChange = (value) => {
     const params = new URLSearchParams(searchParams);
     params.set('tab', value);
     router.push(`?${params.toString()}`, { scroll: false });
   };
-
+  
   return (
     <PersonalDetails currentTab={currentTab} onTabChange={handleTabChange} />
   );
@@ -39,9 +37,64 @@ function PersonalDetails({ currentTab, onTabChange }) {
         className="w-full h-full flex flex-col gap-4"
       >
         <h1 className="text-2xl font-bold">Settings</h1>
-        <div className="flex h-full gap-6">
-          {/* Fixed TabsList */}
-          <div className="bg-muted border rounded-lg p-2 sticky top-0 h-full ">
+        
+        {/* Mobile/Tablet View - Horizontal Tabs */}
+        <div className="flex flex-col h-full gap-4 lg:hidden">
+          <div className="bg-muted border rounded-lg w-full">
+            <TabsList className="bg-muted flex">
+              <TabsTrigger
+                className="data-[state=active]:bg-foreground data-[state=active]:text-background flex-1 text-center font-semibold w-full  px-2 text-sm my-1"
+                value="General Settings"
+              >
+                General Settings
+              </TabsTrigger>
+              <TabsTrigger
+                className="data-[state=active]:bg-foreground data-[state=active]:text-background flex-1 text-center font-semibold w-full  px-2 text-sm my-1"
+                value="FAQ"
+              >
+                FAQ
+              </TabsTrigger>
+              <TabsTrigger
+                className="data-[state=active]:bg-foreground data-[state=active]:text-background flex-1 text-center font-semibold w-full  px-2 text-sm my-1"
+                value="Terms & Conditions"
+              >
+                T&C
+              </TabsTrigger>
+              <TabsTrigger
+                className="data-[state=active]:bg-foreground data-[state=active]:text-background flex-1 text-center font-semibold w-full  px-2 text-sm my-1"
+                value="Privacy Policy"
+              >
+                Privacy
+              </TabsTrigger>
+            </TabsList>
+          </div>
+          <div className="flex-1 overflow-auto pb-16 max-h-[calc(100vh-14rem)]">
+            <TabsContent value="General Settings" className="w-full m-0 pb-8">
+              <div className="h-full rounded-lg">
+                <GeneralSettings />
+              </div>
+            </TabsContent>
+            <TabsContent value="FAQ" className="w-full m-0 pb-8">
+              <div className="h-full rounded-lg">
+                <FaqSection/>
+              </div>
+            </TabsContent>
+            <TabsContent value="Terms & Conditions" className="w-full m-0 pb-8">
+              <div className="h-full rounded-lg">
+                <Term/>
+              </div>
+            </TabsContent>
+            <TabsContent value="Privacy Policy" className="w-full m-0 pb-8">
+              <div className="h-full rounded-lg">
+                <Policy/>
+              </div>
+            </TabsContent>
+          </div>
+        </div>
+        
+        {/* Desktop View - Vertical Tabs */}
+        <div className="hidden lg:flex h-full gap-6">
+          <div className="bg-muted border rounded-lg p-2 sticky top-0 h-full">
             <TabsList className="bg-muted flex flex-col items-start justify-start h-full w-64 gap-2 p-4">
               <TabsTrigger
                 className="data-[state=active]:bg-foreground data-[state=active]:text-background w-full items-start justify-normal font-semibold p-2.5 px-4"
@@ -69,25 +122,23 @@ function PersonalDetails({ currentTab, onTabChange }) {
               </TabsTrigger>
             </TabsList>
           </div>
-
-          {/* Scrollable TabsContent */}
-          <div className="flex-1 overflow-auto max-h-[calc(100vh-8rem)]">
-            <TabsContent value="General Settings" className="w-full m-0">
+          <div className="flex-1 overflow-auto pb-16 max-h-[calc(100vh-8rem)]">
+            <TabsContent value="General Settings" className="w-full m-0 pb-8">
               <div className="h-full rounded-lg">
                 <GeneralSettings />
               </div>
             </TabsContent>
-            <TabsContent value="FAQ" className="w-full m-0">
+            <TabsContent value="FAQ" className="w-full m-0 pb-8">
               <div className="h-full rounded-lg">
                 <FaqSection/>
               </div>
             </TabsContent>
-            <TabsContent value="Terms & Conditions" className="w-full m-0">
+            <TabsContent value="Terms & Conditions" className="w-full m-0 pb-8">
               <div className="h-full rounded-lg">
                 <Term/>
               </div>
             </TabsContent>
-            <TabsContent value="Privacy Policy" className="w-full m-0">
+            <TabsContent value="Privacy Policy" className="w-full m-0 pb-8">
               <div className="h-full rounded-lg">
                 <Policy/>
               </div>

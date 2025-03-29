@@ -11,6 +11,7 @@ import {
   YoutubeLogo,
 } from "@phosphor-icons/react/dist/ssr";
 import { useState, useRef } from "react";
+import Image from "next/image"; // Added Next.js Image import
 
 export default function Footer() {
   const [emailFocus, setEmailFocus] = useState(false);
@@ -25,14 +26,12 @@ export default function Footer() {
   const translateY = useTransform(scrollYProgress, [0, 1], [100, 0]);
   const opacity = useTransform(scrollYProgress, [0, 0.6], [0, 1]);
 
-  // Form submission handler
   const handleSubmit = (e) => {
     e.preventDefault();
     setEmail("");
     alert("Thanks for subscribing!");
   };
 
-  // For interactive wave
   const [wavePosition, setWavePosition] = useState(50);
 
   const handleMouseMove = (e) => {
@@ -42,7 +41,6 @@ export default function Footer() {
     setWavePosition(relativeX);
   };
 
-  // Social media links data
   const socialLinks = [
     { 
       Icon: InstagramLogo, 
@@ -64,32 +62,31 @@ export default function Footer() {
       className="bg-gray-900 relative overflow-hidden pt-20 text-gray-200"
       onMouseMove={handleMouseMove}
     >
-      {/* Interactive Wave Overlay */}
       <div
         className="absolute top-0 left-0 w-full h-32 pointer-events-none"
         style={{
           background: `radial-gradient(circle at ${wavePosition}% 0%, 
                       rgba(var(--primary-rgb), 0.3) 0%, 
                       rgba(var(--primary-rgb), 0.1) 30%, 
-                      rgba(31, 41, 55, 1) 70%)`, // Adjusted for dark theme
+                      rgba(31, 41, 55, 1) 70%)`,
         }}
       />
 
-      {/* Main footer content */}
       <div className="container mx-auto px-6 relative z-20">
         <motion.div
           style={{ translateY, opacity }}
           className="grid md:grid-cols-12 gap-x-8 gap-y-12"
         >
-          {/* Brand Column */}
           <div className="md:col-span-4 space-y-6">
             <div className="flex items-center space-x-4">
-              <div className="h-12 w-12 bg-primary/20 rounded-lg flex items-center justify-center">
-                <span className="text-2xl font-bold text-primary">U</span>
-              </div>
-              <h3 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Uttaradhikari
-              </h3>
+              {/* Replaced text with logo */}
+              <Image
+                src="/logos/logo_white_lg.png"
+                alt="Uttaradhikari Logo"
+                width={150}  // Adjust width as needed
+                height={40}  // Adjust height as needed
+                className="object-contain"
+              />
             </div>
 
             <p className="text-gray-400">
@@ -97,7 +94,6 @@ export default function Footer() {
               and ensure it reaches the hands that will carry it forward.
             </p>
 
-            {/* Social Media Links */}
             <div className="flex space-x-4">
               {socialLinks.map((item, index) => (
                 <motion.a
@@ -115,7 +111,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Quick Links Column */}
+          {/* Rest of the code remains unchanged */}
           <div className="md:col-span-2">
             <h4 className="text-lg font-semibold text-gray-100 mb-6 relative">
               Quick Links
@@ -139,7 +135,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Resources Column */}
           <div className="md:col-span-2">
             <h4 className="text-lg font-semibold text-gray-100 mb-6 relative">
               Resources
@@ -163,7 +158,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact Column */}
           <div className="md:col-span-4">
             <h4 className="text-lg font-semibold text-gray-100 mb-6 relative">
               Stay Updated
@@ -173,7 +167,6 @@ export default function Footer() {
               Subscribe for legacy planning tips and be the first to know about our latest features.
             </p>
 
-            {/* Newsletter Subscribe */}
             <form onSubmit={handleSubmit} className="relative">
               <div className="relative">
                 <input
@@ -199,7 +192,6 @@ export default function Footer() {
               </div>
             </form>
 
-            {/* Contact info */}
             <div className="mt-6 space-y-3">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 bg-primary/20 rounded-full flex items-center justify-center">
@@ -223,7 +215,6 @@ export default function Footer() {
           </div>
         </motion.div>
 
-        {/* Copyright bar */}
         <div className="py-6 text-center text-gray-500 text-sm relative z-10 border-t border-gray-800 mt-3">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p>© {new Date().getFullYear()} Uttaradhikari. All rights reserved.</p>

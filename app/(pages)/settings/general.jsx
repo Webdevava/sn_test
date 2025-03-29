@@ -6,11 +6,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Eye, EyeOff, Upload } from "lucide-react";
-import { updateProfile, getProfileDetail, changePassword, deleteAccount } from "@/lib/profile-api";
+import { Eye, EyeOff, Upload, Loader2 } from "lucide-react";
+import { 
+  updateProfile, 
+  getProfileDetail, 
+  changePassword, 
+  deleteAccount 
+} from "@/lib/profile-api";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function GeneralSettings() {
   const [showPassword, setShowPassword] = useState(false);
@@ -49,6 +62,7 @@ export default function GeneralSettings() {
   });
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -61,10 +75,7 @@ export default function GeneralSettings() {
     try {
       setLoading(true);
       const response = await getProfileDetail();
-      console.log("Raw API Response:", response); // Log the raw response for debugging
 
-      // Since the API response is {"status": true, "message": "Success", "data": {...}}
-      // We need to check response.data.status and response.data.data
       if (response.data && response.data.status) {
         const profileData = {
           first_name: response.data.data.first_name || "",
@@ -75,7 +86,6 @@ export default function GeneralSettings() {
           dob: response.data.data.dob || "",
           profile_picture: response.data.data.profile_picture || "",
         };
-        console.log("Profile Data to Set:", profileData); // Log what we're setting
         setProfile((prev) => ({ ...prev, ...profileData }));
         setInitialProfile(profileData);
 
@@ -265,21 +275,20 @@ export default function GeneralSettings() {
   };
 
   const handleDeleteAccount = async () => {
-    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-      try {
-        setLoading(true);
-        const response = await deleteAccount();
-        if (response.status) {
-          toast.success("Success", { description: "Your account has been deleted" });
-          handleLogout();
-        } else {
-          throw new Error(response.message || "Failed to delete account");
-        }
-      } catch (error) {
-        toast.error("Error", { description: error.message || "Failed to delete account" });
-      } finally {
-        setLoading(false);
+    try {
+      setLoading(true);
+      const response = await deleteAccount();
+      if (response.status) {
+        toast.success("Success", { description: "Your account has been deleted" });
+        handleLogout();
+      } else {
+        throw new Error(response.message || "Failed to delete account");
       }
+    } catch (error) {
+      toast.error("Error", { description: error.message || "Failed to delete account" });
+    } finally {
+      setLoading(false);
+      setDeleteDialogOpen(false);
     }
   };
 
@@ -289,22 +298,30 @@ export default function GeneralSettings() {
     router.push("/");
   };
 
-  return (
-    <div className="px-4">
-      <h1 className="text-3xl font-bold mb-10 dark:text-white">General Settings</h1>
+  // Function to get initials from name
+  const getInitials = () => {
+    const first = profile.first_name?.[0] || '';
+    const last = profile.last_name?.[0] || '';
+    return (first + last).toUpperCase();
+  };
 
-      <div className="mb-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="mb-4 md:mb-0">
-            <h2 className="text-xl font-semibold mb-1 dark:text-white">Profile Picture</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
+  return (
+    <div className="container mx-auto lg:px-4 lg:py-6 max-w-5xl">
+      <h1 className="text-2xl font-bold mb-8 text-foreground">General Settings</h1>
+
+      {/* Profile Picture Section */}
+      <div className="mb-8 bg-card rounded-lg shadow-sm p-6 transition-all">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div>
+            <h2 className="text-xl font-semibold mb-1 text-foreground">Profile Picture</h2>
+            <p className="text-muted-foreground text-sm">
               Choose an image that best reflects your identity
               <br />
               (JPG, JPEG, or PNG only. 1MB Max)
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center overflow-hidden border border-gray-200 dark:border-gray-700">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border border-border">
               {profile.profile_picture ? (
                 <img
                   src={profile.profile_picture}
@@ -313,14 +330,21 @@ export default function GeneralSettings() {
                   onError={(e) => (e.target.src = "/placeholder.svg?height=80&width=80")}
                 />
               ) : (
-                <span className="text-green-800 dark:text-green-200 text-2xl font-semibold">
-                  {profile.first_name?.[0]}
-                  {profile.last_name?.[0]}
+                <span className="text-primary text-2xl font-semibold">
+                  {getInitials()}
                 </span>
               )}
             </div>
-            <label className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 dark:border-gray-600 dark:text-white cursor-pointer">
-              <Upload className="h-4 w-4 mr-2" />
+            <label className="inline-flex items-center justify-center rounded-md text-sm font-medium 
+              transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring 
+              focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 
+              border border-input bg-background hover:bg-accent hover:text-accent-foreground 
+              h-10 px-4 py-2 cursor-pointer">
+              {uploadLoading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4 mr-2" />
+              )}
               {uploadLoading ? "Uploading..." : "Upload"}
               <input
                 ref={fileInputRef}
@@ -335,74 +359,86 @@ export default function GeneralSettings() {
         </div>
       </div>
 
-      <form onSubmit={handleProfileUpdate} className="mb-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <div className="flex justify-between mb-6">
+      {/* Personal Information Section */}
+      <form onSubmit={handleProfileUpdate} className="mb-8 bg-card rounded-lg shadow-sm p-6 transition-all">
+        <div className="flex flex-col sm:flex-row justify-between mb-6 gap-4">
           <div>
-            <h2 className="text-xl font-semibold mb-1 dark:text-white">Personal Information</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">Edit your personal information</p>
+            <h2 className="text-xl font-semibold mb-1 text-foreground">Personal Information</h2>
+            <p className="text-muted-foreground text-sm">Edit your personal information</p>
           </div>
-          <Button type="submit" disabled={loading} className="dark:bg-blue-700 dark:hover:bg-blue-800">
-            {loading ? "Saving..." : "Save Changes"}
+          <Button 
+            type="submit" 
+            disabled={loading} 
+            className="w-full sm:w-auto"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Changes"
+            )}
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <Label htmlFor="first_name" className="dark:text-white">First Name</Label>
+          <div className="space-y-2">
+            <Label htmlFor="first_name">First Name</Label>
             <Input
               id="first_name"
               name="first_name"
               value={profile.first_name}
               onChange={handleInputChange}
               disabled={loading}
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              className="w-full"
             />
           </div>
-          <div>
-            <Label htmlFor="middle_name" className="dark:text-white">Middle Name</Label>
+          <div className="space-y-2">
+            <Label htmlFor="middle_name">Middle Name</Label>
             <Input
               id="middle_name"
               name="middle_name"
               value={profile.middle_name}
               onChange={handleInputChange}
               disabled={loading}
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              className="w-full"
             />
           </div>
-          <div>
-            <Label htmlFor="last_name" className="dark:text-white">Last Name</Label>
+          <div className="space-y-2">
+            <Label htmlFor="last_name">Last Name</Label>
             <Input
               id="last_name"
               name="last_name"
               value={profile.last_name}
               onChange={handleInputChange}
               disabled={loading}
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              className="w-full"
             />
           </div>
-          <div>
-            <Label htmlFor="pan" className="dark:text-white">PAN</Label>
+          <div className="space-y-2">
+            <Label htmlFor="pan">PAN</Label>
             <Input
               id="pan"
               name="pan"
               value={profile.pan}
               onChange={handleInputChange}
               disabled={loading}
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              className="w-full"
             />
           </div>
-          <div>
-            <Label htmlFor="adhaar" className="dark:text-white">Aadhaar</Label>
+          <div className="space-y-2">
+            <Label htmlFor="adhaar">Aadhaar</Label>
             <Input
               id="adhaar"
               name="adhaar"
               value={profile.adhaar}
               onChange={handleInputChange}
               disabled={loading}
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              className="w-full"
             />
           </div>
-          <div>
-            <Label htmlFor="dob" className="dark:text-white">Date of Birth</Label>
+          <div className="space-y-2">
+            <Label htmlFor="dob">Date of Birth</Label>
             <Input
               id="dob"
               name="dob"
@@ -410,235 +446,301 @@ export default function GeneralSettings() {
               value={profile.dob}
               onChange={handleInputChange}
               disabled={loading}
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              className="w-full"
             />
           </div>
         </div>
       </form>
 
-      <form onSubmit={handleEmergencyContactUpdate} className="mb-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <div className="flex justify-between mb-6">
+      {/* Emergency Contact Section */}
+      <form onSubmit={handleEmergencyContactUpdate} className="mb-8 bg-card rounded-lg shadow-sm p-6 transition-all">
+        <div className="flex flex-col sm:flex-row justify-between mb-6 gap-4">
           <div>
-            <h2 className="text-xl font-semibold mb-1 dark:text-white">Emergency Contact</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">Edit your emergency contact details</p>
+            <h2 className="text-xl font-semibold mb-1 text-foreground">Emergency Contact</h2>
+            <p className="text-muted-foreground text-sm">Edit your emergency contact details</p>
           </div>
-          <Button type="submit" disabled={loading} className="dark:bg-blue-700 dark:hover:bg-blue-800">
-            {loading ? "Saving..." : "Save Changes"}
+          <Button 
+            type="submit" 
+            disabled={loading}
+            className="w-full sm:w-auto"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Changes"
+            )}
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <Label htmlFor="contact-name" className="dark:text-white">Name</Label>
+          <div className="space-y-2">
+            <Label htmlFor="contact-name">Name</Label>
             <Input
               id="contact-name"
               name="name"
               value={emergencyContact.name}
               onChange={handleEmergencyContactChange}
               disabled={loading}
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              className="w-full"
             />
           </div>
-          <div>
-            <Label htmlFor="contact-relationship" className="dark:text-white">Relationship</Label>
+          <div className="space-y-2">
+            <Label htmlFor="contact-relationship">Relationship</Label>
             <Input
               id="contact-relationship"
               name="relationship"
               value={emergencyContact.relationship}
               onChange={handleEmergencyContactChange}
               disabled={loading}
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              className="w-full"
             />
           </div>
-          <div>
-            <Label htmlFor="contact-phone" className="dark:text-white">Phone Number</Label>
+          <div className="space-y-2">
+            <Label htmlFor="contact-phone">Phone Number</Label>
             <Input
               id="contact-phone"
               name="phone_number"
               value={emergencyContact.phone_number}
               onChange={handleEmergencyContactChange}
               disabled={loading}
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              className="w-full"
             />
           </div>
-          <div>
-            <Label htmlFor="contact-email" className="dark:text-white">Email</Label>
+          <div className="space-y-2">
+            <Label htmlFor="contact-email">Email</Label>
             <Input
               id="contact-email"
               name="email"
               value={emergencyContact.email}
               onChange={handleEmergencyContactChange}
               disabled={loading}
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              className="w-full"
             />
           </div>
-          <div>
-            <Label htmlFor="contact-address" className="dark:text-white">Address</Label>
+          <div className="space-y-2">
+            <Label htmlFor="contact-address">Address</Label>
             <Input
               id="contact-address"
               name="address"
               value={emergencyContact.address}
               onChange={handleEmergencyContactChange}
               disabled={loading}
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              className="w-full"
             />
           </div>
-          <div>
-            <Label htmlFor="contact-alt-phone" className="dark:text-white">Alternate Phone</Label>
+          <div className="space-y-2">
+            <Label htmlFor="contact-alt-phone">Alternate Phone</Label>
             <Input
               id="contact-alt-phone"
               name="alternate_phone_number"
               value={emergencyContact.alternate_phone_number}
               onChange={handleEmergencyContactChange}
               disabled={loading}
-              className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              className="w-full"
             />
           </div>
         </div>
       </form>
 
-      <div className="mb-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-1 dark:text-white">Account Management</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Edit Your Password</p>
-        <div className="flex space-x-4 items-center">
+      {/* Account Management Section */}
+      <div className="mb-8 bg-card rounded-lg shadow-sm p-6 transition-all">
+        <h2 className="text-xl font-semibold mb-1 text-foreground">Account Management</h2>
+        <p className="text-muted-foreground text-sm mb-4">Edit Your Password</p>
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <div className="relative flex-grow">
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
               value={profile.password}
-              className="w-full pr-10 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              className="w-full pr-10"
               disabled
             />
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-0 top-0 h-full dark:text-gray-300"
+              className="absolute right-0 top-0 h-full"
               onClick={togglePasswordVisibility}
+              type="button"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
           </div>
           <Button
-            variant="link"
-            className="text-blue-600 dark:text-blue-400 whitespace-nowrap"
+            variant="outline"
+            className="whitespace-nowrap w-full sm:w-auto"
             onClick={() => setPasswordModalOpen(true)}
           >
             Change Password
           </Button>
         </div>
 
-        {passwordModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
-              <h3 className="text-xl font-semibold mb-4 dark:text-white">Change Password</h3>
-              <form onSubmit={handlePasswordChange}>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="old_password" className="dark:text-white">Current Password</Label>
-                    <Input
-                      id="old_password"
-                      name="old_password"
-                      type="password"
-                      value={passwordForm.old_password}
-                      onChange={handlePasswordInputChange}
-                      className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="new_password" className="dark:text-white">New Password</Label>
-                    <Input
-                      id="new_password"
-                      name="new_password"
-                      type="password"
-                      value={passwordForm.new_password}
-                      onChange={handlePasswordInputChange}
-                      className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="confirm_password" className="dark:text-white">Confirm New Password</Label>
-                    <Input
-                      id="confirm_password"
-                      name="confirm_password"
-                      type="password"
-                      value={passwordForm.confirm_password}
-                      onChange={handlePasswordInputChange}
-                      className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2 mt-6">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setPasswordModalOpen(false)}
-                    className="dark:border-gray-600 dark:text-white"
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={passwordLoading} className="dark:bg-blue-700 dark:hover:bg-blue-800">
-                    {passwordLoading ? "Changing..." : "Change Password"}
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        {/* Password Change Dialog */}
+        <Dialog open={passwordModalOpen} onOpenChange={setPasswordModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Change Password</DialogTitle>
+              <DialogDescription>
+                Update your password to ensure account security
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="old_password">Current Password</Label>
+                <Input
+                  id="old_password"
+                  name="old_password"
+                  type="password"
+                  value={passwordForm.old_password}
+                  onChange={handlePasswordInputChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new_password">New Password</Label>
+                <Input
+                  id="new_password"
+                  name="new_password"
+                  type="password"
+                  value={passwordForm.new_password}
+                  onChange={handlePasswordInputChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm_password">Confirm New Password</Label>
+                <Input
+                  id="confirm_password"
+                  name="confirm_password"
+                  type="password"
+                  value={passwordForm.confirm_password}
+                  onChange={handlePasswordInputChange}
+                  required
+                />
+              </div>
+              <DialogFooter className="mt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setPasswordModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={passwordLoading}>
+                  {passwordLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Changing...
+                    </>
+                  ) : (
+                    "Change Password"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      <div className="mb-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-1 dark:text-white">Language</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Customize your language</p>
-        <Select defaultValue="english" disabled={loading}>
-          <SelectTrigger className="w-full md:w-60 dark:bg-gray-700 dark:text-white dark:border-gray-600">
-            <SelectValue placeholder="Select Language" />
-          </SelectTrigger>
-          <SelectContent className="dark:bg-gray-700 dark:text-white">
-            <SelectItem value="english">English</SelectItem>
-            <SelectItem value="spanish">Spanish</SelectItem>
-            <SelectItem value="french">French</SelectItem>
-            <SelectItem value="german">German</SelectItem>
-            <SelectItem value="hindi">Hindi</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* Language Section */}
+      <div className="mb-8 bg-card rounded-lg shadow-sm p-6 transition-all">
+        <h2 className="text-xl font-semibold mb-1 text-foreground">Language</h2>
+        <p className="text-muted-foreground text-sm mb-4">Customize your language</p>
+        <div className="w-full md:w-60">
+          <Select defaultValue="english" disabled={loading}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select Language" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="english">English</SelectItem>
+              <SelectItem value="spanish">Spanish</SelectItem>
+              <SelectItem value="french">French</SelectItem>
+              <SelectItem value="german">German</SelectItem>
+              <SelectItem value="hindi">Hindi</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <div className="mb-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-1 dark:text-white">Theme</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Choose a preferred theme</p>
-        <RadioGroup value={theme} onValueChange={handleThemeChange} className="flex space-x-6" disabled={loading}>
+      {/* Theme Section */}
+      <div className="mb-8 bg-card rounded-lg shadow-sm p-6 transition-all">
+        <h2 className="text-xl font-semibold mb-1 text-foreground">Theme</h2>
+        <p className="text-muted-foreground text-sm mb-4">Choose a preferred theme</p>
+        <RadioGroup 
+          value={theme} 
+          onValueChange={handleThemeChange} 
+          className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6" 
+          disabled={loading}
+        >
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="light" id="light" className="dark:border-white" />
-            <Label htmlFor="light" className="dark:text-white">Light</Label>
+            <RadioGroupItem value="light" id="light" />
+            <Label htmlFor="light">Light</Label>
           </div>
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="dark" id="dark" className="dark:border-white" />
-            <Label htmlFor="dark" className="dark:text-white">Dark</Label>
+            <RadioGroupItem value="dark" id="dark" />
+            <Label htmlFor="dark">Dark</Label>
           </div>
         </RadioGroup>
       </div>
 
-      <div className="flex flex-col justify-between items-center mt-16">
-        <div className="flex flex-col-reverse md:flex-row justify-between items-center w-full">
-          <Button
-            variant="link"
-            className="text-red-600 dark:text-red-400"
-            disabled={loading}
-            onClick={handleDeleteAccount}
-          >
-            Delete Account
-          </Button>
-          <Button
-            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 w-full md:w-auto mb-4 md:mb-0"
-            disabled={loading}
-            onClick={handleLogout}
-          >
-            Log Out
-          </Button>
-        </div>
+      {/* Account Actions */}
+      <div className="mt-10 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <Button
+          variant="destructive"
+          disabled={loading}
+          onClick={() => setDeleteDialogOpen(true)}
+          className="w-full sm:w-auto"
+        >
+          Delete Account
+        </Button>
+        <Button
+          variant="default"
+          disabled={loading}
+          onClick={handleLogout}
+          className="w-full sm:w-auto"
+        >
+          Log Out
+        </Button>
       </div>
+      
+      {/* Delete Account Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Account</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. Your account and all associated data will be permanently deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button"
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Account"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

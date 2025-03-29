@@ -39,7 +39,7 @@ import { Mail, Phone } from "lucide-react";
     ];
   
     return (
-      <section className="px-4 md:px-8" id="FAQ">
+      <section className=" lg:px-8" id="FAQ">
         <div className="container mx-auto mb-4">
           <div className="flex flex-col md:flex-row gap-8 md:gap-12">
             {/* Header */}
