@@ -52,39 +52,58 @@ const DepositCard = ({ deposit, onEdit }) => {
   }, [deposit.id, deposit.deposit_type]);
 
   const handleDownload = async () => {
-    try {
-      const response = await fetch(deposit.document, {
-        method: 'GET',
-        mode: 'cors',
-        credentials: 'omit',
-        headers: {
-          'Accept': 'application/pdf',
-        },
-      });
+    if (!deposit.document) {
+      toast.error("No document available to download");
+      return;
+    }
 
+    try {
+      // Use a server-side API endpoint to handle the download
+      const response = await fetch(`/api/download-file?url=${encodeURIComponent(deposit.document)}`);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+      
       const blob = await response.blob();
       const filename = deposit.document.split("/").pop() || "document.pdf";
-      const url = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
-      const link = document.createElement('a');
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', filename);
+      link.download = filename;
+      
       document.body.appendChild(link);
       link.click();
+      
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      
       toast.success("Document downloaded successfully");
     } catch (error) {
       console.error("Download failed:", error);
-      toast.error("Failed to download document: " + error.message);
+      
+      // Fallback method
+      try {
+        const link = document.createElement("a");
+        link.href = deposit.document;
+        link.download = deposit.document.split("/").pop() || "document.pdf";
+        link.target = "_blank";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Download initiated. If the document opens instead, please use your browser's save function.");
+      } catch (fallbackError) {
+        toast.error("Failed to download document. Please try again later.");
+      }
     }
   };
 
   const handleView = () => {
-    setViewDialogOpen(true);
+    if (deposit.document) {
+      setViewDialogOpen(true);
+    } else {
+      toast.error("No document available to view");
+    }
   };
 
   const handleConfirmDelete = async () => {
@@ -211,12 +230,26 @@ const DepositCard = ({ deposit, onEdit }) => {
         </CardContent>
         <CardFooter className="border-t p-2 sm:p-4 justify-between flex-col sm:flex-row gap-2 sm:gap-0">
           <div className="bg-background/85 text-xs p-2 rounded-lg flex gap-2 sm:gap-3 items-center w-full sm:w-60 justify-between">
-            <span className="truncate">{deposit.document?.split("/").pop() || "Document"}</span>
+            {deposit.document ? (
+              <span className="truncate">{deposit.document.split("/").pop()}</span>
+            ) : (
+              <span>No file attached</span>
+            )}
             <div className="flex items-center gap-1 sm:gap-2">
-              <Button variant="ghost" size="icon" onClick={handleView}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleView}
+                disabled={!deposit.document}
+              >
                 <Eye className="h-4 w-4 text-primary" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleDownload} disabled={!deposit.document}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDownload}
+                disabled={!deposit.document}
+              >
                 <FileDown className="h-4 w-4 text-primary" />
               </Button>
             </div>
@@ -247,14 +280,27 @@ const DepositCard = ({ deposit, onEdit }) => {
           </DialogHeader>
           <div className="w-full h-full overflow-auto">
             {deposit.document && (
-              <object
-                data={deposit.document}
-                type="application/pdf"
-                width="100%"
-                height="600px"
-              >
-                <p>Your browser cannot display the PDF. Please use the download button instead.</p>
-              </object>
+              <div className="pdf-container" style={{ height: "600px", width: "100%" }}>
+                <embed
+                  src={deposit.document}
+                  type="application/pdf"
+                  width="100%"
+                  height="100%"
+                  style={{ border: "none" }}
+                />
+                <div className="pdf-fallback" style={{ display: "none", padding: "1rem", textAlign: "center" }}>
+                  <p>
+                    Unable to display PDF. 
+                    <Button
+                      variant="link"
+                      className="p-0 h-auto font-medium"
+                      onClick={() => window.open(deposit.document, "_blank")}
+                    >
+                      Click here to open in a new tab
+                    </Button>
+                  </p>
+                </div>
+              </div>
             )}
           </div>
         </DialogContent>

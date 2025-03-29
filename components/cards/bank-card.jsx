@@ -1,4 +1,3 @@
-// @/components/cards/bank-card.jsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -50,43 +49,56 @@ const BankCard = ({ bank, onEdit, onDelete }) => {
   }, [bank.id]);
 
   const handleDownload = async () => {
-    try {
-      // Fetch the file with proper response handling
-      const response = await fetch(bank.passbook_or_statement, {
-        method: 'GET',
-        mode: 'cors',
-        credentials: 'omit',
-        headers: {
-          'Accept': 'application/pdf',
-        },
-      });
+    if (!bank.passbook_or_statement) {
+      toast.error("No document available to download");
+      return;
+    }
 
+    try {
+      // Create a server-side API endpoint for handling the download
+      // This approach avoids CORS issues by using your own server as a proxy
+      const response = await fetch(`/api/download-file?url=${encodeURIComponent(bank.passbook_or_statement)}`);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
-      // Get the blob
+      
+      // Get the blob from the response
       const blob = await response.blob();
+      
+      // Get filename from the URL or use a default
       const filename = bank.passbook_or_statement.split("/").pop() || "document.pdf";
-
-      // Create download link
-      const url = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+      
+      // Create a download link and trigger it
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', filename);
+      link.download = filename; // This forces download instead of opening in a new tab
       
-      // Trigger download
       document.body.appendChild(link);
       link.click();
-
-      // Cleanup
+      
+      // Clean up
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
       toast.success("Document downloaded successfully");
     } catch (error) {
       console.error("Download failed:", error);
-      toast.error("Failed to download document: " + error.message);
+      
+      // Fallback method if the server-side approach fails
+      try {
+        const link = document.createElement('a');
+        link.href = bank.passbook_or_statement;
+        link.download = bank.passbook_or_statement.split("/").pop() || "document.pdf";
+        link.target = "_blank";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Download initiated. If the document opens instead, please use your browser's save function.");
+      } catch (fallbackError) {
+        toast.error("Failed to download document. Please try again later.");
+      }
     }
   };
 
@@ -249,16 +261,27 @@ const BankCard = ({ bank, onEdit, onDelete }) => {
           </DialogHeader>
           <div className="w-full h-full overflow-auto">
             {bank.passbook_or_statement && (
-              <object
-                data={bank.passbook_or_statement}
-                type="application/pdf"
-                width="100%"
-                height="600px"
-              >
-                <p>
-                  Your browser cannot display the PDF. Please use the download button instead.
-                </p>
-              </object>
+              <div className="pdf-container" style={{ height: "600px", width: "100%" }}>
+                <embed
+                  src={bank.passbook_or_statement}
+                  type="application/pdf"
+                  width="100%"
+                  height="100%"
+                  style={{ border: "none" }}
+                />
+                <div className="pdf-fallback" style={{ display: "none", padding: "1rem", textAlign: "center" }}>
+                  <p>
+                    Unable to display PDF. 
+                    <Button
+                      variant="link"
+                      className="p-0 h-auto font-medium"
+                      onClick={() => window.open(bank.passbook_or_statement, '_blank')}
+                    >
+                      Click here to open in a new tab
+                    </Button>
+                  </p>
+                </div>
+              </div>
             )}
           </div>
         </DialogContent>

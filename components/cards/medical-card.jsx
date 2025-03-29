@@ -40,7 +40,7 @@ const MedicalCard = ({ medicalInsurance, onEdit, onDelete }) => {
       const response = await getMedicalInsuranceDetail(medicalInsurance.id);
       if (response.status) {
         setDetailedInsurance(response.data);
-        setNominees(response.data.nominee || []); // API uses "nominee" as per MedicalPage
+        setNominees(response.data.nominee || []);
         setDocumentUrl(response.data.document_url || null);
       }
     } catch (error) {
@@ -56,35 +56,45 @@ const MedicalCard = ({ medicalInsurance, onEdit, onDelete }) => {
   }, [medicalInsurance.id]);
 
   const handleDownload = async () => {
-    if (!documentUrl) return;
-    try {
-      const response = await fetch(documentUrl, {
-        method: "GET",
-        mode: "cors",
-        credentials: "omit",
-        headers: {
-          "Accept": "application/pdf,image/*",
-        },
-      });
+    if (!documentUrl) {
+      toast.error("No document available to download");
+      return;
+    }
 
+    try {
+      const response = await fetch(`/api/download-file?url=${encodeURIComponent(documentUrl)}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+      
       const blob = await response.blob();
-      const filename = documentUrl.split("/").pop() || "document";
+      const filename = documentUrl.split("/").pop() || "document.pdf";
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = url;
-      link.setAttribute("download", filename);
+      link.download = filename;
+      
       document.body.appendChild(link);
       link.click();
+      
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      
       toast.success("Document downloaded successfully");
     } catch (error) {
       console.error("Download failed:", error);
-      toast.error("Failed to download document");
+      try {
+        const link = document.createElement('a');
+        link.href = documentUrl;
+        link.download = documentUrl.split("/").pop() || "document.pdf";
+        link.target = "_blank";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Download initiated. If the document opens instead, please use your browser's save function.");
+      } catch (fallbackError) {
+        toast.error("Failed to download document. Please try again later.");
+      }
     }
   };
 
@@ -127,12 +137,10 @@ const MedicalCard = ({ medicalInsurance, onEdit, onDelete }) => {
   };
 
   const handleEditSuccess = () => {
-    fetchMedicalDetails(); // Refresh card data
-    onEdit(); // Refresh parent list
+    fetchMedicalDetails();
+    onEdit();
     setEditDialogOpen(false);
   };
-
-  const isImage = documentUrl?.match(/\.(jpeg|jpg|png)$/i);
 
   return (
     <>
@@ -222,20 +230,16 @@ const MedicalCard = ({ medicalInsurance, onEdit, onDelete }) => {
                 </table>
               </div>
             </div>
-          ) : (
-            <div className="mt-4">
-              <p className="text-sm text-muted-foreground">No nominees assigned</p>
-            </div>
-          )}
+          ) : null}
         </CardContent>
-        <CardFooter className="border-t p-2 sm:p-4 justify-between flex-col sm:flex-row gap-2 sm:gap-0">
-          <div className="bg-background/85 text-xs p-2 rounded-lg flex gap-2 sm:gap-3 items-center w-full sm:w-60 justify-between">
+        <CardFooter className="border-t p-2 justify-between">
+          <div className="bg-background/85 text-xs p-2 rounded-lg flex gap-3 items-center w-60 justify-between">
             {documentUrl ? (
               <span className="truncate">{documentUrl.split("/").pop()}</span>
             ) : (
               <span>No file attached</span>
             )}
-            <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="icon"
@@ -254,7 +258,7 @@ const MedicalCard = ({ medicalInsurance, onEdit, onDelete }) => {
               </Button>
             </div>
           </div>
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="icon"
@@ -280,24 +284,27 @@ const MedicalCard = ({ medicalInsurance, onEdit, onDelete }) => {
           </DialogHeader>
           <div className="w-full h-full overflow-auto">
             {documentUrl && (
-              <>
-                {isImage ? (
-                  <img
-                    src={documentUrl}
-                    alt="Medical Insurance Document"
-                    className="w-full h-auto"
-                  />
-                ) : (
-                  <object
-                    data={documentUrl}
-                    type="application/pdf"
-                    width="100%"
-                    height="600px"
-                  >
-                    <p>Your browser cannot display the PDF. Please use the download button instead.</p>
-                  </object>
-                )}
-              </>
+              <div className="pdf-container" style={{ height: "600px", width: "100%" }}>
+                <embed
+                  src={documentUrl}
+                  type="application/pdf"
+                  width="100%"
+                  height="100%"
+                  style={{ border: "none" }}
+                />
+                <div className="pdf-fallback" style={{ display: "none", padding: "1rem", textAlign: "center" }}>
+                  <p>
+                    Unable to display PDF. 
+                    <Button
+                      variant="link"
+                      className="p-0 h-auto font-medium"
+                      onClick={() => window.open(documentUrl, '_blank')}
+                    >
+                      Click here to open in a new tab
+                    </Button>
+                  </p>
+                </div>
+              </div>
             )}
           </div>
         </DialogContent>

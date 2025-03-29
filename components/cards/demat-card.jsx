@@ -32,7 +32,7 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
   const [nominees, setNominees] = useState([]);
   const [documentUrl, setDocumentUrl] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(true);
-  const [detailedAccount, setDetailedAccount] = useState(dematAccount); // New state for full details
+  const [detailedAccount, setDetailedAccount] = useState(dematAccount);
 
   // Fetch nominee and document details
   useEffect(() => {
@@ -41,7 +41,7 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
         setLoadingDetails(true);
         const response = await getDematAccountDetail(dematAccount.id);
         if (response.status) {
-          setDetailedAccount(response.data); // Store full response data
+          setDetailedAccount(response.data);
           setNominees(response.data.nominees || []);
           setDocumentUrl(response.data.document || null);
         }
@@ -56,35 +56,49 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
   }, [dematAccount.id]);
 
   const handleDownload = async () => {
-    if (!documentUrl) return;
-    try {
-      const response = await fetch(documentUrl, {
-        method: "GET",
-        mode: "cors",
-        credentials: "omit",
-        headers: {
-          "Accept": "application/pdf,image/*",
-        },
-      });
+    if (!documentUrl) {
+      toast.error("No document available to download");
+      return;
+    }
 
+    try {
+      // Use a server-side API endpoint to handle the download
+      const response = await fetch(`/api/download-file?url=${encodeURIComponent(documentUrl)}`);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+      
       const blob = await response.blob();
-      const filename = documentUrl.split("/").pop() || "document";
+      const filename = documentUrl.split("/").pop() || "document.pdf";
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", filename);
+      link.download = filename;
+      
       document.body.appendChild(link);
       link.click();
+      
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      
       toast.success("Document downloaded successfully");
     } catch (error) {
       console.error("Download failed:", error);
-      toast.error("Failed to download document");
+      
+      // Fallback method
+      try {
+        const link = document.createElement("a");
+        link.href = documentUrl;
+        link.download = documentUrl.split("/").pop() || "document.pdf";
+        link.target = "_blank";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Download initiated. If the document opens instead, please use your browser's save function.");
+      } catch (fallbackError) {
+        toast.error("Failed to download document. Please try again later.");
+      }
     }
   };
 
@@ -131,8 +145,6 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
     setEditDialogOpen(false);
   };
 
-  const isImage = documentUrl?.match(/\.(jpeg|jpg|png)$/i);
-
   return (
     <>
       <Card className="p-0 transition-all hover:shadow-lg hover:-translate-y-1">
@@ -173,7 +185,6 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
             </div>
           </div>
 
-          {/* Nominee Table Section */}
           {loadingDetails ? (
             <div className="mt-4">
               <p className="text-sm">Loading details...</p>
@@ -275,27 +286,27 @@ const DematCard = ({ dematAccount, onEdit, onDelete }) => {
           </DialogHeader>
           <div className="w-full h-full overflow-auto">
             {documentUrl && (
-              <>
-                {isImage ? (
-                  <img
-                    src={documentUrl}
-                    alt="Demat Document"
-                    className="w-full h-auto"
-                  />
-                ) : (
-                  <object
-                    data={documentUrl}
-                    type="application/pdf"
-                    width="100%"
-                    height="600px"
-                  >
-                    <p>
-                      Your browser cannot display the PDF. Please use the
-                      download button instead.
-                    </p>
-                  </object>
-                )}
-              </>
+              <div className="pdf-container" style={{ height: "600px", width: "100%" }}>
+                <embed
+                  src={documentUrl}
+                  type="application/pdf"
+                  width="100%"
+                  height="100%"
+                  style={{ border: "none" }}
+                />
+                <div className="pdf-fallback" style={{ display: "none", padding: "1rem", textAlign: "center" }}>
+                  <p>
+                    Unable to display PDF. 
+                    <Button
+                      variant="link"
+                      className="p-0 h-auto font-medium"
+                      onClick={() => window.open(documentUrl, "_blank")}
+                    >
+                      Click here to open in a new tab
+                    </Button>
+                  </p>
+                </div>
+              </div>
             )}
           </div>
         </DialogContent>

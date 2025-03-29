@@ -175,7 +175,7 @@ const AddTravelDialog = ({ open, onOpenChange, onSuccess }) => {
 
     setLoading(true);
     try {
-      const response = await createNominee("travel", {
+      const response = await createNominee("travel_insurance", {
         nominee_id: newNominee.nominee_id,
         percentage: parseInt(newNominee.percentage),
         asset_id: insuranceId,

@@ -67,7 +67,7 @@ export default function PersonalDetailsLayout({ children }) {
         </div>
       )}
       
-      <div className="flex w-full h-full overflow-hidden">
+      <div className="flex w-full h-full overflow-hidden p-2">
         <div className="hidden md:block">
           <PersonalSidebar />
         </div>
