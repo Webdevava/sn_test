@@ -1,65 +1,95 @@
-// @/components/DocumentList.jsx (assuming this is the file path)
-"use client";
+'use client';
 
-import React, { useEffect, useState, useCallback } from "react";
-import { Toaster, toast } from "sonner"; // Import sonner
+import { useState, useEffect, useCallback } from 'react';
+import { listDocuments, deleteDocument } from '@/lib/document-api';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CirclePlus, Pencil, Trash2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { listDocuments, deleteDocument } from "@/lib/document-api";
-import { cn } from "@/lib/utils";
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle,
+  CardDescription,
+  CardFooter
+} from "@/components/ui/card";
+import { 
+  CirclePlus, 
+  Pencil, 
+  Trash2, 
+  FileText, 
+  Calendar, 
+  Loader2, 
+  BriefcaseBusiness
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import AddDocumentDialog from "../dialogs/document/add-document";
 import EditDocumentDialog from "../dialogs/document/edit-document";
 
-const DocumentList = () => {
+export default function DocumentList({ maxHeight = "500px" }) {
+  const { toast } = useToast();
   const [documents, setDocuments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
+  // Fetch documents
   const fetchDocuments = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await listDocuments();
-      console.log("Fetch Documents Response:", response);
-
-      // Check if the response indicates success
+      
       if (response.status === true) {
-        setDocuments(response.data || []); // Set documents, even if empty
+        setDocuments(response.data || []);
       } else {
         throw new Error("Failed to fetch documents");
       }
     } catch (error) {
       console.error("Fetch Documents Error:", error);
-      toast.error(error.message || "Failed to fetch documents"); // Use sonner toast
-      setDocuments([]); // Reset to empty on error to avoid stale data
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to fetch documents"
+      });
+      setDocuments([]);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     fetchDocuments();
-  }, [fetchDocuments, refreshTrigger]);
+  }, [fetchDocuments]);
 
   const handleDelete = async (documentId) => {
     try {
       setIsDeleting(documentId);
       const response = await deleteDocument(documentId);
-      console.log("Delete Document Response:", response);
-
+      
       if (response.status === true) {
-        toast.success("Document deleted successfully"); // Use sonner toast
-        setRefreshTrigger((prev) => prev + 1); // Trigger fetchDocuments
+        toast({
+          title: "Success",
+          description: "Document deleted successfully"
+        });
+        setDocuments(prev => prev.filter(doc => doc.id !== documentId));
       } else {
         throw new Error("Failed to delete document");
       }
     } catch (error) {
       console.error("Delete Document Error:", error);
-      toast.error(error.message || "Failed to delete document"); // Use sonner toast
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to delete document"
+      });
     } finally {
       setIsDeleting(null);
     }
@@ -71,123 +101,146 @@ const DocumentList = () => {
   };
 
   const handleAddSuccess = () => {
-    console.log("handleAddSuccess triggered");
-    setRefreshTrigger((prev) => prev + 1);
+    fetchDocuments();
     setIsAddDialogOpen(false);
   };
 
   const handleEditSuccess = () => {
-    console.log("handleEditSuccess triggered");
-    setRefreshTrigger((prev) => prev + 1);
+    fetchDocuments();
     setIsEditDialogOpen(false);
     setSelectedDocument(null);
   };
 
-  if (isLoading) {
+  if (isLoading && documents.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="animate-pulse space-y-4">
-          {[1, 2].map((i) => (
-            <div key={i} className="bg-muted rounded-lg w-80 h-32"></div>
-          ))}
-        </div>
-      </div>
+      <Card className="w-full shadow-sm">
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </CardContent>
+      </Card>
     );
   }
 
-  if (!documents.length) {
-    return (
-      <div className="h-full flex items-center justify-center flex-col gap-3">
-        <p className="text-center text-sm">
-          <span>
-            You have not added <span className="font-semibold">"Document"</span> yet.{" "}
-          </span>
-          <br />
-          <span>
-            Please Click on <span className="font-semibold">"Add document"</span> button to
-            add details.
-          </span>
-        </p>
-        <Button size="sm" onClick={() => setIsAddDialogOpen(true)}>
-          <CirclePlus className="mr-2 h-4 w-4" />
-          Add Document
-        </Button>
-        <AddDocumentDialog
-          open={isAddDialogOpen}
-          onOpenChange={setIsAddDialogOpen}
-          onSuccess={handleAddSuccess}
-        />
-      </div>
-    );
-  }
+  // Helper function to format dates
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
 
   return (
-    <div className="space-y-4 p-2">
-      <Toaster richColors /> {/* Add Toaster component for sonner */}
-      {documents.map((doc) => (
-        <Card key={doc.id} className="relative group">
-          <CardContent className="p-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span
-                    className={cn(
-                      "text-xs px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-700"
-                    )}
-                  >
-                    {doc.document_type}
-                  </span>
-                </div>
-                <p className="text-sm">Number: {doc.document_number}</p>
-                <p className="text-sm">Issue Date: {doc.issue_date}</p>
-                <p className="text-sm">Expiry Date: {doc.expiry_date}</p>
+    <Card className="w-full shadow-sm max-h-96 flex flex-col">
+      <div className="overflow-auto" style={{ maxHeight }}>
+        <CardContent className="pt-4">
+          {documents.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="bg-muted p-4 rounded-full mb-4">
+                <FileText className="h-6 w-6 text-muted-foreground" />
               </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleEdit(doc)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleDelete(doc.id)}
-                  disabled={isDeleting === doc.id}
-                >
-                  {isDeleting === doc.id ? (
-                    <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
+              <h3 className="text-lg font-medium">No documents yet</h3>
+              <p className="text-muted-foreground mt-2 text-sm">
+                You have not added any documents yet.
+                Please click on the button below to add details.
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      ))}
-      <div className="flex justify-center pt-4">
-        <Button size="sm" onClick={() => setIsAddDialogOpen(true)}>
+          ) : (
+            <div className="space-y-4">
+              {documents.map((doc) => (
+                <Card key={doc.id} className="overflow-hidden border-l-4 border-l-primary">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                            {doc.document_type}
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                            <p className="text-sm font-medium">
+                              Document Number: <span className="text-primary">{doc.document_number}</span>
+                            </p>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <p className="text-sm">
+                              Issue Date: <span className="font-medium">{formatDate(doc.issue_date)}</span>
+                            </p>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <p className="text-sm">
+                              Expiry Date: <span className="font-medium">{formatDate(doc.expiry_date)}</span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex space-x-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleEdit(doc)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive"
+                          onClick={() => handleDelete(doc.id)}
+                          disabled={isDeleting === doc.id}
+                        >
+                          {isDeleting === doc.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </div>
+      
+      {/* Fixed footer with add button */}
+      <CardFooter className="border-t p-4 mt-auto">
+        <Button
+          onClick={() => setIsAddDialogOpen(true)}
+          className="w-full"
+        >
           <CirclePlus className="mr-2 h-4 w-4" />
           Add Another Document
         </Button>
-        <AddDocumentDialog
-          open={isAddDialogOpen}
-          onOpenChange={setIsAddDialogOpen}
-          onSuccess={handleAddSuccess}
-        />
-        <EditDocumentDialog
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          document={selectedDocument}
-          onSuccess={handleEditSuccess}
-        />
-      </div>
-    </div>
-  );
-};
+      </CardFooter>
 
-export default DocumentList;
+      {/* Add Document Dialog */}
+      <AddDocumentDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onSuccess={handleAddSuccess}
+      />
+
+      {/* Edit Document Dialog */}
+      <EditDocumentDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        document={selectedDocument}
+        onSuccess={handleEditSuccess}
+      />
+    </Card>
+  );
+}

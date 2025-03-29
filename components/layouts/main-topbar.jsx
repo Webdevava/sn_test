@@ -55,11 +55,11 @@ const MainTopbar = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 200, damping: 20 }}
-      className="w-full bg-gray-900 border-b border-gray-800 text-white px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm"
+      className="w-full bg-gray-900 border-b border-gray-800 text-white px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm rounded-4xl lg:rounded-none"
     >
-      {/* Left Section: Logo */}
+      {/* Left Section: Logo - Different logo for small screens */}
       <div className="flex items-center gap-4">
-        <div className="relative w-24 sm:w-32 h-10">
+        <div className="relative hidden sm:block w-32 h-10">
           <Image
             src="/logos/logo_white_lg.png"
             alt="Logo"
@@ -67,10 +67,18 @@ const MainTopbar = () => {
             className="object-contain"
           />
         </div>
+        <div className="relative sm:hidden w-10 h-10">
+          <Image
+            src="/logos/logo_white_sm.png"
+            alt="Logo"
+            fill
+            className="object-contain rounded-full"
+          />
+        </div>
       </div>
 
-      {/* Center Section: Navigation Links */}
-      <nav className="flex gap-4 sm:gap-6">
+      {/* Center Section: Navigation Links with enhanced active states */}
+      <nav className="flex gap-3 sm:gap-6">
         {navLinks.map((link) => {
           const Icon = link.icon;
           const active = isActive(link.href);
@@ -78,18 +86,18 @@ const MainTopbar = () => {
             <Link
               key={link.name}
               href={link.href}
-              className={`flex items-center gap-2 font-medium transition-colors ${
+              className={`flex items-center gap-2 font-medium transition-colors px-3 py-2 ${
                 active
-                  ? "text-indigo-600 dark:text-indigo-400"
-                  : "text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                  ? "bg-white text-primary rounded-md"
+                  : "text-gray-300 hover:text-white hover:bg-gray-800 hover:rounded-md"
               }`}
             >
               <Icon
                 size={20}
                 weight="duotone"
-                className={active ? "text-indigo-600 dark:text-indigo-400" : ""}
+                className={active ? "text-primary" : ""}
               />
-              {/* Hide text on small screens, show on md and up */}
+              {/* Only show text on medium screens and up, never on small screens */}
               <span className="hidden md:inline">{link.name}</span>
             </Link>
           );
@@ -102,7 +110,7 @@ const MainTopbar = () => {
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
-          className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="text-gray-300 hover:bg-gray-800 rounded-full"
         >
           {theme === "light" ? (
             <Moon size={20} weight="duotone" />
@@ -113,7 +121,7 @@ const MainTopbar = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="text-gray-300 hover:bg-gray-800 rounded-full"
         >
           <Bell size={20} weight="duotone" />
         </Button>

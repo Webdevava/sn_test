@@ -1,4 +1,4 @@
-// pages/contacts.js
+// components/ContactsCard.js
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -7,8 +7,7 @@ import {
   addContact, 
   listContacts, 
   updateContact, 
-  deleteContact, 
-  getContactDetail 
+  deleteContact
 } from '@/lib/auth-api';
 import { 
   Dialog, 
@@ -31,11 +30,13 @@ import {
   Card, 
   CardContent, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
+  CardDescription,
+  CardFooter
 } from "@/components/ui/card";
-import { CirclePlus, Pencil, Trash2, Phone, Mail } from "lucide-react";
+import { CirclePlus, Pencil, Trash2, Phone, Mail, Loader2 } from "lucide-react";
 
-export default function ContactsPage() {
+export default function ContactsCard({ maxHeight = "500px" }) {
   const { toast } = useToast();
   const [contacts, setContacts] = useState([]);
   const [phoneContacts, setPhoneContacts] = useState([]);
@@ -220,130 +221,149 @@ export default function ContactsPage() {
 
   if (isLoading && contacts.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="animate-pulse space-y-4">
-          {[1, 2].map((i) => (
-            <div key={i} className="bg-muted rounded-lg w-80 h-32"></div>
-          ))}
-        </div>
-      </div>
+      <Card className="w-full shadow-sm">
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="container mx-auto p-2 max-w-3xl flex flex-col justify-between h-full relative">
-      <div className="space-y-2">
-        {/* Phone Numbers Card */}
-        {phoneContacts.length > 0 && (
-          <Card className="mb-2">
-            <CardHeader className="flex flex-row items-center justify-between pb-0 p-3">
-              <CardTitle className="text-sm font-bold">Phone Numbers</CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 pt-0 overflow-auto max-h-44">
-              <ul className="space-y-2">
-                {phoneContacts.map((contact, index) => (
-                  <li 
-                    key={contact.id} 
-                    className="flex items-center justify-between border-b last:border-b-0 group"
-                  >
-                    <div className="flex items-center">
-                      <span className="font-semibold mr-3">{index + 1}.</span>
-                      <span className="text-primary">{contact.phone_number}</span>
-                    </div>
-                    <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleEdit(contact.id)}
+    <Card className="w-full shadow-sm max-h-96 flex flex-col">
+      {/* <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Contact Information</CardTitle>
+        <CardDescription>Manage your contact details</CardDescription>
+      </CardHeader> */}
+      
+      {/* Scrollable content area */}
+      <div className="overflow-auto" style={{ maxHeight }}>
+        <CardContent className="pt-4">
+          {contacts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="bg-muted p-4 rounded-full mb-4">
+                <Phone className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-medium">No contacts yet</h3>
+              <p className="text-muted-foreground mt-2 text-sm">
+                Add your first contact by clicking the button below
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Phone Numbers Section */}
+              {phoneContacts.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Phone className="h-4 w-4 text-primary" />
+                    <h3 className="font-medium">Phone Numbers</h3>
+                  </div>
+                  <ul className="divide-y">
+                    {phoneContacts.map((contact, index) => (
+                      <li 
+                        key={contact.id} 
+                        className="py-2 flex items-center justify-between group"
                       >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive"
-                        onClick={() => handleDelete(contact.id)}
-                        disabled={isDeleting === contact.id}
-                      >
-                        {isDeleting === contact.id ? (
-                          <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
+                        <div className="flex items-center">
+                          <span className="text-primary font-medium break-all">{contact.phone_number}</span>
+                        </div>
+                        <div className="flex space-x-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleEdit(contact.id)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive"
+                            onClick={() => handleDelete(contact.id)}
+                            disabled={isDeleting === contact.id}
+                          >
+                            {isDeleting === contact.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-        {/* Email Card */}
-        {emailContacts.length > 0 && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-0 p-3">
-              <CardTitle className="text-sm font-bold">Email</CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 pt-0 overflow-auto max-h-44">
-              <ul className="space-y-2">
-                {emailContacts.map((contact, index) => (
-                  <li 
-                    key={contact.id} 
-                    className="flex items-center justify-between border-b last:border-b-0 group"
-                  >
-                    <div className="flex items-center">
-                      <span className="font-semibold mr-3">{index + 1}.</span>
-                      <span className="text-primary">{contact.email}</span>
-                    </div>
-                    <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleEdit(contact.id)}
+              {/* Email Section */}
+              {emailContacts.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Mail className="h-4 w-4 text-primary" />
+                    <h3 className="font-medium">Email Addresses</h3>
+                  </div>
+                  <ul className="divide-y">
+                    {emailContacts.map((contact, index) => (
+                      <li 
+                        key={contact.id} 
+                        className="py-2 flex items-center justify-between group"
                       >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive"
-                        onClick={() => handleDelete(contact.id)}
-                        disabled={isDeleting === contact.id}
-                      >
-                        {isDeleting === contact.id ? (
-                          <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
+                        <div className="flex items-center">
+                          <span className="text-primary font-medium break-all">{contact.email}</span>
+                        </div>
+                        <div className="flex space-x-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleEdit(contact.id)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive"
+                            onClick={() => handleDelete(contact.id)}
+                            disabled={isDeleting === contact.id}
+                          >
+                            {isDeleting === contact.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
       </div>
-
-      <Button
-        onClick={() => setIsDialogOpen(true)}
-        className="w-full absolute left-0 bottom-0 mb-2"
-      >
-        <CirclePlus className="mr-2 h-4 w-4" />
-        Add Another Contact
-      </Button>
+      
+      {/* Fixed footer with add button */}
+      <CardFooter className="border-t p-4 mt-auto">
+        <Button
+          onClick={() => setIsDialogOpen(true)}
+          className="w-full"
+        >
+          <CirclePlus className="mr-2 h-4 w-4" />
+          Add Another Contact
+        </Button>
+      </CardFooter>
 
       {/* Contact Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={open => {
         if (!open) handleClose();
         else setIsDialogOpen(true);
       }}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{isEditMode ? 'Edit Contact' : 'Add Contact'}</DialogTitle>
+            <DialogTitle className="text-xl">{isEditMode ? 'Edit Contact' : 'Add Contact'}</DialogTitle>
           </DialogHeader>
           
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -358,8 +378,18 @@ export default function ContactsPage() {
                   <SelectValue placeholder="Select contact type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="phone">Phone Number</SelectItem>
+                  <SelectItem value="email">
+                    <div className="flex items-center">
+                      <Mail className="mr-2 h-4 w-4" />
+                      <span>Email</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="phone">
+                    <div className="flex items-center">
+                      <Phone className="mr-2 h-4 w-4" />
+                      <span>Phone Number</span>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -374,6 +404,8 @@ export default function ContactsPage() {
                   placeholder="example@email.com"
                   value={formData.email}
                   onChange={handleInputChange}
+                  className="w-full"
+                  autoComplete="email"
                 />
               </div>
             )}
@@ -388,13 +420,19 @@ export default function ContactsPage() {
                   placeholder="+1234567890"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
+                  className="w-full"
+                  autoComplete="tel"
                 />
               </div>
             )}
 
-            {error && <p className="text-red-500">{error}</p>}
+            {error && (
+              <div className="bg-destructive/10 p-3 rounded-md text-destructive text-sm">
+                {error}
+              </div>
+            )}
 
-            <DialogFooter>
+            <DialogFooter className="sm:justify-end">
               <Button 
                 type="button" 
                 variant="outline" 
@@ -406,12 +444,19 @@ export default function ContactsPage() {
                 type="submit"
                 disabled={isLoading}
               >
-                {isLoading ? 'Saving...' : (isEditMode ? 'Update' : 'Add')}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isEditMode ? 'Updating...' : 'Adding...'}
+                  </>
+                ) : (
+                  isEditMode ? 'Update' : 'Add'
+                )}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </Card>
   );
 }

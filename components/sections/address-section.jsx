@@ -1,4 +1,3 @@
-// pages/addresses.js
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -6,18 +5,17 @@ import { toast } from "sonner";
 import { 
   getAddressList,
   createAddress,
-  getAddressDetail,
   updateAddress,
   deleteAddress
 } from '@/lib/address-api';
-import {
+import { 
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
+import { 
   Select,
   SelectContent,
   SelectItem,
@@ -31,11 +29,21 @@ import {
   Card, 
   CardContent, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
+  CardFooter
 } from "@/components/ui/card";
-import { CirclePlus, Pencil, Trash2 } from "lucide-react";
+import { 
+  CirclePlus, 
+  Pencil, 
+  Trash2, 
+  Home, 
+  Briefcase, 
+  Package, 
+  MapPin, 
+  Loader2 
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
-// Add Address Dialog Component
 const AddAddressDialog = ({ open, onOpenChange, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAddressType, setSelectedAddressType] = useState("");
@@ -95,7 +103,7 @@ const AddAddressDialog = ({ open, onOpenChange, onSuccess }) => {
     try {
       setIsSubmitting(true);
       const data = {
-        street: formData.street,  // Map to API expected fields
+        street: formData.street,
         city: formData.city,
         state: formData.state,
         zip_code: formData.zip_code,
@@ -104,10 +112,9 @@ const AddAddressDialog = ({ open, onOpenChange, onSuccess }) => {
       };
       
       const response = await createAddress(data);
-      // Assuming the API returns the created address object on success
       toast.success("Address added successfully");
       resetForm();
-      onSuccess(response);  // Pass the new address to parent
+      onSuccess(response);
       onOpenChange(false);
     } catch (error) {
       console.error('Add Address Error:', error);
@@ -139,121 +146,101 @@ const AddAddressDialog = ({ open, onOpenChange, onSuccess }) => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] p-0 h-[75vh] flex flex-col">
-        <DialogHeader className="p-4 border-b">
-          <DialogTitle>Add New Address</DialogTitle>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle className="text-xl">Add New Address</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <div className="flex-1 overflow-y-auto">
-            <div className="grid gap-4 p-4">
-              <div className="grid gap-2">
-                <Label htmlFor="address_type">Address Type</Label>
-                <Select 
-                  onValueChange={(value) => setSelectedAddressType(value)}
-                  value={selectedAddressType}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select address type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {addressTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="address_type">Address Type</Label>
+            <Select 
+              onValueChange={(value) => setSelectedAddressType(value)}
+              value={selectedAddressType}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select address type" />
+              </SelectTrigger>
+              <SelectContent>
+                {addressTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {selectedAddressType && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="street">Street Address</Label>
+                <Input
+                  id="street"
+                  name="street"
+                  value={formData.street}
+                  onChange={handleInputChange}
+                  placeholder="Enter street address"
+                />
+                {errors.street && <p className="text-destructive text-sm">{errors.street}</p>}
               </div>
 
-              {selectedAddressType && (
-                <>
-                  <div className="grid gap-2">
-                    <Label htmlFor="street">Street Address</Label>
-                    <Input
-                      id="street"
-                      name="street"
-                      value={formData.street}
-                      onChange={handleInputChange}
-                      placeholder="Enter street address"
-                      className="w-full"
-                    />
-                    {errors.street && <p className="text-destructive text-sm">{errors.street}</p>}
-                  </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    placeholder="Enter city"
+                  />
+                  {errors.city && <p className="text-destructive text-sm">{errors.city}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="state">State</Label>
+                  <Input
+                    id="state"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleInputChange}
+                    placeholder="Enter state"
+                  />
+                  {errors.state && <p className="text-destructive text-sm">{errors.state}</p>}
+                </div>
+              </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="city">City</Label>
-                      <Input
-                        id="city"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        placeholder="Enter city"
-                        className="w-full"
-                      />
-                      {errors.city && <p className="text-destructive text-sm">{errors.city}</p>}
-                    </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Input
+                    id="country"
+                    name="country"
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    placeholder="Enter country"
+                  />
+                  {errors.country && <p className="text-destructive text-sm">{errors.country}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="zip_code">ZIP Code</Label>
+                  <Input
+                    id="zip_code"
+                    name="zip_code"
+                    value={formData.zip_code}
+                    onChange={handleInputChange}
+                    placeholder="Enter ZIP code"
+                  />
+                  {errors.zip_code && <p className="text-destructive text-sm">{errors.zip_code}</p>}
+                </div>
+              </div>
+            </>
+          )}
 
-                    <div className="grid gap-2">
-                      <Label htmlFor="state">State</Label>
-                      <Input
-                        id="state"
-                        name="state"
-                        value={formData.state}
-                        onChange={handleInputChange}
-                        placeholder="Enter state"
-                        className="w-full"
-                      />
-                      {errors.state && <p className="text-destructive text-sm">{errors.state}</p>}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="country">Country</Label>
-                      <Input
-                        id="country"
-                        name="country"
-                        value={formData.country}
-                        onChange={handleInputChange}
-                        placeholder="Enter country"
-                        className="w-full"
-                      />
-                      {errors.country && <p className="text-destructive text-sm">{errors.country}</p>}
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="zip_code">ZIP Code</Label>
-                      <Input
-                        id="zip_code"
-                        name="zip_code"
-                        value={formData.zip_code}
-                        onChange={handleInputChange}
-                        placeholder="Enter ZIP code"
-                        className="w-full"
-                      />
-                      {errors.zip_code && <p className="text-destructive text-sm">{errors.zip_code}</p>}
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-          <DialogFooter className="border-t p-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              className="w-32 bg-popover border-foreground"
-              disabled={isSubmitting}
-            >
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={!selectedAddressType || isSubmitting}
-              className="w-32"
-            >
+            <Button type="submit" disabled={!selectedAddressType || isSubmitting}>
               {isSubmitting ? 'Adding...' : 'Add'}
             </Button>
           </DialogFooter>
@@ -263,7 +250,6 @@ const AddAddressDialog = ({ open, onOpenChange, onSuccess }) => {
   );
 };
 
-// Edit Address Dialog Component
 const EditAddressDialog = ({ open, onOpenChange, address, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAddressType, setSelectedAddressType] = useState("");
@@ -380,117 +366,97 @@ const EditAddressDialog = ({ open, onOpenChange, address, onSuccess }) => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] p-0 h-[75vh] flex flex-col">
-        <DialogHeader className="p-4 border-b">
-          <DialogTitle>Edit Address</DialogTitle>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle className="text-xl">Edit Address</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <div className="flex-1 overflow-y-auto">
-            <div className="grid gap-4 p-4">
-              <div className="grid gap-2">
-                <Label htmlFor="address_type">Address Type</Label>
-                <Select 
-                  onValueChange={(value) => setSelectedAddressType(value)}
-                  value={selectedAddressType}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select address type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {addressTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="address_type">Address Type</Label>
+            <Select 
+              onValueChange={(value) => setSelectedAddressType(value)}
+              value={selectedAddressType}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select address type" />
+              </SelectTrigger>
+              <SelectContent>
+                {addressTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="street">Street Address</Label>
-                <Input
-                  id="street"
-                  name="street"
-                  value={formData.street}
-                  onChange={handleInputChange}
-                  placeholder="Enter street address"
-                  className="w-full"
-                />
-                {errors.street && <p className="text-destructive text-sm">{errors.street}</p>}
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="street">Street Address</Label>
+            <Input
+              id="street"
+              name="street"
+              value={formData.street}
+              onChange={handleInputChange}
+              placeholder="Enter street address"
+            />
+            {errors.street && <p className="text-destructive text-sm">{errors.street}</p>}
+          </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="city">City</Label>
-                  <Input
-                    id="city"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    placeholder="Enter city"
-                    className="w-full"
-                  />
-                  {errors.city && <p className="text-destructive text-sm">{errors.city}</p>}
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="state">State</Label>
-                  <Input
-                    id="state"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleInputChange}
-                    placeholder="Enter state"
-                    className="w-full"
-                  />
-                  {errors.state && <p className="text-destructive text-sm">{errors.state}</p>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="country">Country</Label>
-                  <Input
-                    id="country"
-                    name="country"
-                    value={formData.country}
-                    onChange={handleInputChange}
-                    placeholder="Enter country"
-                    className="w-full"
-                  />
-                  {errors.country && <p className="text-destructive text-sm">{errors.country}</p>}
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="zip_code">ZIP Code</Label>
-                  <Input
-                    id="zip_code"
-                    name="zip_code"
-                    value={formData.zip_code}
-                    onChange={handleInputChange}
-                    placeholder="Enter ZIP code"
-                    className="w-full"
-                  />
-                  {errors.zip_code && <p className="text-destructive text-sm">{errors.zip_code}</p>}
-                </div>
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleInputChange}
+                placeholder="Enter city"
+              />
+              {errors.city && <p className="text-destructive text-sm">{errors.city}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="state">State</Label>
+              <Input
+                id="state"
+                name="state"
+                value={formData.state}
+                onChange={handleInputChange}
+                placeholder="Enter state"
+              />
+              {errors.state && <p className="text-destructive text-sm">{errors.state}</p>}
             </div>
           </div>
-          <DialogFooter className="border-t p-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              className="w-32 bg-popover border-foreground"
-              disabled={isSubmitting}
-            >
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="country">Country</Label>
+              <Input
+                id="country"
+                name="country"
+                value={formData.country}
+                onChange={handleInputChange}
+                placeholder="Enter country"
+              />
+              {errors.country && <p className="text-destructive text-sm">{errors.country}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="zip_code">ZIP Code</Label>
+              <Input
+                id="zip_code"
+                name="zip_code"
+                value={formData.zip_code}
+                onChange={handleInputChange}
+                placeholder="Enter ZIP code"
+              />
+              {errors.zip_code && <p className="text-destructive text-sm">{errors.zip_code}</p>}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-32"
-            >
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Updating...' : 'Update'}
             </Button>
           </DialogFooter>
@@ -500,8 +466,7 @@ const EditAddressDialog = ({ open, onOpenChange, address, onSuccess }) => {
   );
 };
 
-// Main Addresses Page Component
-export default function AddressesPage() {
+export default function AddressesPage({ maxHeight = "500px" }) {
   const [addresses, setAddresses] = useState([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -512,7 +477,7 @@ export default function AddressesPage() {
   const fetchAddresses = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response =await getAddressList();
+      const response = await getAddressList();
       setAddresses(response || []);
     } catch (err) {
       console.error('Fetch addresses error:', err);
@@ -554,109 +519,130 @@ export default function AddressesPage() {
   };
 
   const handleAddSuccess = (newAddress) => {
-    setAddresses(prev => [...prev, {
-      id: newAddress.id,
-      street: newAddress.street,
-      city: newAddress.city,
-      state: newAddress.state,
-      zip_code: newAddress.zip_code,
-      country: newAddress.country,
-      address_type: newAddress.address_type
-    }]);
+    setAddresses(prev => [...prev, newAddress]);
     setIsAddDialogOpen(false);
   };
 
   const handleEditSuccess = (updatedAddress) => {
     setAddresses(prev => prev.map(address => 
-      address.id === updatedAddress.id ? {
-        id: updatedAddress.id,
-        street: updatedAddress.street,
-        city: updatedAddress.city,
-        state: updatedAddress.state,
-        zip_code: updatedAddress.zip_code,
-        country: updatedAddress.country,
-        address_type: updatedAddress.address_type
-      } : address
+      address.id === updatedAddress.id ? updatedAddress : address
     ));
     setIsEditDialogOpen(false);
     setSelectedAddress(null);
   };
 
+  // Address type specific styling and icons
+  const getAddressStyle = (type) => {
+    switch (type) {
+      case "Home":
+        return { icon: <Home className="h-4 w-4" />, border: "border-l-green-500" };
+      case "Office":
+        return { icon: <Briefcase className="h-4 w-4" />, border: "border-l-blue-500" };
+      case "Shipping":
+        return { icon: <Package className="h-4 w-4" />, border: "border-l-purple-500" };
+      case "Billing":
+        return { icon: <MapPin className="h-4 w-4" />, border: "border-l-yellow-500" };
+      case "Permanent":
+        return { icon: <Home className="h-4 w-4" />, border: "border-l-teal-500" };
+      case "Temporary":
+        return { icon: <MapPin className="h-4 w-4" />, border: "border-l-orange-500" };
+      case "Other":
+        return { icon: <MapPin className="h-4 w-4" />, border: "border-l-gray-500" };
+      default:
+        return { icon: <MapPin className="h-4 w-4" />, border: "border-l-gray-500" };
+    }
+  };
+
   if (isLoading && addresses.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="animate-pulse space-y-4">
-          <div className="bg-muted rounded-lg w-80 h-32"></div>
-        </div>
-      </div>
+      <Card className="w-full shadow-sm">
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="container mx-auto p-2 max-w-3xl flex flex-col justify-between h-full relative">
-      <div className="space-y-2">
-        {addresses.length > 0 && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-0 p-3">
-              <CardTitle className="text-sm font-bold">Addresses</CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 pt-0 overflow-auto max-h-96">
-              <ul className="space-y-2">
-                {addresses.map((address, index) => (
-                  <li 
-                    key={address.id} 
-                    className="flex items-center justify-between border-b last:border-b-0 group"
-                  >
-                    <div className="flex items-center">
-                      <span className="font-semibold mr-3">{index + 1}.</span>
-                      <div>
-                        <span className="text-primary">{address.street}</span>
-                        {address.address_type && (
-                          <span className="text-xs text-gray-500 ml-2">({address.address_type})</span>
-                        )}
-                        <div className="text-sm text-gray-600">
-                          {address.city}, {address.state} {address.zip_code}, {address.country}
+    <Card className="w-full shadow-sm max-h-96 flex flex-col">
+      <div className="overflow-auto" style={{ maxHeight }}>
+        <CardContent className="pt-4">
+          {addresses.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="bg-muted p-4 rounded-full mb-4">
+                <MapPin className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-medium">No addresses yet</h3>
+              <p className="text-muted-foreground mt-2 text-sm">
+                Add your first address by clicking the button below
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {addresses.map((address) => {
+                const { icon, border } = getAddressStyle(address.address_type);
+                return (
+                  <Card key={address.id} className={`overflow-hidden border-l-4 ${border}`}>
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            {icon}
+                            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                              {address.address_type}
+                            </Badge>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium">
+                              <span className="text-primary">{address.street}</span>
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {address.city}, {address.state} {address.zip_code}, {address.country}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleEdit(address)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive"
+                            onClick={() => handleDelete(address.id)}
+                            disabled={isDeleting === address.id}
+                          >
+                            {isDeleting === address.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleEdit(address)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive"
-                        onClick={() => handleDelete(address.id)}
-                        disabled={isDeleting === address.id}
-                      >
-                        {isDeleting === address.id ? (
-                          <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
       </div>
 
-      <Button
-        onClick={() => setIsAddDialogOpen(true)}
-        className="w-full absolute left-0 bottom-0 mb-2"
-      >
-        <CirclePlus className="mr-2 h-4 w-4" />
-        Add Another Address
-      </Button>
+      <CardFooter className="border-t p-4 mt-auto">
+        <Button
+          onClick={() => setIsAddDialogOpen(true)}
+          className="w-full"
+        >
+          <CirclePlus className="mr-2 h-4 w-4" />
+          Add Another Address
+        </Button>
+      </CardFooter>
 
       <AddAddressDialog
         open={isAddDialogOpen}
@@ -669,6 +655,6 @@ export default function AddressesPage() {
         address={selectedAddress}
         onSuccess={handleEditSuccess}
       />
-    </div>
+    </Card>
   );
-}
+}                                         

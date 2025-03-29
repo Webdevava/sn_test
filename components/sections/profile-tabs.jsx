@@ -50,13 +50,13 @@ const ProfileTabs = ({ expanded, contentVariants, handleOpenDialog }) => {
           </CardHeader>
 
           <CardContent className="p-2 flex-1">
-            <TabsContent value="Contact" className="h-full flex-1">
+            <TabsContent value="Contact" className="max-h-64 flex-1">
               <ContactList/>
             </TabsContent>
-            <TabsContent value="Address" className="h-full flex-1">
+            <TabsContent value="Address" className="max-h-64 flex-1">
             <AddressList />
             </TabsContent>
-            <TabsContent value="Documents" className="h-full flex-1">
+            <TabsContent value="Documents" className="max-h-64 flex-1">
  <DocumentList/>
             </TabsContent>
           </CardContent>
