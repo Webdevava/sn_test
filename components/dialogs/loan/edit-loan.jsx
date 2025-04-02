@@ -111,7 +111,7 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
         !formData.loan_account_number ||
         !/^[0-9]+$/.test(formData.loan_account_number)
       )
-        newErrors.loan_account_number = "Account number must be numeric";
+        newErrors.loan_account_number = "Loan account number must be numeric";
       if (!formData.emi_amount || parseFloat(formData.emi_amount) <= 0)
         newErrors.emi_amount = "EMI amount must be positive";
       if (!formData.loan_end_date)
@@ -230,10 +230,10 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
       remaining_loan_balance: "",
       collateral_details: "",
       nominee_awareness: false,
-      guarantor: "",
-      notes: "",
+      // guarantor: "",
+      // notes: "",
       linked_bank_account: "",
-      insurance: "",
+      // insurance: "",
       agreed_repayment_date: "",
       payment_mode: "",
       remaining_balance: "",
@@ -366,7 +366,9 @@ const EditLoanDialog = ({ open, onOpenChange, loan, onSuccess }) => {
                     )}
                   </div>
                   <div>
-                    <Label htmlFor="loan_account_number">Account Number</Label>
+                    <Label htmlFor="loan_account_number">
+                      Loan Account Number
+                    </Label>
                     <Input
                       id="loan_account_number"
                       value={formData.loan_account_number}

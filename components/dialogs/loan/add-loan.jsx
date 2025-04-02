@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -523,7 +522,7 @@ export default function AddLoanDialog({ open, onOpenChange, onSuccess }) {
                       </Select>
                     </div>
                     <div>
-                      <Label>Account Number</Label>
+                      <Label>Loan Account Number</Label>
                       <Input
                         value={formData.loan_account_number}
                         onChange={(e) => {
@@ -537,6 +536,46 @@ export default function AddLoanDialog({ open, onOpenChange, onSuccess }) {
                         required
                         placeholder="e.g., 1234567890"
                       />
+                    </div>
+
+                    <div>
+                      <Label>Linked Bank Account</Label>
+                      <Select
+                        value={formData.linked_bank_account}
+                        onValueChange={(value) =>
+                          setFormData({
+                            ...formData,
+                            linked_bank_account: value,
+                          })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a bank account" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {banks.map((bank) => (
+                            <SelectItem
+                              key={bank.id}
+                              value={bank.id.toString()}
+                            >
+                              {bank.account_holder_name} - {bank.account_number}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={formData.nominee_awareness}
+                        onCheckedChange={(checked) =>
+                          setFormData({
+                            ...formData,
+                            nominee_awareness: checked,
+                          })
+                        }
+                      />
+                      <Label>Nominee Awareness</Label>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -589,87 +628,8 @@ export default function AddLoanDialog({ open, onOpenChange, onSuccess }) {
                       placeholder="e.g., Flat No. 101, Mumbai"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Guarantor (Optional)</Label>
-                      <Input
-                        value={formData.guarantor}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            guarantor: e.target.value,
-                          })
-                        }
-                        placeholder="e.g., John Doe"
-                      />
-                    </div>
-                    <div>
-                      <Label>Linked Bank Account</Label>
-                      <Select
-                        value={formData.linked_bank_account}
-                        onValueChange={(value) =>
-                          setFormData({
-                            ...formData,
-                            linked_bank_account: value,
-                          })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a bank account" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {banks.map((bank) => (
-                            <SelectItem
-                              key={bank.id}
-                              value={bank.id.toString()}
-                            >
-                              {bank.account_holder_name} - {bank.account_number}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Insurance ID (Optional)</Label>
-                      <Input
-                        type="number"
-                        value={formData.insurance}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            insurance: e.target.value,
-                          })
-                        }
-                        min={1}
-                        placeholder="e.g., 98765"
-                      />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        checked={formData.nominee_awareness}
-                        onCheckedChange={(checked) =>
-                          setFormData({
-                            ...formData,
-                            nominee_awareness: checked,
-                          })
-                        }
-                      />
-                      <Label>Nominee Awareness</Label>
-                    </div>
-                  </div>
-                  <div>
-                    <Label>Notes (Optional)</Label>
-                    <Input
-                      value={formData.notes}
-                      onChange={(e) =>
-                        setFormData({ ...formData, notes: e.target.value })
-                      }
-                      maxLength={200}
-                      placeholder="e.g., Loan for home renovation"
-                    />
-                  </div>
+                  
+                 
                 </>
               ) : (
                 <>

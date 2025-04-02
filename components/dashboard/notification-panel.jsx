@@ -2,14 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getNotifications, readNotification } from "@/lib/notification-api";
 
 // Icons component to render the right icon based on notification type
 const NotificationIcon = ({ type, isRead }) => {
-  const baseClasses = "h-6 w-6 flex items-center justify-center rounded-full";
-  const iconClasses = `h-4 w-4 ${isRead ? 'opacity-50 grayscale' : ''}`;
+  const baseClasses = "h-8 w-8 flex items-center justify-center rounded-full shrink-0";
+  const iconClasses = `h-4 w-4 ${isRead ? 'opacity-50' : ''}`;
 
   if (type === "success") {
     return (
@@ -102,7 +101,15 @@ const NotificationsPanel = ({ className = "" }) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.round((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    return `${diffInHours}hr ago`;
+    
+    if (diffInHours < 1) {
+      return 'Just now';
+    } else if (diffInHours < 24) {
+      return `${diffInHours}h ago`;
+    } else {
+      const days = Math.floor(diffInHours / 24);
+      return `${days}d ago`;
+    }
   };
 
   // Remove a single notification and mark as read
@@ -126,56 +133,62 @@ const NotificationsPanel = ({ className = "" }) => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className={`w-full max-w-md rounded-lg border bg-card shadow-lg hidden lg:block h-[90vh] ${className}`}>
-      <div className="flex items-center justify-between border-b p-4">
-        <h2 className="text-xl font-bold text-navy-900">Notifications</h2>
-        <div className="text-sm text-gray-500">
-          {unreadCount} Unread
-        </div>
-      </div>
-      
-      <ScrollArea className="h-[calc(90vh-60px)]">
-        {sortedNotifications.length > 0 ? (
-          sortedNotifications.map((notification) => (
-            <div 
-              key={notification.id} 
-              className={`relative px-4 py-3 border-b ${!notification.read ? 'bg-popover' : 'bg-muted/30'} transition-all duration-300`}
-            >
-              <div className={`flex gap-3 ${notification.read ? 'opacity-60 grayscale-[30%]' : ''}`}>
-                <NotificationIcon 
-                  type={notification.type} 
-                  isRead={notification.read} 
-                />
-                <div className="flex-1">
-                  <div className="flex items-start justify-between">
-                    <h4 className={`font-semibold ${notification.read ? 'text-gray-600' : 'text-navy-900'}`}>
-                      {notification.title}
-                    </h4>
-                    <span className={`text-xs ${notification.read ? 'text-gray-400' : 'text-gray-500'} ml-1`}>
-                      {notification.time}
-                    </span>
-                  </div>
-                  <p className={`text-sm ${notification.read ? 'text-gray-500' : 'text-gray-600'} mt-1`}>
-                    {notification.message}
-                  </p>
-                </div>
-              </div>
-              {!notification.read && (
-                <button
-                  onClick={() => removeNotification(notification.id)}
-                  className="absolute top-2 left-[26rem] hover:bg-red-400 rounded-lg p-1 duration-150 transition-all hover:text-background"
-                >
-                  <X size={16} />
-                </button>
-              )}
-            </div>
-          ))
-        ) : (
-          <div className="flex flex-col items-center justify-center h-64">
-            <p className="text-gray-500">No notifications</p>
+    <div className={`h-full flex flex-col rounded-lg overflow-hidden border bg-card shadow-lg ${className}`}>
+      <div className="flex items-center justify-between border-b p-4 sticky top-0 bg-card z-10">
+        <h2 className="text-xl font-semibold">Notifications</h2>
+        {unreadCount > 0 && (
+          <div className="px-2 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
+            {unreadCount} Unread
           </div>
         )}
-      </ScrollArea>
+      </div>
+      
+      {/* Use ScrollArea component for scrolling */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        {sortedNotifications.length > 0 ? (
+          <div className="divide-y">
+            {sortedNotifications.map((notification) => (
+              <div 
+                key={notification.id} 
+                className={`relative  p-4 ${!notification.read ? 'bg-accent/10' : ''} transition-all duration-300`}
+              >
+                <div className="flex gap-3">
+                  <NotificationIcon 
+                    type={notification.type} 
+                    isRead={notification.read} 
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className={`font-medium truncate ${notification.read ? 'text-muted-foreground' : ''}`}>
+                        {notification.title}
+                      </h4>
+                      <span className="text-xs absolute bottom-3 right-3 bg-accent shadow rounded text-muted-foreground whitespace-nowrap">
+                        {notification.time}
+                      </span>
+                    </div>
+                    <p className={`text-sm turncate mt-1 ${notification.read ? 'text-muted-foreground' : ''}`}>
+                      {notification.message}
+                    </p>
+                  </div>
+                </div>
+                {!notification.read && (
+                  <button
+                    onClick={() => removeNotification(notification.id)}
+                    className="absolute top-3 right-3 hover:bg-destructive/10 rounded-full p-1 transition-colors"
+                    aria-label="Mark as read"
+                  >
+                    <X size={16} className="text-muted-foreground hover:text-destructive" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-64">
+            <p className="text-muted-foreground">No notifications</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -69,11 +69,11 @@ const ProfilePage = ({ expanded, showTabs, setShowTabs }) => {
       {expanded ? (
         <>
           <div className="mb-6">
-            <Avatar className="w-40 h-40">
+            <Avatar className="w-40 h-40 border ">
               {profile?.profile_picture ? (
                 <AvatarImage src={profile.profile_picture} alt={getFullName()} />
               ) : null}
-              <AvatarFallback className="text-3xl">{getInitials()}</AvatarFallback>
+              <AvatarFallback className="text-6xl bg-primary/25">{getInitials()}</AvatarFallback>
             </Avatar>
           </div>
           <h2 className="text-2xl font-bold text-center mb-2">
@@ -98,7 +98,7 @@ const ProfilePage = ({ expanded, showTabs, setShowTabs }) => {
             {profile?.profile_picture ? (
               <AvatarImage src={profile.profile_picture} alt={getFullName()} />
             ) : null}
-            <AvatarFallback className="text-lg">{getInitials()}</AvatarFallback>
+            <AvatarFallback className="text-lg bg-primary/25">{getInitials()}</AvatarFallback>
           </Avatar>
         </div>
       )}

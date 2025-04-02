@@ -11,19 +11,26 @@ import { listDematAccounts, deleteDematAccount } from "@/lib/demat-account-api";
 export default function DematAccountPage() {
   const [dematAccounts, setDematAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
 
   const fetchDematAccounts = async () => {
     try {
       setLoading(true);
       const response = await listDematAccounts();
+      
+      // If status is true, set the demat accounts
       if (response.status) {
         setDematAccounts(response.data);
+      } else {
+        // If status is false (including cases like "No demat accounts available"),
+        // just set an empty array - don't treat as an error
+        setDematAccounts([]);
       }
     } catch (err) {
-      setError("Failed to fetch demat accounts");
-      toast.error("Failed to fetch demat accounts");
+      console.error("Error fetching demat accounts:", err);
+      // For unexpected errors (like network issues),
+      // we'll still set empty array but not show an error toast
+      setDematAccounts([]);
     } finally {
       setLoading(false);
     }
@@ -78,21 +85,7 @@ export default function DematAccountPage() {
         onDematAdded={fetchDematAccounts}
       />
 
-      {error ? (
-        <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
-          <BankIcon size={36} className="mb-4 text-red-400 sm:size-48" />
-          <p className="text-red-500 text-base sm:text-lg">{error}</p>
-          <p className="text-gray-400 mt-2 text-sm sm:text-base">
-            Something went wrong. Try adding a demat account or refresh the page.
-          </p>
-          <div className="mt-4">
-            <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
-              <BankIcon size={20} />
-              Add Demat Account
-            </Button>
-          </div>
-        </div>
-      ) : dematAccounts.length === 0 ? (
+      {dematAccounts.length === 0 ? (
         <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
           <BankIcon size={36} className="mb-4 text-gray-400 sm:size-48" />
           <p className="text-gray-500 text-base sm:text-lg">No demat accounts found</p>

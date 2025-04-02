@@ -10,19 +10,26 @@ import { listBanks, deleteBank } from "@/lib/bank-api";
 export default function BankPage() {
   const [banks, setBanks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
 
   const fetchBanks = async () => {
     try {
       setLoading(true);
       const response = await listBanks();
+      
+      // If status is true, set the banks
       if (response.status) {
         setBanks(response.data);
+      } else {
+        // If status is false (including 400 "No banks available"), 
+        // just set an empty array - don't treat as an error
+        setBanks([]);
       }
     } catch (err) {
-      setError("Failed to fetch bank accounts");
-      toast.error("Failed to fetch bank accounts");
+      console.error("Error fetching banks:", err);
+      // For unexpected errors (like network issues), 
+      // we'll still set empty array but not show an error toast
+      setBanks([]);
     } finally {
       setLoading(false);
     }
@@ -46,28 +53,9 @@ export default function BankPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-[60vh] animate-pulse">
-        <BankIcon size={48} className="mx-auto mb-4 text-gray-400" />
+      <div className="flex flex-col justify-center items-center h-[60vh] animate-pulse">
+        <BankIcon size={48} className="mb-4 text-gray-400" />
         <p className="text-gray-500 text-sm sm:text-base">Loading bank accounts...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
-        <BankIcon size={36} className="mb-4 text-red-400 sm:size-48" />
-        <p className="text-red-500 text-base sm:text-lg">{error}</p>
-        <p className="text-gray-400 mt-2 text-sm sm:text-base">
-          Something went wrong. Try adding a bank account or refresh the page.
-        </p>
-        <div className="mt-4">
-          <AddBankDialog 
-            openAddDialog={openAddDialog}
-            setOpenAddDialog={setOpenAddDialog}
-            onBankAdded={fetchBanks} 
-          />
-        </div>
       </div>
     );
   }

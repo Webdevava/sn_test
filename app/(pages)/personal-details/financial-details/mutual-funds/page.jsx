@@ -15,7 +15,6 @@ import { CurrencyCircleDollar as FundIcon } from "@phosphor-icons/react";
 const MutualFundsPage = () => {
   const [mutualFunds, setMutualFunds] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedFund, setSelectedFund] = useState(null);
@@ -27,12 +26,20 @@ const MutualFundsPage = () => {
     try {
       setLoading(true);
       const response = await listMutualFunds();
+      
+      // If status is true and data exists, set the mutual funds
       if (response.status && response.data) {
         setMutualFunds(response.data);
+      } else {
+        // If status is false or no data (including "No mutual funds available"),
+        // set an empty array - don't treat as an error
+        setMutualFunds([]);
       }
     } catch (err) {
-      setError("Failed to fetch mutual funds");
-      toast.error("Failed to fetch mutual funds");
+      console.error("Error fetching mutual funds:", err);
+      // For unexpected errors (like network issues),
+      // set empty array instead of showing error
+      setMutualFunds([]);
     } finally {
       setLoading(false);
     }
@@ -109,21 +116,7 @@ const MutualFundsPage = () => {
       <AddMutualFundDialog open={openAddDialog} onOpenChange={setOpenAddDialog} onSuccess={handleSuccess} />
       <EditMutualFundDialog open={openEditDialog} onOpenChange={setOpenEditDialog} mutualFund={selectedFund} onSuccess={handleSuccess} />
 
-      {error ? (
-        <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
-          <FundIcon size={36} className="mb-4 text-red-400 sm:size-48" />
-          <p className="text-red-500 text-base sm:text-lg">{error}</p>
-          <p className="text-gray-400 mt-2 text-sm sm:text-base">
-            Something went wrong. Try adding a mutual fund or refresh the page.
-          </p>
-          <div className="mt-4">
-            <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
-              <FundIcon size={20} />
-              Add Mutual Fund
-            </Button>
-          </div>
-        </div>
-      ) : mutualFunds.length === 0 ? (
+      {mutualFunds.length === 0 ? (
         <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
           <FundIcon size={36} className="mb-4 text-gray-400 sm:size-48" />
           <p className="text-gray-500 text-base sm:text-lg">No mutual funds found</p>
@@ -144,8 +137,8 @@ const MutualFundsPage = () => {
               <CardHeader className="p-4 sm:p-6 pb-0">
                 <CardTitle className="flex justify-between items-center text-base sm:text-lg">
                   {fund.fund_name}
-                  <Badge className={fund.mutual_fund_category === "Recurring" ? "bg-blue-500" : "bg-green-500"}>{fund.mutual_fund_category}</Badge>
                 </CardTitle>
+                  {/* <Badge className={fund.mutual_fund_category "bg-blue-500" : "bg-green-500"}>{fund.mutual_fund_category}</Badge> */}
               </CardHeader>
               <CardContent className="p-4 sm:p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">

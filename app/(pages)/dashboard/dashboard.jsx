@@ -15,37 +15,51 @@ import { getProfileDetail } from "@/lib/profile-api";
 export default function DashboardPage() {
   // State to hold profile data
   const [profileData, setProfileData] = useState({
-    firstName: "John", // Default values until data is fetched
-    lastName: "Doe",
+    firstName: "",
+    lastName: "",
+    isLoading: true,
   });
 
-  // Fetch profile data from cookies or API
   useEffect(() => {
-    const fetchProfileData = async () => {
-      const profileCookie = Cookies.get('profile');
-      if (profileCookie) {
-        // Use data from cookies
-        const profile = JSON.parse(profileCookie);
-        setProfileData({
-          firstName: profile.first_name || "John",
-          lastName: profile.last_name || "Doe",
-        });
-      } else {
-        // Fetch data from API if not in cookies
-        try {
-          const response = await getProfileDetail();
-          const profile = response.data; // Use the response data
+    // Define async function inside useEffect
+    async function loadProfile() {
+      try {
+        // Directly call the API
+        const response = await getProfileDetail();
+        console.log("API Response:", response);
+        
+        // The response itself is the data object we need
+        const userData = response;
+        
+        if (userData && userData.first_name) {
+          // Direct access to the properties from response
           setProfileData({
-            firstName: profile.first_name || "John",
-            lastName: profile.last_name || "Doe",
+            firstName: userData.first_name,
+            lastName: userData.last_name || "",
+            isLoading: false
           });
-        } catch (error) {
-          console.error('Error fetching profile data:', error);
+          
+          console.log("Setting profile to:", userData.first_name, userData.last_name);
+        } else {
+          console.error("API response doesn't contain name fields:", userData);
+          setProfileData({
+            firstName: "John", 
+            lastName: "Doe",
+            isLoading: false
+          });
         }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        setProfileData({
+          firstName: "John", 
+          lastName: "Doe",
+          isLoading: false
+        });
       }
-    };
-
-    fetchProfileData();
+    }
+    
+    // Call the async function
+    loadProfile();
   }, []);
 
   // Mock data for the financial summary
@@ -85,13 +99,17 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen w-full ">
+    <div className="min-h-screen w-full">
       <div className="pb-12">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-              Welcome, {profileData.firstName} {profileData.lastName} 👋
+              {profileData.isLoading ? (
+                <span className="inline-block w-40 h-6 bg-gray-200 animate-pulse rounded"></span>
+              ) : (
+                `Welcome, ${profileData.firstName || "John"} ${profileData.lastName || "Doe"} 👋`
+              )}
             </h1>
             <p className="text-gray-500 text-xs sm:text-sm mt-1">
               Manage your Family, Financial, and Insurance details in one place. Stay secure and in control!

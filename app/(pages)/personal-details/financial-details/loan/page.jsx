@@ -12,7 +12,6 @@ import { Bank as LoanIcon } from "@phosphor-icons/react";
 const LoansPage = () => {
   const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState(null);
@@ -20,14 +19,38 @@ const LoansPage = () => {
   const fetchLoans = async () => {
     try {
       setLoading(true);
-      const securedResponse = await listSecuredLoans();
-      const unsecuredResponse = await listUnsecuredLoans();
-      const securedLoans = securedResponse.status && securedResponse.data ? securedResponse.data.map(loan => ({ ...loan, type: "Secured" })) : [];
-      const unsecuredLoans = unsecuredResponse.status && unsecuredResponse.data ? unsecuredResponse.data.map(loan => ({ ...loan, type: "Unsecured" })) : [];
-      setLoans([...securedLoans, ...unsecuredLoans]);
+      
+      // Get secured loans
+      let securedLoans = [];
+      try {
+        const securedResponse = await listSecuredLoans();
+        // Don't check status - we'll handle the empty data separately
+        securedLoans = securedResponse.data && securedResponse.data.length > 0 
+          ? securedResponse.data.map(loan => ({ ...loan, type: "Secured" })) 
+          : [];
+      } catch (securedErr) {
+        console.error("Error fetching secured loans:", securedErr);
+        // Continue with empty secured loans
+      }
+      
+      // Get unsecured loans
+      let unsecuredLoans = [];
+      try {
+        const unsecuredResponse = await listUnsecuredLoans();
+        // Don't check status - we'll handle the empty data separately
+        unsecuredLoans = unsecuredResponse.data && unsecuredResponse.data.length > 0 
+          ? unsecuredResponse.data.map(loan => ({ ...loan, type: "Unsecured" })) 
+          : [];
+      } catch (unsecuredErr) {
+        console.error("Error fetching unsecured loans:", unsecuredErr);
+        // Continue with empty unsecured loans
+      }
+      
+      // Combine loans - this will work even if only one type is available
+      const allLoans = [...securedLoans, ...unsecuredLoans];
+      setLoans(allLoans);
     } catch (err) {
-      setError("Failed to fetch loans");
-      toast.error("Failed to fetch loans");
+      console.error("Error in overall loan fetching:", err);
     } finally {
       setLoading(false);
     }
@@ -60,8 +83,8 @@ const LoansPage = () => {
 
   if (loading && !loans.length) {
     return (
-      <div className="flex justify-center items-center h-[60vh] animate-pulse">
-        <LoanIcon size={48} className="mx-auto mb-4 text-gray-400" />
+      <div className="flex flex-col justify-center items-center h-[60vh] animate-pulse">
+        <LoanIcon size={48} className="mb-4 text-gray-400" />
         <p className="text-gray-500 text-sm sm:text-base">Loading loans...</p>
       </div>
     );
@@ -92,21 +115,7 @@ const LoansPage = () => {
         onSuccess={handleSuccess} 
       />
 
-      {error ? (
-        <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
-          <LoanIcon size={36} className="mb-4 text-red-400 sm:size-48" />
-          <p className="text-red-500 text-base sm:text-lg">{error}</p>
-          <p className="text-gray-400 mt-2 text-sm sm:text-base">
-            Something went wrong. Try adding a loan or refresh the page.
-          </p>
-          <div className="mt-4">
-            <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
-              <LoanIcon size={20} />
-              Add Loan
-            </Button>
-          </div>
-        </div>
-      ) : loans.length === 0 ? (
+      {loans.length === 0 ? (
         <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
           <LoanIcon size={36} className="mb-4 text-gray-400 sm:size-48" />
           <p className="text-gray-500 text-base sm:text-lg">No loans found</p>

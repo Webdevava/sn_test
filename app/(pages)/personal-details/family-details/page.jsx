@@ -18,7 +18,6 @@ import {
 export default function FamilyPage() {
   const [familyMembers, setFamilyMembers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
@@ -41,12 +40,20 @@ export default function FamilyPage() {
     try {
       setLoading(true);
       const response = await listFamilyMembers();
+      
+      // If status is true, set the family members
       if (response.status) {
         setFamilyMembers(response.data);
+      } else {
+        // If status is false (e.g., "No family members available"),
+        // set an empty array - don't treat as an error
+        setFamilyMembers([]);
       }
     } catch (err) {
-      setError("Failed to fetch family members");
-      toast.error("Failed to fetch family members");
+      console.error("Error fetching family members:", err);
+      // For unexpected errors (like network issues),
+      // set empty array instead of showing error
+      setFamilyMembers([]);
     } finally {
       setLoading(false);
     }
@@ -186,36 +193,12 @@ export default function FamilyPage() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
-        <UsersIcon size={36} className="mb-4 text-red-400 sm:size-48" />
-        <p className="text-red-500 text-base sm:text-lg">{error}</p>
-        <p className="text-gray-400 mt-2 text-sm sm:text-base">
-          Something went wrong. Try adding a family member or refresh the page.
-        </p>
-        <div className="mt-4">
-          <AddFamilyDialog
-            openAddDialog={openAddDialog}
-            setOpenAddDialog={setOpenAddDialog}
-            addFormData={addFormData}
-            setAddFormData={setAddFormData}
-            customRelationship={customRelationship}
-            setCustomRelationship={setCustomRelationship}
-            handleAddFamilyMember={handleAddFamilyMember}
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto py-6 px-4 sm:py-12 sm:px-6 lg:px-8 relative">
       <Toaster richColors />
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
         <div className="flex items-center gap-3">
-          {/* <UsersIcon size={24} className="text-primary sm:size-32" /> */}
           <h1 className="text-xl sm:text-2xl font-bold">
             Total Members ({familyMembers.length})
           </h1>
@@ -272,17 +255,17 @@ export default function FamilyPage() {
       )}
 
       {/* Fixed Add Button for Mobile */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t sm:hidden w-full ">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t sm:hidden w-full">
         <div className="flex items-center justify-center">
-        <AddFamilyDialog
-          openAddDialog={openAddDialog}
-          setOpenAddDialog={setOpenAddDialog}
-          addFormData={addFormData}
-          setAddFormData={setAddFormData}
-          customRelationship={customRelationship}
-          setCustomRelationship={setCustomRelationship}
-          handleAddFamilyMember={handleAddFamilyMember}
-        />
+          <AddFamilyDialog
+            openAddDialog={openAddDialog}
+            setOpenAddDialog={setOpenAddDialog}
+            addFormData={addFormData}
+            setAddFormData={setAddFormData}
+            customRelationship={customRelationship}
+            setCustomRelationship={setCustomRelationship}
+            handleAddFamilyMember={handleAddFamilyMember}
+          />
         </div>
       </div>
 

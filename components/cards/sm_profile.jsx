@@ -80,7 +80,7 @@ const ProfileCard = () => {
           {profile?.profile_picture ? (
             <AvatarImage src={profile.profile_picture} alt={getFullName()} />
           ) : null}
-          <AvatarFallback className="text-3xl">{getInitials()}</AvatarFallback>
+          <AvatarFallback className="text-3xl bg-primary/25">{getInitials()}</AvatarFallback>
         </Avatar>
         
         <div className="flex flex-col items-center sm:items-start">

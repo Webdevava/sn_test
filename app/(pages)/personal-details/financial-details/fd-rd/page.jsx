@@ -11,19 +11,26 @@ import { Bank } from "@phosphor-icons/react";
 const FDRDPage = () => {
   const [deposits, setDeposits] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
 
   const fetchDeposits = async () => {
     try {
       setLoading(true);
       const response = await listDeposits();
+      
+      // If status is true and data exists, set the deposits
       if (response.status && response.data) {
         setDeposits(response.data);
+      } else {
+        // If status is false (including 400 "No deposits available"), 
+        // just set an empty array - don't treat as an error
+        setDeposits([]);
       }
     } catch (err) {
-      setError("Failed to fetch deposits");
-      toast.error("Failed to fetch deposits");
+      console.error("Error fetching deposits:", err);
+      // For unexpected errors (like network issues), 
+      // we'll still set empty array but not show an error toast
+      setDeposits([]);
     } finally {
       setLoading(false);
     }
@@ -39,8 +46,8 @@ const FDRDPage = () => {
 
   if (loading && !deposits.length) {
     return (
-      <div className="flex justify-center items-center h-[60vh] animate-pulse">
-        <Bank size={48} className="mx-auto mb-4 text-gray-400" />
+      <div className="flex flex-col justify-center items-center h-[60vh] animate-pulse">
+        <Bank size={48} className="mb-4 text-gray-400" />
         <p className="text-gray-500 text-sm sm:text-base">Loading deposits...</p>
       </div>
     );
@@ -66,21 +73,7 @@ const FDRDPage = () => {
 
       <AddDepositDialog open={openAddDialog} onOpenChange={setOpenAddDialog} onSuccess={handleSuccess} />
 
-      {error ? (
-        <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
-          <Bank size={36} className="mb-4 text-red-400 sm:size-48" />
-          <p className="text-red-500 text-base sm:text-lg">{error}</p>
-          <p className="text-gray-400 mt-2 text-sm sm:text-base">
-            Something went wrong. Try adding a deposit or refresh the page.
-          </p>
-          <div className="mt-4">
-            <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
-              <Bank size={20} />
-              Add Deposit
-            </Button>
-          </div>
-        </div>
-      ) : deposits.length === 0 ? (
+      {deposits.length === 0 ? (
         <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
           <Bank size={36} className="mb-4 text-gray-400 sm:size-48" />
           <p className="text-gray-500 text-base sm:text-lg">No deposits found</p>

@@ -10,6 +10,7 @@ import { Eye, EyeOff, Mail, User, Phone, Shield } from "lucide-react";
 import { signupUser } from "@/lib/auth-api";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
+import                                                    Cookies from "js-cookie"
 
 export default function SignupForm({
   formData,
@@ -89,6 +90,7 @@ export default function SignupForm({
       };
       const response = await signupUser(userData);
       if (response.status) {
+        console.log("Signup token after signup:", Cookies.get("signup_token")); // Debug line
         setIsVerifyingOtp(true);
         setSuccessMessage("Signup successful! Please verify your OTP.");
       } else {

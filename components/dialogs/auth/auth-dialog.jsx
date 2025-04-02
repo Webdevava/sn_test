@@ -49,7 +49,8 @@ export default function AuthDialog({ children, type: initialType = "login" }) {
     setSuccessMessage(null);
     setIsLoading(false);
     setShowForgotPassword(false);
-    if (authType === "signup") {
+    // Only remove signup_token if authType is no longer "signup" or after verification
+    if (authType !== "signup") {
       Cookies.remove("signup_token", { path: "/" });
     }
   };
