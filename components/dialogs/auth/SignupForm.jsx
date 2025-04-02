@@ -1,3 +1,4 @@
+// SignupForm.jsx
 "use client";
 
 import { useState } from "react";
@@ -23,7 +24,7 @@ export default function SignupForm({
   isLoading,
   setIsVerifyingOtp,
   error,
-  successMessage
+  successMessage,
 }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -77,9 +78,7 @@ export default function SignupForm({
   const handleSignup = async () => {
     setIsLoading(true);
     try {
-        const formattedDob = formData.dob
-        ? format(new Date(formData.dob), "yyyy-MM-dd")
-        : null;
+      const formattedDob = formData.dob ? format(new Date(formData.dob), "yyyy-MM-dd") : null;
       const userData = {
         first_name: formData.firstName,
         last_name: formData.lastName,

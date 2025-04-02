@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import OtpVerificationForm from "./OtpVerificationForm";
+import ForgotPasswordDialog from "./ForgotPasswordDialog";
 
 export default function AuthDialog({ children, type: initialType = "login" }) {
   const router = useRouter();
@@ -28,6 +29,7 @@ export default function AuthDialog({ children, type: initialType = "login" }) {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const resetForm = () => {
     setFormData({
@@ -46,6 +48,7 @@ export default function AuthDialog({ children, type: initialType = "login" }) {
     setError(null);
     setSuccessMessage(null);
     setIsLoading(false);
+    setShowForgotPassword(false);
     if (authType === "signup") {
       Cookies.remove("signup_token", { path: "/" });
     }
@@ -68,14 +71,20 @@ export default function AuthDialog({ children, type: initialType = "login" }) {
       <DialogContent className="sm:max-w-md md:max-w-lg border border-primary/20 bg-popover text-foreground">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-primary/80 text-center">
-            {authType === "login" ? "Welcome Back" : "Create Your Account"}
+            {authType === "login" && !showForgotPassword
+              ? "Welcome Back"
+              : showForgotPassword
+              ? "Reset Your Password"
+              : "Create Your Account"}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground text-center">
-            {authType === "login" ? (
+            {authType === "login" && !showForgotPassword ? (
               <div className="text-center">
                 <p>Glad to see you again</p>
                 <p>Login to your account below</p>
               </div>
+            ) : showForgotPassword ? (
+              "Follow the steps to reset your password."
             ) : isVerifyingOtp ? (
               "Enter the 6-digit OTP sent to your phone."
             ) : (
@@ -84,7 +93,19 @@ export default function AuthDialog({ children, type: initialType = "login" }) {
           </DialogDescription>
         </DialogHeader>
 
-        {authType === "login" ? (
+        {showForgotPassword ? (
+          <ForgotPasswordDialog
+            setError={setError}
+            setSuccessMessage={setSuccessMessage}
+            setIsLoading={setIsLoading}
+            isLoading={isLoading}
+            setOpen={setOpen}
+            resetForm={resetForm}
+            router={router}
+            error={error}
+            successMessage={successMessage}
+          />
+        ) : authType === "login" ? (
           <LoginForm
             formData={formData}
             setFormData={setFormData}
@@ -97,6 +118,7 @@ export default function AuthDialog({ children, type: initialType = "login" }) {
             router={router}
             error={error}
             successMessage={successMessage}
+            setShowForgotPassword={setShowForgotPassword}
           />
         ) : isVerifyingOtp ? (
           <OtpVerificationForm
@@ -132,19 +154,21 @@ export default function AuthDialog({ children, type: initialType = "login" }) {
           />
         )}
 
-        <div className="text-center pt-2">
-          <p className="text-muted-foreground text-sm">
-            {authType === "login" ? "Don't have an account? " : "Already have an account? "}
-            <button
-              type="button"
-              onClick={() => switchAuthType(authType === "login" ? "signup" : "login")}
-              className="text-primary hover:text-primary/80 font-medium transition-colors disabled:opacity-50"
-              disabled={isVerifyingOtp || isLoading}
-            >
-              {authType === "login" ? "Sign up" : "Log in"}
-            </button>
-          </p>
-        </div>
+        {!showForgotPassword && (
+          <div className="text-center pt-2">
+            <p className="text-muted-foreground text-sm">
+              {authType === "login" ? "Don't have an account? " : "Already have an account? "}
+              <button
+                type="button"
+                onClick={() => switchAuthType(authType === "login" ? "signup" : "login")}
+                className="text-primary hover:text-primary/80 font-medium transition-colors disabled:opacity-50"
+                disabled={isVerifyingOtp || isLoading}
+              >
+                {authType === "login" ? "Sign up" : "Log in"}
+              </button>
+            </p>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

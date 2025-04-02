@@ -1,3 +1,4 @@
+// OtpVerificationForm.jsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ export default function OtpVerificationForm({
   setCurrentStep,
   router,
   error,
-  successMessage
+  successMessage,
 }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,7 +28,6 @@ export default function OtpVerificationForm({
     setFormData({ ...formData, [name]: numericValue });
     setError(null);
   };
-  
 
   const validateOtp = () => {
     return formData.otp.length === 6;

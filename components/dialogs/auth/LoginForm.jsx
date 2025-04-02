@@ -1,3 +1,4 @@
+// LoginForm.jsx
 "use client";
 
 import { useState } from "react";
@@ -19,7 +20,8 @@ export default function LoginForm({
   resetForm,
   router,
   error,
-  successMessage
+  successMessage,
+  setShowForgotPassword,
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -111,9 +113,13 @@ export default function LoginForm({
         </div>
       </div>
       <div className="flex justify-end">
-        <a href="#" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+        <button
+          type="button"
+          onClick={() => setShowForgotPassword(true)}
+          className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+        >
           Forgot password?
-        </a>
+        </button>
       </div>
 
       <div>
