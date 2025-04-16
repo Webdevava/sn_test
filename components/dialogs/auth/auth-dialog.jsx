@@ -49,7 +49,6 @@ export default function AuthDialog({ children, type: initialType = "login" }) {
     setSuccessMessage(null);
     setIsLoading(false);
     setShowForgotPassword(false);
-    // Only remove signup_token if authType is no longer "signup" or after verification
     if (authType !== "signup") {
       Cookies.remove("signup_token", { path: "/" });
     }
@@ -105,6 +104,8 @@ export default function AuthDialog({ children, type: initialType = "login" }) {
             router={router}
             error={error}
             successMessage={successMessage}
+            initialPhoneNumber={formData.phoneNumber} // Pass the phone number from LoginForm
+            setShowForgotPassword={setShowForgotPassword}
           />
         ) : authType === "login" ? (
           <LoginForm

@@ -135,15 +135,18 @@ export default function DashboardPage() {
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <div className="lg:col-span-1 order-1">
-            {/* <NomineeChart data={nomineeData} /> */}
             <NomineeShareChart />
           </div>
           <div className="lg:col-span-2 order-2">
             <FinancialDetailsChart data={financialDetailsData} />
           </div>
-        </div>
+        </div> */}
+
+<div className="lg:col-span-1 order-1 mb-4">
+            <NomineeShareChart />
+          </div>
 
         {/* Insurance and Documents Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

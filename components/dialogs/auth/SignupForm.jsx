@@ -1,4 +1,3 @@
-// SignupForm.jsx
 "use client";
 
 import { useState } from "react";
@@ -90,14 +89,13 @@ export default function SignupForm({
       };
       const response = await signupUser(userData);
       if (response.status) {
-        console.log("Signup token after signup:", Cookies.get("signup_token")); // Debug line
+        console.log("Signup token after signup:", Cookies.get("signup_token"));
         setIsVerifyingOtp(true);
         setSuccessMessage("Signup successful! Please verify your OTP.");
       } else {
         setError(response.message || "Signup failed.");
       }
     } catch (error) {
-      // Handle the specific case of mobile already registered
       if (error.response && error.response.status === 400 && 
           error.response.data && error.response.data.detail === "Mobile already registered") {
         setError("Mobile number already registered. Please use a different number.");

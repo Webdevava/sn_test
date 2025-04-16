@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,15 +18,21 @@ export default function ForgotPasswordDialog({
   router,
   error,
   successMessage,
+  initialPhoneNumber,
+  setShowForgotPassword,
 }) {
   const [step, setStep] = useState(1);
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber || "");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [token, setToken] = useState(""); // Store the token from forgetPassword
+  const [token, setToken] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    setPhoneNumber(initialPhoneNumber || "");
+  }, [initialPhoneNumber]);
 
   const handlePhoneChange = (e) => {
     const numericValue = e.target.value.replace(/\D/g, "").slice(0, 10);
@@ -64,7 +70,7 @@ export default function ForgotPasswordDialog({
     try {
       const response = await forgetPassword(phoneNumber);
       if (response.status) {
-        setToken(response.data.token); // Store the token from the response
+        setToken(response.data.token);
         setSuccessMessage(response.message || "OTP sent to your phone!");
         setStep(2);
       } else {
@@ -85,10 +91,10 @@ export default function ForgotPasswordDialog({
     }
     setIsLoading(true);
     try {
-      const response = await validateForgetPasswordOtp(otp, token); // Use the stored token
+      const response = await validateForgetPasswordOtp(otp, token);
       if (response.status) {
         setSuccessMessage(response.message || "OTP verified successfully!");
-        setStep(3); // Token is already stored, move to reset password step
+        setStep(3);
       } else {
         setError(response.message || "Invalid OTP.");
       }
@@ -104,7 +110,7 @@ export default function ForgotPasswordDialog({
     setError(null);
     setSuccessMessage(null);
     try {
-      const response = await resendForgetPasswordOtp(token); // Use the stored token
+      const response = await resendForgetPasswordOtp(token);
       if (response.status) {
         setSuccessMessage(response.message || "New OTP sent to your phone!");
       } else {
@@ -125,13 +131,13 @@ export default function ForgotPasswordDialog({
     }
     setIsLoading(true);
     try {
-      const response = await resetPassword(token, newPassword); // Use the stored token
+      const response = await resetPassword(token, newPassword);
       if (response.status) {
         setSuccessMessage(response.message || "Password reset successful! Redirecting to login...");
         setTimeout(() => {
           setOpen(false);
           resetForm();
-          router.push("/"); // Or wherever you want to redirect after reset
+          router.push("/");
         }, 1500);
       } else {
         setError(response.message || "Failed to reset password.");
@@ -140,6 +146,23 @@ export default function ForgotPasswordDialog({
       setError(error.message || "Failed to reset password. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleBack = () => {
+    if (step === 1) {
+      setShowForgotPassword(false);
+    } else if (step === 2) {
+      setStep(1);
+      setOtp("");
+      setError(null);
+      setSuccessMessage(null);
+    } else if (step === 3) {
+      setStep(2);
+      setNewPassword("");
+      setConfirmPassword("");
+      setError(null);
+      setSuccessMessage(null);
     }
   };
 
@@ -170,14 +193,25 @@ export default function ForgotPasswordDialog({
               <div className="text-green-500 text-sm bg-green-500/10 p-2 rounded-md animate-in fade-in">{successMessage}</div>
             )}
           </div>
-          <Button
-            type="submit"
-            disabled={!validatePhone() || isLoading}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 py-5"
-          >
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-            {isLoading ? "Sending..." : "Send OTP"}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 pt-2">
+            <Button
+              type="button"
+              onClick={handleBack}
+              variant="outline"
+              className="sm:flex-1 bg-transparent border-input text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200 py-5"
+              disabled={isLoading}
+            >
+              Back
+            </Button>
+            <Button
+              type="submit"
+              disabled={!validatePhone() || isLoading}
+              className="sm:flex-1 bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 py-5"
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {isLoading ? "Sending..." : "Send OTP"}
+            </Button>
+          </div>
         </form>
       )}
 
@@ -212,14 +246,25 @@ export default function ForgotPasswordDialog({
               <div className="text-green-500 text-sm bg-green-500/10 p-2 rounded-md animate-in fade-in">{successMessage}</div>
             )}
           </div>
-          <Button
-            type="submit"
-            disabled={!validateOtp() || isLoading}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 py-5"
-          >
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-            {isLoading ? "Validating..." : "Validate OTP"}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 pt-2">
+            <Button
+              type="button"
+              onClick={handleBack}
+              variant="outline"
+              className="sm:flex-1 bg-transparent border-input text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200 py-5"
+              disabled={isLoading}
+            >
+              Back
+            </Button>
+            <Button
+              type="submit"
+              disabled={!validateOtp() || isLoading}
+              className="sm:flex-1 bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 py-5"
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {isLoading ? "Validating..." : "Validate OTP"}
+            </Button>
+          </div>
         </form>
       )}
 
@@ -282,14 +327,25 @@ export default function ForgotPasswordDialog({
               <div className="text-green-500 text-sm bg-green-500/10 p-2 rounded-md animate-in fade-in">{successMessage}</div>
             )}
           </div>
-          <Button
-            type="submit"
-            disabled={!validatePasswords() || isLoading}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 py-5"
-          >
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-            {isLoading ? "Resetting..." : "Reset Password"}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 pt-2">
+            <Button
+              type="button"
+              onClick={handleBack}
+              variant="outline"
+              className="sm:flex-1 bg-transparent border-input text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200 py-5"
+              disabled={isLoading}
+            >
+              Back
+            </Button>
+            <Button
+              type="submit"
+              disabled={!validatePasswords() || isLoading}
+              className="sm:flex-1 bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 py-5"
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {isLoading ? "Resetting..." : "Reset Password"}
+            </Button>
+          </div>
         </form>
       )}
     </div>

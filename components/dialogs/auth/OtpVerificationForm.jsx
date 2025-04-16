@@ -1,4 +1,3 @@
-// OtpVerificationForm.jsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -82,6 +81,14 @@ export default function OtpVerificationForm({
     }
   };
 
+  const handleBack = () => {
+    setIsVerifyingOtp(false);
+    setCurrentStep(2);
+    setFormData({ ...formData, otp: "" });
+    setError(null);
+    setSuccessMessage(null);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setError(null);
@@ -127,14 +134,25 @@ export default function OtpVerificationForm({
         )}
       </div>
 
-      <Button
-        type="submit"
-        disabled={!validateOtp() || isLoading}
-        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 py-5"
-      >
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-        {isLoading ? "Verifying..." : "Verify OTP"}
-      </Button>
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 pt-2">
+        <Button
+          type="button"
+          onClick={handleBack}
+          variant="outline"
+          className="sm:flex-1 bg-transparent border-input text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200 py-5"
+          disabled={isLoading}
+        >
+          Back
+        </Button>
+        <Button
+          type="submit"
+          disabled={!validateOtp() || isLoading}
+          className="sm:flex-1 bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 py-5"
+        >
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+          {isLoading ? "Verifying..." : "Verify OTP"}
+        </Button>
+      </div>
     </form>
   );
 }
