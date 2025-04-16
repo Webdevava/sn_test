@@ -10,7 +10,7 @@ import { Eye, EyeOff, Mail, User, Phone, Shield } from "lucide-react";
 import { signupUser } from "@/lib/auth-api";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
-import                                                    Cookies from "js-cookie"
+import Cookies from "js-cookie";
 
 export default function SignupForm({
   formData,
@@ -97,7 +97,13 @@ export default function SignupForm({
         setError(response.message || "Signup failed.");
       }
     } catch (error) {
-      setError(error.message || "Signup failed. Please try again.");
+      // Handle the specific case of mobile already registered
+      if (error.response && error.response.status === 400 && 
+          error.response.data && error.response.data.detail === "Mobile already registered") {
+        setError("Mobile number already registered. Please use a different number.");
+      } else {
+        setError(error.message || "Signup failed. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
