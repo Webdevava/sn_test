@@ -3,8 +3,10 @@
 import { motion } from "framer-motion";
 import { useRef } from "react";
 import styles from "./FeaturesSection.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function FeaturesSection() {
+  const { t } = useLanguage();
   const sectionRef = useRef(null);
 
   const sectionVariants = {
@@ -21,59 +23,33 @@ export default function FeaturesSection() {
 
   const features = [
     {
-      title: "Secure Asset & Debt Storage",
-      description: (
-        <>
-          <em>"Your financial footprint, safeguarded until the right moment."</em> Store all your transactions, assets, debts—whether your family knows about them or not.
-        </>
-      ),
+      title: t("secureAssetDebtStorage"),
+      description: t("secureAssetDebtStorageDescription"),
       icon: "/icons/features/1.svg",
     },
     {
-      title: "Nominee Management & Controlled Access",
-      description: (
-        <>
-          <em>"Your loved ones should never be left in the dark."</em>{" "}
-          <strong>Assign nominees, define access levels, and control when they receive the information.</strong>
-        </>
-      ),
+      title: t("nomineeManagement"),
+      description: t("nomineeManagementDescription"),
       icon: "/icons/features/2.svg",
     },
     {
-      title: "Smart Inactivity Detection & Triple Confirmation System",
-      description: (
-        <>
-          <em>"Because mistakes are not an option."</em> Before we disclose any information to your nominees,{" "}
-          <strong>we verify your inactivity at least 3 times through multiple communication channels.</strong> If there is no response, only then do we share the data.
-        </>
-      ),
+      title: t("smartInactivityDetection"),
+      description: t("smartInactivityDetectionDescription"),
       icon: "/icons/features/3.svg",
     },
     {
-      title: "Hidden or Delayed Asset Disclosure",
-      description: (
-        <>
-          <em>"Protect your family's future the way you want."</em> Maybe you have investments you{" "}
-          <strong>don't want your family to know about until the right time.</strong> Maybe you fear sudden wealth will{" "}
-          <strong>make them lazy, careless, or unmotivated.</strong> You decide when and how your financial secrets are revealed.
-        </>
-      ),
+      title: t("hiddenOrDelayedAssetDisclosure"),
+      description: t("hiddenOrDelayedAssetDisclosureDescription"),
       icon: "/icons/features/4.svg",
     },
     {
-      title: "Unaccounted Transactions",
-      description: (
-        <>
-          Your secrets, protected and revealed on your terms. If you have transactions or assets that {" "}
-          <strong>you want to disclose only after your passing</strong>, you can store them here securely. No immediate reporting. No interference. Only your chosen nominee will access it—when you allow it.
-        </>
-      ),
+      title: t("unaccountedTransactions"),
+      description: t("unaccountedTransactionsDescription"),
       icon: "/icons/features/5.svg",
     },
     {
-      title: "Insights & Reports",
-      description:
-        "Your financial roadmap, always clear. Understand your total assets, liabilities, and nominee allocations with advanced analytics.",
+      title: t("insightsReports"),
+      description: t("insightsReportsDescription"),
       icon: "/icons/features/6.svg",
     },
   ];
@@ -94,11 +70,11 @@ export default function FeaturesSection() {
         >
           <div className="bg-gradient-to-r from-primary/35 via-primary/15 to-transparent w-fit px-3 py-1 rounded-md">
             <h2 className="text-sm md:text-base font-medium text-primary tracking-wide">
-              Key Features
+              {t("keyFeatures")}
             </h2>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
-            Our Top Key Features That Empowers YOU
+            {t("ourTopKeyFeatures")}
           </h1>
         </motion.div>
 

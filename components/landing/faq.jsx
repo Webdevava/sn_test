@@ -3,8 +3,10 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CaretDown, QuestionMark, Lightbulb, Shield, Clock } from "@phosphor-icons/react/dist/ssr";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function FAQSection() {
+  const { t } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(null);
   const sectionRef = useRef(null);
 
@@ -23,27 +25,23 @@ export default function FAQSection() {
   const faqs = [
     {
       icon: Shield,
-      question: "How secure is my data?",
-      answer:
-        "Your data is encrypted with military-grade security and stored in a vault that only activates when conditions are met. We use end-to-end encryption and zero-knowledge architecture to ensure that only you and your designated nominees can access your information when the time is right.",
+      question: t("howSecureIsMyDataFaq"),
+      answer: t("howSecureIsMyDataFaqDescription"),
     },
     {
       icon: Clock,
-      question: "What happens if I don't respond to alerts?",
-      answer:
-        "After five unanswered emails or notifications, your pre-set plan triggers, securely passing your assets to your nominees. This automated system ensures nothing falls through the cracks, while giving you ample opportunity to respond if you're simply on vacation or temporarily unreachable.",
+      question: t("whatHappensIfIDontRespond"),
+      answer: t("whatHappensIfIDontRespondDescription"),
     },
     {
       icon: QuestionMark,
-      question: "Can I change my nominees?",
-      answer:
-        "Yes, you can update your nominees anytime through your secure dashboard. We've made the process simple while maintaining strict security protocols to verify your identity before any changes are made to your succession plan.",
+      question: t("canIChangeMyNominees"),
+      answer: t("canIChangeMyNomineesDescription"),
     },
     {
       icon: Lightbulb,
-      question: "Is there a limit to the assets I can add?",
-      answer:
-        "No limits—add as many financial, property, or personal assets as you need. Our flexible system accommodates everything from traditional assets like real estate and bank accounts to digital assets such as cryptocurrencies and online accounts.",
+      question: t("isThereALimitToAssets"),
+      answer: t("isThereALimitToAssetsDescription"),
     },
   ];
 
@@ -65,14 +63,14 @@ export default function FAQSection() {
           >
             <div className="bg-gradient-to-r from-primary/35 via-primary/15 to-transparent w-fit px-3 py-1 rounded-md">
               <h2 className="text-sm md:text-base font-medium text-primary tracking-wide">
-                FAQs
+                {t("faq")}
               </h2>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
-              Frequently Asked Questions
+              {t("frequentlyAskedQuestions")}
             </h1>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
-              Everything you need to know about securing your legacy with confidence and clarity.
+              {t("everythingYouNeedToKnow")}
             </p>
           </motion.div>
 

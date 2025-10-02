@@ -6,8 +6,10 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { MenuIcon, X } from "lucide-react";
 import AuthDialog from "../dialogs/auth/auth-dialog";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Navbar() {
+  const { t } = useLanguage();
   const [scrollY, setScrollY] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -28,7 +30,7 @@ export default function Navbar() {
       
       // Use a small timeout to ensure menu closes before scrolling
       setTimeout(() => {
-        const navbarHeight = 80; // Adjusted navbar height
+        const navbarHeight = 80; // Adjust based on your navbar height
         const targetPosition =
           targetElement.getBoundingClientRect().top +
           window.pageYOffset -
@@ -104,16 +106,16 @@ export default function Navbar() {
 
             <nav className="hidden md:flex items-center space-x-4">
               {[
-                { name: "Home", href: "#home", id: "home" },
-                { name: "About Us", href: "#about-us", id: "about-us" },
-                { name: "Key Features", href: "#features", id: "features" },
+                { name: "home", href: "#home", id: "home" },
+                { name: "aboutUs", href: "#about-us", id: "about-us" },
+                { name: "keyFeatures", href: "#features", id: "features" },
                 {
-                  name: "Why Choose Us",
+                  name: "whyChooseUs",
                   href: "#why-choose-us",
                   id: "why-choose-us",
                 },
-                { name: "Pricing", href: "#pricing", id: "pricing" },
-                { name: "FAQ's", href: "#faq", id: "faq" },
+                { name: "pricing", href: "#pricing", id: "pricing" },
+                { name: "faq", href: "#faq", id: "faq" },
               ].map((item) => (
                 <a
                   key={item.name}
@@ -125,7 +127,7 @@ export default function Navbar() {
                       : "text-white font-medium hover:text-foreground text-sm lg:text-sm cursor-pointer text-nowrap"
                   }`}
                 >
-                  {item.name}
+                  {t(item.name)}
                 </a>
               ))}
             </nav>
@@ -141,7 +143,7 @@ export default function Navbar() {
                       : "text-white font-medium hover:text-foreground text-sm lg:text-sm cursor-pointer text-nowrap"
                   }`}
                 >
-                  Log In
+                  {t("logIn")}
                 </Button>
               </AuthDialog>
               <AuthDialog type="signup">
@@ -149,7 +151,7 @@ export default function Navbar() {
                   size="sm"
                   className="bg-blue-700 hover:bg-blue-500/75 text-white text-sm cursor-pointer"
                 >
-                  Sign Up
+                  {t("signUp")}
                 </Button>
               </AuthDialog>
             </div>
@@ -186,12 +188,12 @@ export default function Navbar() {
         >
           <div className="container mx-auto px-4 pt-2 pb-4 space-y-1">
             {[
-              { name: "Home", id: "home" },
-              { name: "About Us", id: "about-us" },
-              { name: "Key Features", id: "features" },
-              { name: "Why Choose Us", id: "why-choose-us" },
-              { name: "Pricing", id: "pricing" },
-              { name: "FAQ's", id: "faq" },
+              { name: "home", id: "home" },
+              { name: "aboutUs", id: "about-us" },
+              { name: "keyFeatures", id: "features" },
+              { name: "whyChooseUs", id: "why-choose-us" },
+              { name: "pricing", id: "pricing" },
+              { name: "faq", id: "faq" },
             ].map((item) => (
               <a
                 key={item.name}
@@ -199,7 +201,7 @@ export default function Navbar() {
                 className="block py-2 px-4 text-slate-700 font-medium text-sm"
                 onClick={(e) => handleSmoothScroll(e, item.id)}
               >
-                {item.name}
+                {t(item.name)}
               </a>
             ))}
             <div className="flex flex-col space-y-2 pt-3">
@@ -209,7 +211,7 @@ export default function Navbar() {
                   size="sm"
                   className="text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap"
                 >
-                  Log In
+                  {t("logIn")}
                 </Button>
               </AuthDialog>
               <AuthDialog type="signup">
@@ -217,7 +219,7 @@ export default function Navbar() {
                   size="sm"
                   className="bg-primary hover:bg-white/15 text-white text-sm cursor-pointer"
                 >
-                  Sign Up
+                  {t("signUp")}
                 </Button>
               </AuthDialog>
             </div>

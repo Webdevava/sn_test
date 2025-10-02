@@ -3,8 +3,10 @@
 import { motion } from "framer-motion";
 import { useRef } from "react";
 import { Quotes } from "@phosphor-icons/react/dist/ssr";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function TestimonialSection() {
+  const { t } = useLanguage();
   const sectionRef = useRef(null);
 
   const sectionVariants = {
@@ -21,22 +23,19 @@ export default function TestimonialSection() {
 
   const testimonials = [
     {
-      quote:
-        "After my father’s passing, we had no idea about his investments. It took us months to figure things out. If this platform had existed back then, our financial stability wouldn’t have been affected.",
-      author: "Amit Sharma",
-      location: "Mumbai",
+      quote: t("afterMyFathersPassing"),
+      author: t("amitSharma"),
+      location: t("mumbai"),
     },
     {
-      quote:
-        "I have assets that I don’t want my family to know about right now, but I also don’t want them to go to waste. This platform gives me the peace of mind to disclose them at the right time.",
-      author: "Neha Jadhav",
-      location: "Pune",
+      quote: t("iHaveAssetsThatI"),
+      author: t("nehaJadhav"),
+      location: t("pune"),
     },
     {
-      quote:
-        "I now have complete peace of mind knowing my family won’t struggle to find my important documents and financial details if anything happens to me.",
-      author: "Shweta Rathi",
-      location: "Nagpur",
+      quote: t("iNowHaveCompletePeace"),
+      author: t("shwetaRathi"),
+      location: t("nagpur"),
     },
   ];
 
@@ -57,11 +56,11 @@ export default function TestimonialSection() {
         >
           <div className="bg-gradient-to-r from-primary/35 via-primary/15 to-transparent w-fit px-3 py-1 rounded-md">
             <h2 className="text-sm md:text-base font-medium text-primary tracking-wide">
-              Testimonials
+              {t("testimonials")}
             </h2>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-foreground">
-            Real Stories, Real Impact
+            {t("realStoriesRealImpact")}
           </h1>
         </motion.div>
 

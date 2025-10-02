@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React, { useRef, useState } from "react";
 import AuthDialog from "../dialogs/auth/auth-dialog";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function PricingSection() {
+  const { t } = useLanguage();
   const sectionRef = useRef(null);
   const [activePlan, setActivePlan] = useState(1); // Default to Standard plan
 
@@ -25,47 +27,47 @@ export default function PricingSection() {
 
   const plans = [
     {
-      name: "Free",
+      name: t("free"),
       price: "₹0",
-      period: "/month",
+      period: t("perMonth"),
       icon: CaretUp,
-      tagline: "Basic features",
+      tagline: t("basicFeatures"),
       features: [
-        { text: "Limited Personal Data Storage", available: true },
-        { text: "Basic Account Tracking", available: true },
-        { text: "1 Nominee", available: true },
-        { text: "Inactivity Verification", available: true },
-        { text: "Advanced Features", available: false },
+        { text: t("limitedPersonalDataStorage"), available: true },
+        { text: t("basicAccountTracking"), available: true },
+        { text: t("oneNominee"), available: true },
+        { text: t("inactivityVerification"), available: true },
+        { text: t("advancedFeatures"), available: false },
       ],
     },
     {
-      name: "Standard",
+      name: t("standard"),
       price: "₹9",
-      period: "/month",
+      period: t("perMonth"),
       icon: Star,
-      tagline: "Most popular choice",
+      tagline: t("mostPopularChoice"),
       features: [
-        { text: "Full Financial Asset Tracking", available: true },
-        { text: "Up to 5 Nominees", available: true },
-        { text: "10 Document Storage", available: true },
-        { text: "Custom Time Delay for Nominees", available: true },
-        { text: "24/7 Priority Support", available: true },
+        { text: t("fullFinancialAssetTracking"), available: true },
+        { text: t("upTo5Nominees"), available: true },
+        { text: t("10DocumentStorage"), available: true },
+        { text: t("customTimeDelayForNominees"), available: true },
+        { text: t("prioritySupport"), available: true },
       ],
       highlighted: true,
     },
     {
-      name: "Premium",
+      name: t("premium"),
       price: "₹49",
-      period: "/month",
+      period: t("perMonth"),
       icon: Crown,
-      tagline: "Complete protection",
-      badge: "1 Month FREE",
+      tagline: t("completeProtection"),
+      badge: t("oneMonthFree"),
       features: [
-        { text: "Unlimited Storage & Nominees", available: true },
-        { text: "Hidden Transaction Storage", available: true },
-        { text: "Advanced Analytics & Reports", available: true },
-        { text: "Customizable Notifications", available: true },
-        { text: "Premium Support & Security", available: true },
+        { text: t("unlimitedStorageNominees"), available: true },
+        { text: t("hiddenTransactionStorage"), available: true },
+        { text: t("advancedAnalyticsReports"), available: true },
+        { text: t("customizableNotifications"), available: true },
+        { text: t("premiumSupportSecurity"), available: true },
       ],
     },
   ];
@@ -97,14 +99,14 @@ export default function PricingSection() {
         >
           <div className="bg-gradient-to-r from-primary/35 via-primary/15 to-transparent w-fit px-3 py-1 rounded-md ">
             <h2 className="text-sm md:text-base font-medium text-primary tracking-wide">
-              Pricing
+              {t("pricing")}
             </h2>
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-            Pricing Plans
+            {t("pricingPlans")}
           </h1>
           <p className="text-sm md:text-base lg:text-lg text-muted-foreground max-w-2xl ">
-            Flexible plans to suit your needs. Choose what fits you best and get the security and control you deserve.
+            {t("flexiblePlans")}
           </p>
         </motion.div>
 
@@ -113,11 +115,11 @@ export default function PricingSection() {
           <TabsList className="grid grid-cols-2 w-48 sm:w-56 mx-auto mb-6 md:mb-8">
             <TabsTrigger value="plans" className="flex items-center gap-2 text-xs sm:text-sm">
               <Calendar size={16} weight="duotone" />
-              Plans
+              {t("plans")}
             </TabsTrigger>
             <TabsTrigger value="comparison" className="flex items-center gap-2 text-xs sm:text-sm">
               <Table size={16} weight="duotone" />
-              Compare
+              {t("compare")}
             </TabsTrigger>
           </TabsList>
 
@@ -134,24 +136,24 @@ export default function PricingSection() {
                 <thead>
                   <tr className="bg-muted/70">
                     <th className="p-3 sm:p-4 text-left font-semibold text-sm sm:text-lg text-foreground border-b">
-                      Feature
+                      {t("feature")}
                     </th>
                     <th className="p-3 sm:p-4 text-center font-semibold text-sm sm:text-lg text-foreground border-b w-20 sm:w-24">
                       <div className="flex flex-col items-center">
                         <CaretUp size={16} weight="duotone" className="mb-1" />
-                        Free
+                        {t("free")}
                       </div>
                     </th>
                     <th className="p-3 sm:p-4 text-center font-semibold text-sm sm:text-lg text-primary border-b w-20 sm:w-24">
                       <div className="flex flex-col items-center">
                         <Star size={16} weight="duotone" className="mb-1" />
-                        Standard
+                        {t("standard")}
                       </div>
                     </th>
                     <th className="p-3 sm:p-4 text-center font-semibold text-sm sm:text-lg text-foreground border-b w-20 sm:w-24">
                       <div className="flex flex-col items-center">
                         <Crown size={16} weight="duotone" className="mb-1" />
-                        Premium
+                        {t("premium")}
                       </div>
                     </th>
                   </tr>
@@ -160,41 +162,41 @@ export default function PricingSection() {
                   {/* Storage Features */}
                   <tr className="bg-muted/40">
                     <td colSpan={4} className="p-2 sm:p-3 pl-4 font-medium text-foreground text-sm sm:text-base">
-                      Storage Features
+                      {t("storageFeatures")}
                     </td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Secure Personal Data Storage</td>
-                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">Limited</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("securePersonalDataStorage")}</td>
+                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">{t("limited")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Bank Accounts, FD/RD, EPF/PPF Tracking</td>
-                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">Limited</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("bankAccountsFDRDEPFPFTracking")}</td>
+                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">{t("limited")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Insurance (Life, Health, Vehicle, etc.)</td>
-                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">Limited</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("insuranceLifeHealthVehicleEtc")}</td>
+                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">{t("limited")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Investments (Stocks, Mutual Funds, Crypto)</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("investmentsStocksMutualFundsCrypto")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(false)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Gold/Silver/Ornaments Asset Tracking</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("goldSilverOrnamentsAssetTracking")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(false)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Property & Utility Bill Management</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("propertyUtilityBillManagement")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(false)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
@@ -203,29 +205,29 @@ export default function PricingSection() {
                   {/* Nominee & Security Features */}
                   <tr className="bg-muted/40">
                     <td colSpan={4} className="p-2 sm:p-3 pl-4 font-medium text-foreground text-sm sm:text-base">
-                      Nominee & Security Features
+                      {t("nomineeSecurityFeatures")}
                     </td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Nominee Assignment & Notifications</td>
-                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">1 Nominee</td>
-                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">Up to 5</td>
-                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">Unlimited</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("nomineeAssignmentNotifications")}</td>
+                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">{t("oneNominee")}</td>
+                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">{t("upTo5")}</td>
+                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">{t("unlimited")}</td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Secure Document Upload & Storage</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("secureDocumentUploadStorage")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(false)}</td>
-                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">Up to 10 Docs</td>
-                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">Unlimited</td>
+                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">{t("upTo10Docs")}</td>
+                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">{t("unlimited")}</td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Inactivity Verification (Triple Check)</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("inactivityVerificationTripleCheck")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Custom Time Delay for Nominee Disclosure</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("customTimeDelayForNomineeDisclosure")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(false)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
@@ -234,41 +236,41 @@ export default function PricingSection() {
                   {/* Advanced Features */}
                   <tr className="bg-muted/40">
                     <td colSpan={4} className="p-2 sm:p-3 pl-4 font-medium text-foreground text-sm sm:text-base">
-                      Advanced Features
+                      {t("advancedFeatures")}
                     </td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Alerts & Reminders for Financial Planning</td>
-                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">Limited</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("alertsRemindersForFinancialPlanning")}</td>
+                    <td className="p-2 sm:p-3 text-center text-xs sm:text-sm">{t("limited")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Advanced Analytics & Reports</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("advancedAnalyticsReports")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(false)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Downloadable PDF/Excel Reports</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("downloadablePDFExcelReports")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(false)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Undocumented Money & Hidden Transactions Storage</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("undocumentedMoneyHiddenTransactionsStorage")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(false)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(false)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">24/7 Priority Customer Support</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("24/7PriorityCustomerSupport")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(false)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                   </tr>
                   <tr className="border-b border-primary/20 hover:bg-muted/20 transition-colors">
-                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">Customizable Notification Preferences</td>
+                    <td className="p-2 sm:p-3 pl-4 text-xs sm:text-sm">{t("customizableNotificationPreferences")}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(false)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
                     <td className="p-2 sm:p-3 text-center">{renderFeatureValue(true)}</td>
@@ -369,10 +371,10 @@ export default function PricingSection() {
                               : "bg-primary text-white hover:bg-primary/90"
                             : "bg-muted text-foreground hover:bg-muted/80"}`}
                       >
-                        {index === 0 ? "Sign Up Free" : isActive ? "Get Started Now" : "Select Plan"}
+                        {index === 0 ? t("signUpFree") : isActive ? t("getStartedNow") : t("selectPlan")}
                       </Button></AuthDialog>
                       <p className={`text-center text-xs mt-2 ${index === 1 ? "text-white/80" : "text-muted-foreground"}`}>
-                        {index === 0 ? "No payment required" : "No credit card required for 14-day trial"}
+                        {index === 0 ? t("noPaymentRequired") : t("noCreditCardRequired")}
                       </p>
                     </div>
                   </motion.div>
@@ -390,9 +392,9 @@ export default function PricingSection() {
           viewport={{ once: true, amount: 0.2 }}
           className="mt-8 sm:mt-10 md:mt-12 bg-muted/30 p-4 sm:p-6 rounded-lg border border-primary/10 text-center max-w-3xl mx-auto"
         >
-          <h4 className="font-semibold text-foreground text-sm sm:text-base">All plans include:</h4>
+          <h4 className="font-semibold text-foreground text-sm sm:text-base">{t("allPlansInclude")}</h4>
           <p className="mt-2 text-muted-foreground text-xs sm:text-sm">
-            Industry-leading security, inactivity verification, data encryption, 24/7 monitoring, and 30-day money-back guarantee.
+            {t("industryLeadingSecurity")}
           </p>
         </motion.div>
       </div>

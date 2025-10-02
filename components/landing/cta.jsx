@@ -1,13 +1,17 @@
 "use client";
+
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import AuthDialog from "../dialogs/auth/auth-dialog";
 import { ArrowRight } from "@phosphor-icons/react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function CTASection() {
+  const { t } = useLanguage();
+
   return (
-    <section className="relative  ">
+    <section className="relative">
       {/* Split background */}
       <div className="absolute inset-0">
         <div className="h-1/2 bg-transparent"></div>
@@ -24,15 +28,15 @@ export default function CTASection() {
         >
           <div className="p-8 md:p-12 lg:p-16 text-center">
             <div className="inline-block bg-primary/10 text-primary px-4 py-1.5 rounded-full mb-4 text-sm font-medium">
-              Take Control
+              {t("takeControl")}
             </div>
             
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-              Your Wealth, Your Decisions, Your Control
+              {t("yourWealthYourDecisions")}
             </h2>
             
             <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-              Take charge of your financial legacy today. Keep your information safe, and ensure it reaches the right hands at the right time.
+              {t("takeChargeDescription")}
             </p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -41,7 +45,7 @@ export default function CTASection() {
                   size="lg" 
                   className="bg-primary text-white hover:bg-primary/90 px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
                 >
-                  Sign Up Here
+                  {t("signUpHere")}
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </AuthDialog>
@@ -51,14 +55,14 @@ export default function CTASection() {
                   variant="outline" 
                   className="w-full sm:w-auto border-primary/30 text-primary hover:bg-primary/10 px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
                 >
-                  See How It Works
+                  {t("seeHowItWorks")}
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
             </div>
             
             <div className="mt-8 text-sm text-gray-500">
-              <p>Secure Your Financial Future with Confidence</p>
+              <p>{t("secureYourFinancialFuture")}</p>
             </div>
           </div>
         </motion.div>

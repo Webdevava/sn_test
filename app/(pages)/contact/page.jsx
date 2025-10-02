@@ -1,4 +1,3 @@
-// pages/contacts.js
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,8 +8,10 @@ import {
   deleteContact, 
   getContactDetail 
 } from '@/lib/auth-api';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ContactsPage() {
+  const { t } = useLanguage(); // 👈 use translations
   const [contacts, setContacts] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -35,7 +36,7 @@ export default function ContactsPage() {
         setContacts(response.data);
       }
     } catch (err) {
-      setError('Failed to fetch contacts');
+      setError(t.failedFetch); // 👈 translation
     } finally {
       setLoading(false);
     }
@@ -55,12 +56,12 @@ export default function ContactsPage() {
 
     // Validate that only one field is filled
     if (formData.email && formData.phoneNumber) {
-      setError('Please provide either email or phone number, not both');
+      setError(t.errorBoth); // 👈 translation
       return;
     }
 
     if (!formData.email && !formData.phoneNumber) {
-      setError('Please provide either an email or phone number');
+      setError(t.errorRequired); // 👈 translation
       return;
     }
 
@@ -79,7 +80,7 @@ export default function ContactsPage() {
       await fetchContacts();
       handleClose();
     } catch (err) {
-      setError('Failed to save contact');
+      setError(t.failedSave); // 👈 translation
     } finally {
       setLoading(false);
     }
@@ -98,18 +99,18 @@ export default function ContactsPage() {
         setIsDialogOpen(true);
       }
     } catch (err) {
-      setError('Failed to load contact details');
+      setError(t.failedLoad); // 👈 translation
     }
   };
 
   const handleDelete = async (contactId) => {
-    if (confirm('Are you sure you want to delete this contact?')) {
+    if (confirm(t.confirmDelete)) { // 👈 translation
       try {
         setLoading(true);
         await deleteContact(contactId);
         await fetchContacts();
       } catch (err) {
-        setError('Failed to delete contact');
+        setError(t.failedDelete); // 👈 translation
       } finally {
         setLoading(false);
       }
@@ -126,18 +127,18 @@ export default function ContactsPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Contacts</h1>
+      <h1 className="text-2xl font-bold mb-4">{t.contacts}</h1>
       
       {/* Add Contact Button */}
       <button
         onClick={() => setIsDialogOpen(true)}
         className="bg-blue-500 text-white px-4 py-2 rounded mb-4 hover:bg-blue-600"
       >
-        Add Contact
+        {t.addContact}
       </button>
 
       {/* Contacts List */}
-      {loading && <p>Loading...</p>}
+      {loading && <p>{t.loading}</p>}
       {error && <p className="text-red-500">{error}</p>}
       <ul className="space-y-2">
         {contacts.map(contact => (
@@ -153,13 +154,13 @@ export default function ContactsPage() {
                 onClick={() => handleEdit(contact.id)}
                 className="text-blue-500 mr-2 hover:text-blue-700"
               >
-                Edit
+                {t.edit}
               </button>
               <button
                 onClick={() => handleDelete(contact.id)}
                 className="text-red-500 hover:text-red-700"
               >
-                Delete
+                {t.delete}
               </button>
             </div>
           </li>
@@ -171,12 +172,12 @@ export default function ContactsPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg w-96">
             <h2 className="text-xl font-bold mb-4">
-              {isEditMode ? 'Edit Contact' : 'Add Contact'}
+              {isEditMode ? t.editContact : t.addContact}
             </h2>
             
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="block mb-1">Email</label>
+                <label className="block mb-1">{t.email}</label>
                 <input
                   type="email"
                   name="email"
@@ -188,7 +189,7 @@ export default function ContactsPage() {
               </div>
 
               <div className="mb-4">
-                <label className="block mb-1">Phone Number</label>
+                <label className="block mb-1">{t.phone}</label>
                 <input
                   type="tel"
                   name="phoneNumber"
@@ -207,14 +208,14 @@ export default function ContactsPage() {
                   onClick={handleClose}
                   className="px-4 py-2 border rounded hover:bg-gray-100"
                 >
-                  Cancel
+                  {t.cancel}
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
                 >
-                  {loading ? 'Saving...' : (isEditMode ? 'Update' : 'Add')}
+                  {loading ? t.saving : (isEditMode ? t.update : t.add)}
                 </button>
               </div>
             </form>

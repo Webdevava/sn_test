@@ -7,25 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Eye, EyeOff, Upload, Loader2 } from "lucide-react";
-import { 
-  updateProfile, 
-  getProfileDetail, 
-  changePassword, 
-  deleteAccount 
-} from "@/lib/profile-api";
+import { updateProfile, getProfileDetail, changePassword, deleteAccount } from "@/lib/profile-api";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function GeneralSettings() {
+  const { t, language, setLanguage } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
@@ -34,13 +24,13 @@ export default function GeneralSettings() {
   const router = useRouter();
 
   const [profile, setProfile] = useState({
-    first_name: "",
-    middle_name: "",
-    last_name: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
     pan: "",
-    adhaar: "",
+    aadhaar: "",
     dob: "",
-    profile_picture: "",
+    profilePicture: "",
     password: "••••••••••",
   });
   const [initialProfile, setInitialProfile] = useState({});
@@ -48,17 +38,17 @@ export default function GeneralSettings() {
   const [emergencyContact, setEmergencyContact] = useState({
     name: "",
     relationship: "",
-    phone_number: "",
+    phoneNumber: "",
     email: "",
     address: "",
-    alternate_phone_number: "",
+    alternatePhoneNumber: "",
   });
   const [initialEmergencyContact, setInitialEmergencyContact] = useState({});
 
   const [passwordForm, setPasswordForm] = useState({
-    old_password: "",
-    new_password: "",
-    confirm_password: "",
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -78,13 +68,13 @@ export default function GeneralSettings() {
 
       if (response.data && response.data.status) {
         const profileData = {
-          first_name: response.data.data.first_name || "",
-          middle_name: response.data.data.middle_name || "",
-          last_name: response.data.data.last_name || "",
+          firstName: response.data.data.first_name || "",
+          middleName: response.data.data.middle_name || "",
+          lastName: response.data.data.last_name || "",
           pan: response.data.data.pan || "",
-          adhaar: response.data.data.adhaar || "",
+          aadhaar: response.data.data.adhaar || "",
           dob: response.data.data.dob || "",
-          profile_picture: response.data.data.profile_picture || "",
+          profilePicture: response.data.data.profile_picture || "",
         };
         setProfile((prev) => ({ ...prev, ...profileData }));
         setInitialProfile(profileData);
@@ -93,23 +83,23 @@ export default function GeneralSettings() {
           const contactData = {
             name: response.data.data.emergency_contacts[0].name || "",
             relationship: response.data.data.emergency_contacts[0].relationship || "",
-            phone_number: response.data.data.emergency_contacts[0].phone_number || "",
+            phoneNumber: response.data.data.emergency_contacts[0].phone_number || "",
             email: response.data.data.emergency_contacts[0].email || "",
             address: response.data.data.emergency_contacts[0].address || "",
-            alternate_phone_number: response.data.data.emergency_contacts[0].alternate_phone_number || "",
+            alternatePhoneNumber: response.data.data.emergency_contacts[0].alternate_phone_number || "",
           };
           setEmergencyContact(contactData);
           setInitialEmergencyContact(contactData);
         }
       } else {
-        toast.warning("Warning", {
-          description: response.data?.message || "Failed to fetch profile data",
+        toast.warning(t("warning"), {
+          description: response.data?.message || t("failedFetchProfile"),
         });
       }
     } catch (error) {
       console.error("Fetch Profile Error:", error);
-      toast.error("Error", {
-        description: "An error occurred while fetching profile data",
+      toast.error(t("error"), {
+        description: t("errorFetchingProfile"),
       });
     } finally {
       setLoading(false);
@@ -132,25 +122,25 @@ export default function GeneralSettings() {
       setLoading(true);
       const changedFields = {};
       Object.keys(profile).forEach((key) => {
-        if (key !== "profile_picture" && key !== "password" && profile[key] !== initialProfile[key]) {
+        if (key !== "profilePicture" && key !== "password" && profile[key] !== initialProfile[key]) {
           changedFields[key] = profile[key];
         }
       });
 
       if (Object.keys(changedFields).length === 0) {
-        toast.info("Info", { description: "No changes detected" });
+        toast.info(t("info"), { description: t("noChangesDetected") });
         return;
       }
 
       const response = await updateProfile(changedFields);
       if (response.status) {
-        toast.success("Success", { description: "Profile updated successfully" });
+        toast.success(t("success"), { description: t("profileUpdatedSuccessfully") });
         setInitialProfile((prev) => ({ ...prev, ...changedFields }));
       } else {
-        throw new Error(response.message || "Failed to update profile");
+        throw new Error(response.message || t("failedUpdateProfile"));
       }
     } catch (error) {
-      toast.error("Error", { description: error.message || "Failed to update profile" });
+      toast.error(t("error"), { description: error.message || t("failedUpdateProfile") });
     } finally {
       setLoading(false);
     }
@@ -168,19 +158,19 @@ export default function GeneralSettings() {
       });
 
       if (Object.keys(changedContactFields).length === 0) {
-        toast.info("Info", { description: "No changes detected in emergency contact" });
+        toast.info(t("info"), { description: t("noChangesEmergencyContact") });
         return;
       }
 
       const response = await updateProfile({ emergency_contacts: [{ ...emergencyContact }] });
       if (response.status) {
-        toast.success("Success", { description: "Emergency contact updated successfully" });
+        toast.success(t("success"), { description: t("emergencyContactUpdatedSuccessfully") });
         setInitialEmergencyContact(emergencyContact);
       } else {
-        throw new Error(response.message || "Failed to update emergency contact");
+        throw new Error(response.message || t("failedUpdateEmergencyContact"));
       }
     } catch (error) {
-      toast.error("Error", { description: error.message || "Failed to update emergency contact" });
+      toast.error(t("error"), { description: error.message || t("failedUpdateEmergencyContact") });
     } finally {
       setLoading(false);
     }
@@ -191,31 +181,31 @@ export default function GeneralSettings() {
     if (!file) return;
 
     if (!["image/jpeg", "image/png"].includes(file.type)) {
-      toast.error("Error", { description: "Only JPG, JPEG, or PNG files are allowed" });
+      toast.error(t("error"), { description: t("invalidFileType") });
       return;
     }
 
     if (file.size > 1048576) {
-      toast.error("Error", { description: "File size should not exceed 1MB" });
+      toast.error(t("error"), { description: t("fileSizeExceedsLimit") });
       return;
     }
 
     try {
       setUploadLoading(true);
       const formData = new FormData();
-      formData.append("profile_picture", file);
+      formData.append("profilePicture", file);
 
       const response = await updateProfile(formData);
       if (response.status && response.data?.profile_picture) {
-        setProfile((prev) => ({ ...prev, profile_picture: response.data.profile_picture }));
-        setInitialProfile((prev) => ({ ...prev, profile_picture: response.data.profile_picture }));
-        toast.success("Success", { description: "Profile picture updated successfully" });
+        setProfile((prev) => ({ ...prev, profilePicture: response.data.profile_picture }));
+        setInitialProfile((prev) => ({ ...prev, profilePicture: response.data.profile_picture }));
+        toast.success(t("success"), { description: t("profilePictureUpdatedSuccessfully") });
       } else {
-        throw new Error(response.message || "Failed to upload profile picture");
+        throw new Error(response.message || t("failedUploadProfilePicture"));
       }
     } catch (error) {
       console.error("Image Upload Error:", error);
-      toast.error("Error", { description: error.message || "Failed to upload image" });
+      toast.error(t("error"), { description: error.message || t("failedUploadProfilePicture") });
       await fetchProfile();
     } finally {
       setUploadLoading(false);
@@ -243,27 +233,27 @@ export default function GeneralSettings() {
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    if (passwordForm.new_password !== passwordForm.confirm_password) {
-      toast.error("Error", { description: "New passwords do not match" });
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error(t("error"), { description: t("passwordsDoNotMatch") });
       return;
     }
 
     try {
       setPasswordLoading(true);
       const response = await changePassword({
-        old_password: passwordForm.old_password,
-        new_password: passwordForm.new_password,
+        oldPassword: passwordForm.oldPassword,
+        newPassword: passwordForm.newPassword,
       });
 
       if (response.status) {
-        toast.success("Success", { description: "Password changed successfully" });
+        toast.success(t("success"), { description: t("passwordChangedSuccessfully") });
         setPasswordModalOpen(false);
-        setPasswordForm({ old_password: "", new_password: "", confirm_password: "" });
+        setPasswordForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
       } else {
-        throw new Error(response.message || "Failed to change password");
+        throw new Error(response.message || t("failedChangePassword"));
       }
     } catch (error) {
-      toast.error("Error", { description: error.message || "Failed to change password" });
+      toast.error(t("error"), { description: error.message || t("failedChangePassword") });
     } finally {
       setPasswordLoading(false);
     }
@@ -279,13 +269,13 @@ export default function GeneralSettings() {
       setLoading(true);
       const response = await deleteAccount();
       if (response.status) {
-        toast.success("Success", { description: "Your account has been deleted" });
+        toast.success(t("success"), { description: t("accountDeletedSuccessfully") });
         handleLogout();
       } else {
-        throw new Error(response.message || "Failed to delete account");
+        throw new Error(response.message || t("failedDeleteAccount"));
       }
     } catch (error) {
-      toast.error("Error", { description: error.message || "Failed to delete account" });
+      toast.error(t("error"), { description: error.message || t("failedDeleteAccount") });
     } finally {
       setLoading(false);
       setDeleteDialogOpen(false);
@@ -298,34 +288,35 @@ export default function GeneralSettings() {
     router.push("/");
   };
 
-  // Function to get initials from name
   const getInitials = () => {
-    const first = profile.first_name?.[0] || '';
-    const last = profile.last_name?.[0] || '';
+    const first = profile.firstName?.[0] || '';
+    const last = profile.lastName?.[0] || '';
     return (first + last).toUpperCase();
+  };
+
+  const handleLanguageChange = (value) => {
+    setLanguage(value);
   };
 
   return (
     <div className="container mx-auto lg:px-4 lg:py-6 max-w-5xl">
-      <h1 className="text-2xl font-bold mb-8 text-foreground">General Settings</h1>
+      <h1 className="text-2xl font-bold mb-8 text-foreground">{t("generalSettings")}</h1>
 
       {/* Profile Picture Section */}
       <div className="mb-8 bg-card rounded-lg shadow-sm p-6 transition-all">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div>
-            <h2 className="text-xl font-semibold mb-1 text-foreground">Profile Picture</h2>
+            <h2 className="text-xl font-semibold mb-1 text-foreground">{t("profilePicture")}</h2>
             <p className="text-muted-foreground text-sm">
-              Choose an image that best reflects your identity
-              <br />
-              (JPG, JPEG, or PNG only. 1MB Max)
+              {t("profilePictureDescription")}
             </p>
           </div>
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border border-border">
-              {profile.profile_picture ? (
+              {profile.profilePicture ? (
                 <img
-                  src={profile.profile_picture}
-                  alt="Profile"
+                  src={profile.profilePicture}
+                  alt={t("profilePicture")}
                   className="w-full h-full object-cover"
                   onError={(e) => (e.target.src = "/placeholder.svg?height=80&width=80")}
                 />
@@ -345,7 +336,7 @@ export default function GeneralSettings() {
               ) : (
                 <Upload className="h-4 w-4 mr-2" />
               )}
-              {uploadLoading ? "Uploading..." : "Upload"}
+              {uploadLoading ? t("uploading") : t("upload")}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -363,8 +354,8 @@ export default function GeneralSettings() {
       <form onSubmit={handleProfileUpdate} className="mb-8 bg-card rounded-lg shadow-sm p-6 transition-all">
         <div className="flex flex-col sm:flex-row justify-between mb-6 gap-4">
           <div>
-            <h2 className="text-xl font-semibold mb-1 text-foreground">Personal Information</h2>
-            <p className="text-muted-foreground text-sm">Edit your personal information</p>
+            <h2 className="text-xl font-semibold mb-1 text-foreground">{t("personalInformation")}</h2>
+            <p className="text-muted-foreground text-sm">{t("personalInformationDescription")}</p>
           </div>
           <Button 
             type="submit" 
@@ -374,49 +365,49 @@ export default function GeneralSettings() {
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
+                {t("saving")}
               </>
             ) : (
-              "Save Changes"
+              t("saveChanges")
             )}
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="first_name">First Name</Label>
+            <Label htmlFor="firstName">{t("firstName")}</Label>
             <Input
-              id="first_name"
-              name="first_name"
-              value={profile.first_name}
+              id="firstName"
+              name="firstName"
+              value={profile.firstName}
               onChange={handleInputChange}
               disabled={loading}
               className="w-full"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="middle_name">Middle Name</Label>
+            <Label htmlFor="middleName">{t("middleName")}</Label>
             <Input
-              id="middle_name"
-              name="middle_name"
-              value={profile.middle_name}
+              id="middleName"
+              name="middleName"
+              value={profile.middleName}
               onChange={handleInputChange}
               disabled={loading}
               className="w-full"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="last_name">Last Name</Label>
+            <Label htmlFor="lastName">{t("lastName")}</Label>
             <Input
-              id="last_name"
-              name="last_name"
-              value={profile.last_name}
+              id="lastName"
+              name="lastName"
+              value={profile.lastName}
               onChange={handleInputChange}
               disabled={loading}
               className="w-full"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="pan">PAN</Label>
+            <Label htmlFor="pan">{t("pan")}</Label>
             <Input
               id="pan"
               name="pan"
@@ -427,18 +418,18 @@ export default function GeneralSettings() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="adhaar">Aadhaar</Label>
+            <Label htmlFor="aadhaar">{t("aadhaar")}</Label>
             <Input
-              id="adhaar"
-              name="adhaar"
-              value={profile.adhaar}
+              id="aadhaar"
+              name="aadhaar"
+              value={profile.aadhaar}
               onChange={handleInputChange}
               disabled={loading}
               className="w-full"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="dob">Date of Birth</Label>
+            <Label htmlFor="dob">{t("dateOfBirth")}</Label>
             <Input
               id="dob"
               name="dob"
@@ -456,8 +447,8 @@ export default function GeneralSettings() {
       <form onSubmit={handleEmergencyContactUpdate} className="mb-8 bg-card rounded-lg shadow-sm p-6 transition-all">
         <div className="flex flex-col sm:flex-row justify-between mb-6 gap-4">
           <div>
-            <h2 className="text-xl font-semibold mb-1 text-foreground">Emergency Contact</h2>
-            <p className="text-muted-foreground text-sm">Edit your emergency contact details</p>
+            <h2 className="text-xl font-semibold mb-1 text-foreground">{t("emergencyContact")}</h2>
+            <p className="text-muted-foreground text-sm">{t("emergencyContactDescription")}</p>
           </div>
           <Button 
             type="submit" 
@@ -467,16 +458,16 @@ export default function GeneralSettings() {
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
+                {t("saving")}
               </>
             ) : (
-              "Save Changes"
+              t("saveChanges")
             )}
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="contact-name">Name</Label>
+            <Label htmlFor="contact-name">{t("name")}</Label>
             <Input
               id="contact-name"
               name="name"
@@ -487,7 +478,7 @@ export default function GeneralSettings() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contact-relationship">Relationship</Label>
+            <Label htmlFor="contact-relationship">{t("relationship")}</Label>
             <Input
               id="contact-relationship"
               name="relationship"
@@ -498,18 +489,18 @@ export default function GeneralSettings() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contact-phone">Phone Number</Label>
+            <Label htmlFor="contact-phone">{t("phoneNumber")}</Label>
             <Input
               id="contact-phone"
-              name="phone_number"
-              value={emergencyContact.phone_number}
+              name="phoneNumber"
+              value={emergencyContact.phoneNumber}
               onChange={handleEmergencyContactChange}
               disabled={loading}
               className="w-full"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contact-email">Email</Label>
+            <Label htmlFor="contact-email">{t("email")}</Label>
             <Input
               id="contact-email"
               name="email"
@@ -520,7 +511,7 @@ export default function GeneralSettings() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contact-address">Address</Label>
+            <Label htmlFor="contact-address">{t("address")}</Label>
             <Input
               id="contact-address"
               name="address"
@@ -531,11 +522,11 @@ export default function GeneralSettings() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contact-alt-phone">Alternate Phone</Label>
+            <Label htmlFor="contact-alt-phone">{t("alternatePhoneNumber")}</Label>
             <Input
               id="contact-alt-phone"
-              name="alternate_phone_number"
-              value={emergencyContact.alternate_phone_number}
+              name="alternatePhoneNumber"
+              value={emergencyContact.alternatePhoneNumber}
               onChange={handleEmergencyContactChange}
               disabled={loading}
               className="w-full"
@@ -544,10 +535,28 @@ export default function GeneralSettings() {
         </div>
       </form>
 
+      {/* Language Section */}
+      <div className="mb-8 bg-card rounded-lg shadow-sm p-6 transition-all">
+        <h2 className="text-xl font-semibold mb-1 text-foreground">{t("language")}</h2>
+        <p className="text-muted-foreground text-sm mb-4">{t("languageDescription")}</p>
+        <div className="w-full md:w-60">
+          <Select value={language} onValueChange={handleLanguageChange} disabled={loading}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t("selectLanguage")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">{t("english")}</SelectItem>
+              <SelectItem value="hi">{t("hindi")}</SelectItem>
+              <SelectItem value="mr">{t("marathi")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       {/* Account Management Section */}
       <div className="mb-8 bg-card rounded-lg shadow-sm p-6 transition-all">
-        <h2 className="text-xl font-semibold mb-1 text-foreground">Account Management</h2>
-        <p className="text-muted-foreground text-sm mb-4">Edit Your Password</p>
+        <h2 className="text-xl font-semibold mb-1 text-foreground">{t("accountManagement")}</h2>
+        <p className="text-muted-foreground text-sm mb-4">{t("accountManagementDescription")}</p>
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <div className="relative flex-grow">
             <Input
@@ -572,7 +581,7 @@ export default function GeneralSettings() {
             className="whitespace-nowrap w-full sm:w-auto"
             onClick={() => setPasswordModalOpen(true)}
           >
-            Change Password
+            {t("changePassword")}
           </Button>
         </div>
 
@@ -580,41 +589,39 @@ export default function GeneralSettings() {
         <Dialog open={passwordModalOpen} onOpenChange={setPasswordModalOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Change Password</DialogTitle>
-              <DialogDescription>
-                Update your password to ensure account security
-              </DialogDescription>
+              <DialogTitle>{t("changePassword")}</DialogTitle>
+              <DialogDescription>{t("changePasswordDescription")}</DialogDescription>
             </DialogHeader>
             <form onSubmit={handlePasswordChange} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="old_password">Current Password</Label>
+                <Label htmlFor="oldPassword">{t("currentPassword")}</Label>
                 <Input
-                  id="old_password"
-                  name="old_password"
+                  id="oldPassword"
+                  name="oldPassword"
                   type="password"
-                  value={passwordForm.old_password}
+                  value={passwordForm.oldPassword}
                   onChange={handlePasswordInputChange}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="new_password">New Password</Label>
+                <Label htmlFor="newPassword">{t("newPassword")}</Label>
                 <Input
-                  id="new_password"
-                  name="new_password"
+                  id="newPassword"
+                  name="newPassword"
                   type="password"
-                  value={passwordForm.new_password}
+                  value={passwordForm.newPassword}
                   onChange={handlePasswordInputChange}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirm_password">Confirm New Password</Label>
+                <Label htmlFor="confirmPassword">{t("confirmNewPassword")}</Label>
                 <Input
-                  id="confirm_password"
-                  name="confirm_password"
+                  id="confirmPassword"
+                  name="confirmPassword"
                   type="password"
-                  value={passwordForm.confirm_password}
+                  value={passwordForm.confirmPassword}
                   onChange={handlePasswordInputChange}
                   required
                 />
@@ -625,16 +632,16 @@ export default function GeneralSettings() {
                   variant="outline"
                   onClick={() => setPasswordModalOpen(false)}
                 >
-                  Cancel
+                  {t("cancel")}
                 </Button>
                 <Button type="submit" disabled={passwordLoading}>
                   {passwordLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Changing...
+                      {t("changing")}
                     </>
                   ) : (
-                    "Change Password"
+                    t("changePassword")
                   )}
                 </Button>
               </DialogFooter>
@@ -643,30 +650,10 @@ export default function GeneralSettings() {
         </Dialog>
       </div>
 
-      {/* Language Section */}
-      <div className="mb-8 bg-card rounded-lg shadow-sm p-6 transition-all">
-        <h2 className="text-xl font-semibold mb-1 text-foreground">Language</h2>
-        <p className="text-muted-foreground text-sm mb-4">Customize your language</p>
-        <div className="w-full md:w-60">
-          <Select defaultValue="english" disabled={loading}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Language" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="english">English</SelectItem>
-              <SelectItem value="spanish">Spanish</SelectItem>
-              <SelectItem value="french">French</SelectItem>
-              <SelectItem value="german">German</SelectItem>
-              <SelectItem value="hindi">Hindi</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
       {/* Theme Section */}
       <div className="mb-8 bg-card rounded-lg shadow-sm p-6 transition-all">
-        <h2 className="text-xl font-semibold mb-1 text-foreground">Theme</h2>
-        <p className="text-muted-foreground text-sm mb-4">Choose a preferred theme</p>
+        <h2 className="text-xl font-semibold mb-1 text-foreground">{t("theme")}</h2>
+        <p className="text-muted-foreground text-sm mb-4">{t("themeDescription")}</p>
         <RadioGroup 
           value={theme} 
           onValueChange={handleThemeChange} 
@@ -675,11 +662,11 @@ export default function GeneralSettings() {
         >
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="light" id="light" />
-            <Label htmlFor="light">Light</Label>
+            <Label htmlFor="light">{t("light")}</Label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="dark" id="dark" />
-            <Label htmlFor="dark">Dark</Label>
+            <Label htmlFor="dark">{t("dark")}</Label>
           </div>
         </RadioGroup>
       </div>
@@ -692,7 +679,7 @@ export default function GeneralSettings() {
           onClick={() => setDeleteDialogOpen(true)}
           className="w-full sm:w-auto"
         >
-          Delete Account
+          {t("deleteAccount")}
         </Button>
         <Button
           variant="default"
@@ -700,7 +687,7 @@ export default function GeneralSettings() {
           onClick={handleLogout}
           className="w-full sm:w-auto"
         >
-          Log Out
+          {t("logOut")}
         </Button>
       </div>
       
@@ -708,10 +695,8 @@ export default function GeneralSettings() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete Account</DialogTitle>
-            <DialogDescription>
-              This action cannot be undone. Your account and all associated data will be permanently deleted.
-            </DialogDescription>
+            <DialogTitle>{t("deleteAccount")}</DialogTitle>
+            <DialogDescription>{t("deleteAccountDescription")}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
             <Button
@@ -720,7 +705,7 @@ export default function GeneralSettings() {
               onClick={() => setDeleteDialogOpen(false)}
               className="w-full sm:w-auto"
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button 
               type="button"
@@ -732,10 +717,10 @@ export default function GeneralSettings() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t("deleting")}
                 </>
               ) : (
-                "Delete Account"
+                t("deleteAccount")
               )}
             </Button>
           </DialogFooter>

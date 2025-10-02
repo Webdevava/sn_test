@@ -10,8 +10,10 @@ import {
   Lock,
   Person,
 } from "@phosphor-icons/react/dist/ssr";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function AudienceSection() {
+  const { t } = useLanguage();
   const sectionRef = useRef(null);
 
   const sectionVariants = {
@@ -42,39 +44,33 @@ export default function AudienceSection() {
   const audienceGroups = [
     {
       icon: House,
-      title: "Families & Parents",
-      description:
-        "Ensure your loved ones don't suffer financially if something happens to you.",
+      title: t("familiesParents"),
+      description: t("ensureYourLovedOnes"),
     },
     {
       icon: Briefcase,
-      title: "Working Professionals",
-      description:
-        "Your growing wealth and assets deserve to be tracked and secured for the future.",
+      title: t("workingProfessionals"),
+      description: t("yourGrowingWealth"),
     },
     {
       icon: PiggyBank,
-      title: "Investors & Business Owners",
-      description:
-        "Keep your investments and debts organized—whether disclosed or hidden.",
+      title: t("investorsBusinessOwners"),
+      description: t("keepYourInvestments"),
     },
     {
       icon: Buildings,
-      title: "Property Owners",
-      description:
-        "Manage your real estate, rental properties, and undisclosed investments in one place.",
+      title: t("propertyOwners"),
+      description: t("manageYourRealEstate"),
     },
     {
       icon: Lock,
-      title: "Individuals with Unreported Assets",
-      description:
-        "Safeguard and control access to your confidential transactions.",
+      title: t("individualsWithUnreportedAssets"),
+      description: t("safeguardAndControlAccess"),
     },
     {
       icon: Person,
-      title: "Retirees & Senior Citizens",
-      description:
-        "Leave a well-organized legacy for your family. Because they should never have to struggle to find what matters.",
+      title: t("retireesSeniorCitizens"),
+      description: t("leaveAWellOrganizedLegacy"),
     },
   ];
 
@@ -84,11 +80,6 @@ export default function AudienceSection() {
       className="py-12 md:py-16 lg:py-20 relative overflow-hidden"
       id="audience"
     >
-      {/* Subtle Radial Background */}
-      {/* <div className="absolute inset-0 z-0">
-        <div className="w-full h-full bg-gradient-radial from-primary/5 via-background to-background" />
-      </div> */}
-
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Heading */}
         <motion.div
@@ -100,14 +91,14 @@ export default function AudienceSection() {
         >
           <div className="bg-gradient-to-r from-primary/35 via-primary/15 to-transparent w-fit px-3 py-1 rounded-md">
             <h2 className="text-sm md:text-base font-medium text-primary tracking-wide">
-              Our Audience
+              {t("ourAudience")}
             </h2>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-foreground">
-            Who Is This For?
+            {t("whoIsThisFor")}
           </h1>
-          <p className="text-base md:text-lg text-muted-foreground">
-            Smart Nominee was designed with everyone in mind. No matter your situation, we have solutions to protect what matters most to you.
+          <p className="text-base md:text-lg text-muted-foreground ">
+            {t("smartNomineeWasDesigned")}
           </p>
         </motion.div>
 

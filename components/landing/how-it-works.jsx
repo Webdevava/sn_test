@@ -2,8 +2,10 @@
 
 import { motion } from "framer-motion";
 import { useRef } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ProcessSection() {
+  const { t } = useLanguage();
   const sectionRef = useRef(null);
 
   const sectionVariants = {
@@ -21,40 +23,35 @@ export default function ProcessSection() {
   const steps = [
     {
       step: "1",
-      title: "Sign Up & Secure Your Profile",
-      description:
-        "Your data is encrypted. No one—not even us—can access it without your consent.",
+      title: t("signUpSecureYourProfile"),
+      description: t("yourDataIsEncrypted"),
     },
     {
       step: "2",
-      title: "Add & Organize Your Information",
-      description:
-        "Store all your assets, debts, transactions, and nominee details.",
+      title: t("addOrganizeYourInformation"),
+      description: t("storeAllYourAssets"),
     },
     {
       step: "3",
-      title: "Set Rules for Access & Notifications",
-      description:
-        "You control when and how your family receives this information.",
+      title: t("setRulesForAccessNotifications"),
+      description: t("youControlWhenAndHow"),
     },
     {
       step: "4",
-      title: "Smart Inactivity Tracking",
-      description:
-        "We attempt contact at least 3 times before confirming inactivity and notifying your nominee.",
+      title: t("smartInactivityTracking"),
+      description: t("weAttemptContact"),
     },
     {
       step: "5",
-      title: "Data is Shared Only When Necessary",
-      description:
-        "If we confirm something has happened, only then do we securely disclose your stored information to your nominees.",
+      title: t("dataIsSharedOnlyWhenNecessary"),
+      description: t("ifWeConfirmSomething"),
     },
   ];
 
   return (
     <section
       ref={sectionRef}
-      className=" py-12 md:py-16 lg:py-20"
+      className="py-12 md:py-16 lg:py-20"
       id="process"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -69,14 +66,14 @@ export default function ProcessSection() {
           >
             <div className="bg-gradient-to-r from-primary/35 via-primary/15 to-transparent w-fit px-3 py-1 rounded-md">
               <h2 className="text-sm md:text-base font-medium text-primary tracking-wide">
-                Our Process
+                {t("ourProcess")}
               </h2>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
-              How It Works – The Safety Process
+              {t("howItWorksTheSafetyProcess")}
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
-              We've created a secure and transparent system to protect your information while ensuring it reaches the right people at the right time.
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
+              {t("weveCreatedASecure")}
             </p>
           </motion.div>
 
@@ -91,9 +88,6 @@ export default function ProcessSection() {
                 viewport={{ once: true, amount: 0.2 }}
                 className="relative mb-8 last:mb-0"
               >
-                {/* Horizontal Line */}
-                {/* <div className="w-1 h-10 bg-primary/20 absolute left-0 top-8"></div> */}
-
                 <div className="flex items-start">
                   {/* Step Number Circle */}
                   <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center bg-primary/10 rounded-full mr-4 relative z-10">

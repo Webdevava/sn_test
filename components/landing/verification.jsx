@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef } from "react";
 import { motion } from "framer-motion";
+import { useRef } from "react";
 import {
   Bell,
   CheckCircle,
@@ -17,8 +17,10 @@ import {
 } from "@phosphor-icons/react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function NotificationsVerificationSection() {
+  const { t } = useLanguage();
   const sectionRef = useRef(null);
 
   // Simplified animations with reduced motion
@@ -58,11 +60,11 @@ export default function NotificationsVerificationSection() {
           >
             <div className="bg-gradient-to-r from-primary/35 via-primary/15 to-transparent w-fit px-3 py-1 rounded-md">
               <h2 className="text-sm md:text-base font-medium text-primary tracking-wide">
-                Verification
+                {t("verification")}
               </h2>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-foreground">
-              Notifications & Final Verification
+              {t("notificationsFinalVerification")}
             </h1>
           </motion.div>
 
@@ -80,13 +82,13 @@ export default function NotificationsVerificationSection() {
                   />
                   <div>
                     <h3 className="text-xl font-semibold text-foreground">
-                      We DO NOT Notify Nominees Immediately
+                      {t("weDoNotNotifyNomineesImmediately")}
                     </h3>
                     <p className="mt-2 text-muted-foreground">
-                      Before releasing any information, we send notifications to your preferred communication channels (Email, SMS, Calls, In-App Alerts).
+                      {t("beforeReleasingAnyInformation")}
                     </p>
                     <p className="mt-2 text-muted-foreground">
-                      We check for inactivity at least 3 times across multiple days before any disclosure.
+                      {t("weCheckForInactivity")}
                     </p>
                   </div>
                 </div>
@@ -102,10 +104,10 @@ export default function NotificationsVerificationSection() {
                   />
                   <div>
                     <h3 className="text-xl font-semibold text-foreground">
-                      Final Confirmation Step
+                      {t("finalConfirmationStep")}
                     </h3>
                     <p className="mt-2 text-muted-foreground">
-                      If no response is received, we proceed with data transfer to your nominees—but ONLY according to your predefined settings.
+                      {t("ifNoResponseIsReceived")}
                     </p>
                   </div>
                 </div>
@@ -121,10 +123,10 @@ export default function NotificationsVerificationSection() {
                   />
                   <div>
                     <h3 className="text-xl font-semibold text-foreground">
-                      Absolute Control
+                      {t("absoluteControl")}
                     </h3>
                     <p className="mt-2 text-muted-foreground">
-                      You can pause, update, or cancel nominee disclosure settings at any time before inactivity is confirmed.
+                      {t("youCanPauseUpdateOrCancel")}
                     </p>
                   </div>
                 </div>
@@ -167,7 +169,7 @@ export default function NotificationsVerificationSection() {
                       <ShieldCheck size={32} weight="duotone" className="text-primary" />
                     </div>
                     <h3 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
-                      Foolproof Verification
+                      {t("foolproofVerification")}
                     </h3>
                   </div>
 
@@ -181,18 +183,18 @@ export default function NotificationsVerificationSection() {
                     {[
                       {
                         icon: <Clock size={24} weight="duotone" />,
-                        title: "Multi-Stage Confirmation",
-                        description: "Rigorous 3-stage verification process spanning multiple communication channels."
+                        title: t("multiStageConfirmation"),
+                        description: t("rigorous3StageVerification")
                       },
                       {
                         icon: <UsersFour size={24} weight="duotone" />,
-                        title: "Nominee Network Protection",
-                        description: "Comprehensive checks to ensure your nominees' identities and intentions."
+                        title: t("nomineeNetworkProtection"),
+                        description: t("comprehensiveChecksToEnsure")
                       },
                       {
                         icon: <ShieldCheck size={24} weight="duotone" />,
-                        title: "Continuous Monitoring",
-                        description: "Ongoing verification and security checks to maintain data integrity."
+                        title: t("continuousMonitoring"),
+                        description: t("ongoingVerificationAndSecurity")
                       }
                     ].map((item, index) => (
                       <div 
@@ -213,29 +215,29 @@ export default function NotificationsVerificationSection() {
                 <div className="bg-card p-6 rounded-xl border border-border">
                   <h4 className="text-xl font-semibold text-foreground mb-6 flex items-center">
                     <CheckCircle weight="duotone" className="text-primary mr-3" size={24} />
-                    Verification Flow
+                    {t("verificationFlow")}
                   </h4>
 
                   <div className="space-y-4">
                     {[
                       { 
-                        step: "Initial Trigger", 
-                        description: "Inactivity detected",
+                        step: t("initialTrigger"), 
+                        description: t("inactivityDetected"),
                         status: "pending"
                       },
                       { 
-                        step: "Notification Wave", 
-                        description: "Multi-channel alerts",
+                        step: t("notificationWave"), 
+                        description: t("multiChannelAlerts"),
                         status: "pending"
                       },
                       { 
-                        step: "Response Window", 
-                        description: "Waiting for confirmation",
+                        step: t("responseWindow"), 
+                        description: t("waitingForConfirmation"),
                         status: "pending"
                       },
                       { 
-                        step: "Final Verification", 
-                        description: "Nominee authentication",
+                        step: t("finalVerification"), 
+                        description: t("nomineeAuthentication"),
                         status: "completed"
                       }
                     ].map((item, index) => (
@@ -258,7 +260,7 @@ export default function NotificationsVerificationSection() {
               {/* Quote */}
               <div className="mt-8 text-center">
                 <blockquote className="text-lg md:text-xl font-medium text-foreground italic opacity-80 max-w-2xl mx-auto">
-                  "Security is not a product, but a continuous process of verification and trust."
+                  {t("securityIsNotAProduct")}
                 </blockquote>
               </div>
             </div>

@@ -3,8 +3,10 @@
 import { motion } from "framer-motion";
 import { useRef } from "react";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function AboutSection() {
+  const { t } = useLanguage();
   const sectionRef = useRef(null);
 
   const sectionVariants = {
@@ -39,43 +41,43 @@ export default function AboutSection() {
           >
             <div className="bg-gradient-to-r from-primary/35 via-primary/15 to-transparent w-fit px-3 py-1 rounded-md">
               <h2 className="text-sm md:text-base font-medium text-primary tracking-wide">
-                About Us
+                {t("aboutUs")}
               </h2>
             </div>
 
             <div className="space-y-4 md:space-y-6">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
-                Why We Exist
+                {t("whyWeExist")}
               </h1>
               <div className="space-y-3">
                 <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-prose">
-                  Life is unpredictable, but your legacy shouldn't be. We created this platform to ensure that your personal, financial, and nominee details are always accessible, safeguarded, and shared with the people who matter most only when it is truly needed.
+                  {t("lifeIsUnpredictable")}
                 </p>
               </div>
             </div>
 
             <div className="space-y-4 md:space-y-6">
               <h3 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-foreground">
-                What Sets Us Apart?
+                {t("whatSetsUsApart")}
               </h3>
               <ul className="space-y-3 md:space-y-4 text-base md:text-lg text-muted-foreground list-disc pl-5">
                 <li>
                   <span className="font-semibold text-foreground">
-                    We Don’t Just Store Data:{" "}
+                    {t("weDontJustStoreData")}{" "}
                   </span>
-                  We Protect It Until It’s Needed.
+                  {t("weDonNotJustStoreDataDescription")}
                 </li>
                 <li>
                   <span className="font-semibold text-foreground">
-                    We Verify Before We Share:{" "}
+                    {t("weVerifyBeforeWeShare")}{" "}
                   </span>
-                  No Premature Disclosure.
+                  {t("weVerifyBeforeWeShareDescription")}
                 </li>
                 <li>
                   <span className="font-semibold text-foreground">
-                    Your Privacy Is Our Priority:{" "}
+                    {t("yourPrivacyIsOurPriority")}{" "}
                   </span>
-                  Hidden Transactions Stay Hidden Until You Decide Otherwise.
+                  {t("yourPrivacyIsOurPriorityDescription")}
                 </li>
               </ul>
             </div>
@@ -91,7 +93,7 @@ export default function AboutSection() {
           >
             <Image
               src="/images/about.png"
-              alt="Uttaradhikari Hero"
+              alt={t("aboutUs")}
               fill
               className="object-contain"
               priority

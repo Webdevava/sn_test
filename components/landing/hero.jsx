@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import AuthDialog from "../dialogs/auth/auth-dialog";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Hero() {
+  const { t } = useLanguage();
+
   const fadeInUp = {
     initial: { opacity: 0, y: 30 },
     animate: {
@@ -28,7 +31,7 @@ export default function Hero() {
     e.preventDefault();
     const featuresSection = document.getElementById('features');
     if (featuresSection) {
-      const navbarHeight = 80; // Adjust based on your navbar height
+      const navbarHeight = 80;
       const targetPosition = 
         featuresSection.getBoundingClientRect().top + 
         window.pageYOffset - 
@@ -48,8 +51,6 @@ export default function Hero() {
       
       {/* Prominent decorative elements */}
       <div className="absolute top-0 left-0 w-full h-full z-0">
-        
-        {/* Wave pattern */}
         <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-background to-transparent z-10" />
         <div className="absolute bottom-0 left-0 w-full">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full h-auto opacity-20">
@@ -71,11 +72,11 @@ export default function Hero() {
             className="space-y-6 md:space-y-8 text-center lg:text-left max-w-lg mx-auto lg:max-w-none lg:mx-0"
           >
             <h1 className="text-3xl sm:text-4xl md:text-4xl lg:text-6xl font-bold leading-tight text-foreground">
-              <span className="block text-white">Your Life. Your Legacy.</span>
-              <span className="block text-xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold">Protected & Shared Only When It Matters.</span>
+              <span className="block text-white">{t("yourLifeYourLegacy")}</span>
+              <span className="block text-xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold">{t("protectedSharedWhenMatters")}</span>
             </h1>
             <p className="text-base sm:text-lg md:text-lg text-foreground">
-            Your hard-earned assets, your hidden investments, and your responsibilities should never be lost or forgotten. Store them securely and ensure they reach your loved ones at the right time, in the right way.
+              {t("yourHardEarnedAssets")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <AuthDialog type="signup">
@@ -83,7 +84,7 @@ export default function Hero() {
                   size="lg"
                   className="bg-blue-700 text-white hover:bg-primary/90 px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
                 >
-                  Get Started Today
+                  {t("getStartedToday")}
                 </Button>
               </AuthDialog>
               <Button
@@ -92,7 +93,7 @@ export default function Hero() {
                 onClick={handleExploreFeatures}
                 className="border-primary/20 text-primary hover:bg-primary/10 px-6 py-3 rounded-lg font-medium transition-all"
               >
-                Explore Features
+                {t("exploreFeatures")}
               </Button>
             </div>
             <motion.div
@@ -100,15 +101,15 @@ export default function Hero() {
               className="grid grid-cols-3 gap-4 pt-6 border-t border-primary/10"
             >
               {[
-                { value: "12M+", text: "Assets Secured" },
-                { value: "15K+", text: "Families Protected" },
-                { value: "99.9%", text: "Uptime Guarantee" },
+                { value: "12M+", text: t("assetsSecured") },
+                { value: "15K+", text: t("familiesProtected") },
+                { value: "99.9%", text: t("uptimeGuarantee") },
               ].map((metric, index) => (
                 <div key={index} className="flex flex-col items-center lg:items-start">
                   <p className="text-xl sm:text-2xl md:text-3xl font-bold text-card">
                     {metric.value}
                   </p>
-                  <p className="text-xs sm:text-sm ">{metric.text}</p>
+                  <p className="text-xs sm:text-sm">{metric.text}</p>
                 </div>
               ))}
             </motion.div>
@@ -119,7 +120,6 @@ export default function Hero() {
         </motion.div>
       </div>
 
-      {/* Image Container - Pinned to Bottom */}
       <motion.div
         variants={fadeInUp}
         initial="initial"
@@ -130,7 +130,7 @@ export default function Hero() {
           <div className="relative w-full max-w-md mx-auto lg:max-w-2xl lg:absolute lg:bottom-0 lg:right-0">
             <Image
               src="/images/hero.png"
-              alt="Digital legacy protection"
+              alt={t("yourLifeYourLegacy")}
               width={600}
               height={600}
               className="w-full h-auto object-contain object-bottom"

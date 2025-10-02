@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from 'react';
 import { 
   CartesianGrid, 
@@ -19,24 +20,22 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { getInsuranceOverview } from "@/lib/dashboard-api";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Custom Active Dot component to draw a line from X-axis to the dot
 const CustomActiveDot = (props) => {
   const { cx, cy, chartHeight } = props;
-  // Calculate the Y position of the X-axis (bottom of the chart)
-  const xAxisY = chartHeight - 30; // Adjust based on margin.bottom (20) + tick margin
+  const xAxisY = chartHeight - 30;
   return (
     <g>
-      {/* Vertical line from X-axis to dot */}
       <line
         x1={cx}
-        y1={xAxisY} // Start at X-axis level
+        y1={xAxisY}
         x2={cx}
-        y2={cy} // End at dot
-        stroke="#3B82F6" // Blue line
+        y2={cy}
+        stroke="#3B82F6"
         strokeWidth={2}
       />
-      {/* The active dot itself */}
       <circle
         cx={cx}
         cy={cy}
@@ -50,21 +49,26 @@ const CustomActiveDot = (props) => {
 };
 
 export default function InsuranceChart() {
+  const { t } = useLanguage();
   const [chartData, setChartData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Chart configuration with labels and colors
+  // Chart configuration with translated labels
   const chartConfig = {
     coverage: {
-      label: "Coverage",
-      color: "#3B82F6", // Blue
+      label: t("coverage"),
+      color: "#3B82F6",
     },
+    lifeInsurance: { label: t("lifeInsurance") },
+    healthInsurance: { label: t("healthInsurance") },
+    vehicleInsurance: { label: t("vehicleInsurance") },
+    propertyInsurance: { label: t("propertyInsurance") },
+    travelInsurance: { label: t("travelInsurance") },
   };
 
-  // Custom function to format coverage amount (in lakhs)
   const formatToLakhs = (value) => {
-    return `${(value / 100000).toFixed(1)}L`; // Convert to lakhs
+    return `${(value / 100000).toFixed(1)}L`;
   };
 
   useEffect(() => {
@@ -77,57 +81,57 @@ export default function InsuranceChart() {
           const data = response.data;
           const formattedData = [
             { 
-              insuranceType: "Life Ins", 
+              insuranceType: "lifeInsurance", 
               coverage: data.life_insurance?.sum_assured || 0,
-              count: data.life_insurance?.count || 0
+              count: data.life_insurance?.count || 0,
             },
             { 
-              insuranceType: "Health Ins", 
+              insuranceType: "healthInsurance", 
               coverage: data.health_insurance?.sum_assured || 0,
-              count: data.health_insurance?.count || 0
+              count: data.health_insurance?.count || 0,
             },
             { 
-              insuranceType: "Vehicle Ins", 
+              insuranceType: "vehicleInsurance", 
               coverage: data.vehicle_insurance?.sum_assured || 0,
-              count: data.vehicle_insurance?.count || 0
+              count: data.vehicle_insurance?.count || 0,
             },
             { 
-              insuranceType: "Property Ins", 
+              insuranceType: "propertyInsurance", 
               coverage: data.property_insurance?.sum_assured || 0,
-              count: data.property_insurance?.count || 0
+              count: data.property_insurance?.count || 0,
             },
             { 
-              insuranceType: "Travel Ins", 
+              insuranceType: "travelInsurance", 
               coverage: data.travel_insurance?.sum_assured || 0,
-              count: data.travel_insurance?.count || 0
+              count: data.travel_insurance?.count || 0,
             },
           ];
           
           setChartData(formattedData);
         } else {
-          throw new Error("Failed to fetch insurance overview");
+          throw new Error(t("failedLoadInsurance"));
         }
       } catch (err) {
         console.error("Error fetching insurance data:", err);
-        setError(err);
+        setError(t("failedLoadInsurance"));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchInsuranceData();
-  }, []);
+  }, [t]);
 
   if (isLoading) {
     return (
       <Card className="rounded-lg shadow-sm w-full mx-auto">
         <CardHeader className="border-b p-4">
           <CardTitle className="text-lg sm:text-xl font-bold">
-            Insurance Details Overview
+            {t("insuranceOverview")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 text-center">
-          Loading insurance data...
+          {t("loadingInsurance")}
         </CardContent>
       </Card>
     );
@@ -138,11 +142,11 @@ export default function InsuranceChart() {
       <Card className="rounded-lg shadow-sm w-full mx-auto">
         <CardHeader className="border-b p-4">
           <CardTitle className="text-lg sm:text-xl font-bold">
-            Insurance Details Overview
+            {t("insuranceOverview")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 text-center text-red-500">
-          Failed to load insurance data. Please try again later.
+          {error}
         </CardContent>
       </Card>
     );
@@ -152,7 +156,7 @@ export default function InsuranceChart() {
     <Card className="rounded-lg shadow-sm w-full mx-auto">
       <CardHeader className="border-b p-4">
         <CardTitle className="text-lg sm:text-xl font-bold">
-          Insurance Details Overview
+          {t("insuranceOverview")}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-2 sm:p-4">
@@ -167,7 +171,7 @@ export default function InsuranceChart() {
               left: -10,
               top: 20,
               right: 20,
-              bottom: 20
+              bottom: 20,
             }}
           >
             <CartesianGrid
@@ -175,15 +179,14 @@ export default function InsuranceChart() {
               strokeDasharray="3 3"
               className="opacity-50"
             />
-            {/* X-axis with "Insurance Types" label */}
             <XAxis
               dataKey="insuranceType"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               className="text-xs sm:text-sm"
+              tickFormatter={(value) => chartConfig[value].label}
             />
-            {/* Y-axis with "Total Coverage Amount" label */}
             <YAxis
               dataKey="coverage"
               tickLine={false}
@@ -193,7 +196,7 @@ export default function InsuranceChart() {
               className="text-xs sm:text-sm"
             />
             <ChartTooltip
-              cursor={false} // Disable default cursor line
+              cursor={false}
               content={
                 <ChartTooltipContent 
                   hideLabel 
@@ -201,7 +204,7 @@ export default function InsuranceChart() {
                     const dataPoint = chartData.find(d => d[name] === value);
                     return [
                       `₹${formatToLakhs(value)}`,
-                      `Count: ${dataPoint?.count || 0}`
+                      `${t("count")}: ${dataPoint?.count || 0}`,
                     ];
                   }}
                 />

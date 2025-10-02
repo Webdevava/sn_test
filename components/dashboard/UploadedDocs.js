@@ -1,19 +1,24 @@
+"use client";
+
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileDown, Eye, Download } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 const DocumentItem = ({ title, numberLabel, number, docName }) => {
+  const { t } = useLanguage();
+
   return (
     <div className='bg-muted p-3 sm:p-4 rounded-lg'>
-      <h3 className="text-base sm:text-lg font-semibold mb-2">{title}</h3>
+      <h3 className="text-base sm:text-lg font-semibold mb-2">{t(title)}</h3>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 p-3 rounded-md">
         <div className="w-full sm:w-auto">
-          <p className="text-xs sm:text-sm text-muted-foreground mb-1">{numberLabel}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t(numberLabel)}</p>
           <p className="text-xs sm:text-sm">{number}</p>
         </div>
         <div className="w-full sm:w-auto mt-2 sm:mt-0">
-          <p className="text-xs sm:text-sm text-muted-foreground mb-1">Document</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t("document")}</p>
           <div className="flex items-center">
             <FileDown className='text-red-800 h-4 w-4' fill='#EF4343' />
             <span className="ml-2 text-xs sm:text-sm font-semibold">{docName}</span>
@@ -32,39 +37,41 @@ const DocumentItem = ({ title, numberLabel, number, docName }) => {
   );
 };
 
-const UploadedDocs = () => {
+export default function UploadedDocs() {
+  const { t } = useLanguage();
+
   const documents = [
     {
-      title: "Aadhaar Card",
-      numberLabel: "Aadhaar Number",
+      title: "aadhaarCard",
+      numberLabel: "aadhaarNumber",
       number: "1234 5678 9012",
-      docName: "Aadhaar.pdf"
+      docName: "Aadhaar.pdf",
     },
     {
-      title: "PAN Card",
-      numberLabel: "PAN Number",
+      title: "panCard",
+      numberLabel: "panNumber",
       number: "ABCDE1234F",
-      docName: "PAN.pdf"
+      docName: "PAN.pdf",
     },
     {
-      title: "Passport",
-      numberLabel: "Passport Number",
+      title: "passport",
+      numberLabel: "passportNumber",
       number: "X1234567",
-      docName: "Passport.pdf"
+      docName: "Passport.pdf",
     },
     {
-      title: "Passbook",
-      numberLabel: "Account Number",
+      title: "passbook",
+      numberLabel: "accountNumber",
       number: "9876543210",
-      docName: "Passbook.pdf"
-    }
+      docName: "Passbook.pdf",
+    },
   ];
 
   return (
     <Card className="w-full mx-auto shadow-sm">
       <CardHeader className="border-b p-4">
         <CardTitle className="text-lg sm:text-xl font-bold">
-          Uploaded Documents
+          {t("uploadedDocuments")}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-2 sm:p-4 max-h-[380px] sm:max-h-[430px] overflow-y-auto">
@@ -82,6 +89,4 @@ const UploadedDocs = () => {
       </CardContent>
     </Card>
   );
-};
-
-export default UploadedDocs;
+}

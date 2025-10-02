@@ -16,31 +16,41 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/context/LanguageContext"; // Import useLanguage hook
 
 const TopBar = () => {
-//   const { theme, setTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage(); // Use LanguageContext
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [notifications, setNotifications] = React.useState(3);
+  const [theme, setTheme] = React.useState("light"); // Theme state
+
+  // Load theme from localStorage on mount
+  React.useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+    document.body.classList.toggle("dark", savedTheme === "dark");
+  }, []);
+
+  // Toggle theme and update localStorage
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.body.classList.toggle("dark", newTheme === "dark");
+  };
 
   const navLinks = [
-    { name: "Dashboard", href: "/dashboard" },
-    { name: "Personal Details", href: "/personal-details" },
-    { name: "Settings", href: "/settings" },
+    { name: t("dashboard"), href: "/dashboard" },
+    { name: t("personalDetails"), href: "/personal-details" },
+    { name: t("settings"), href: "/settings" },
   ];
 
   const languages = [
-    { name: "English", code: "en" },
-    { name: "हिन्दी", code: "hi" },
-    { name: "मराठी", code: "mr" },
-    { name: "ગુજરાતી", code: "gu" },
+    { name: t("english"), code: "en" },
+    { name: t("hindi"), code: "hi" },
+    { name: t("marathi"), code: "mr" },
   ];
 
   return (
@@ -49,7 +59,7 @@ const TopBar = () => {
         {/* Mobile menu trigger */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild className="md:hidden mr-2">
-            <Button variant="ghost" size="icon" aria-label="Menu">
+            <Button variant="ghost" size="icon" aria-label={t("menu")}>
               {mobileOpen ? (
                 <X weight="bold" className="h-5 w-5" />
               ) : (
@@ -110,81 +120,56 @@ const TopBar = () => {
         {/* Right side items */}
         <div className="flex items-center gap-2 sm:gap-4">
           {/* Language toggle */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" aria-label="Change language">
-                      <GlobeSimple weight="fill" className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {languages.map((lang) => (
-                      <DropdownMenuItem key={lang.code}>
-                        {lang.name}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TooltipTrigger>
-              <TooltipContent>Language</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label={t("changeLanguage")}>
+                <GlobeSimple weight="fill" className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {languages.map((lang) => (
+                <DropdownMenuItem
+                  key={lang.code}
+                  onClick={() => setLanguage(lang.code)}
+                >
+                  {lang.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Theme toggle */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center">
-                  <Switch
-                    // checked={theme === "dark"}
-                    // onCheckedChange={() => setTheme(theme === "dark" ? "light" : "dark")}
-                    aria-label="Toggle theme"
-                  />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>{"Dark mode"}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className="flex items-center">
+            <Switch
+              checked={theme === "dark"}
+              onCheckedChange={toggleTheme}
+              aria-label={t("toggleTheme")}
+            />
+          </div>
 
           {/* Notifications */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
-                  <Bell weight="fill" className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
-                  {notifications > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary text-primary-foreground">
-                      {notifications}
-                    </Badge>
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Notifications</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          {/* <Button variant="ghost" size="icon" aria-label={t("notifications")} className="relative">
+            <Bell weight="fill" className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+            {notifications > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary text-primary-foreground">
+                {notifications}
+              </Badge>
+            )}
+          </Button> */}
 
           {/* Profile */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="rounded-full border-primary/20 hover:bg-primary/10">
-                      <User weight="fill" className="h-5 w-5 text-primary" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Account</DropdownMenuItem>
-                    <DropdownMenuItem>Log out</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TooltipTrigger>
-              <TooltipContent>Profile</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          {/* <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="rounded-full border-primary/20 hover:bg-primary/10">
+                <User weight="fill" className="h-5 w-5 text-primary" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>{t("profile")}</DropdownMenuItem>
+              <DropdownMenuItem>{t("account")}</DropdownMenuItem>
+              <DropdownMenuItem>{t("logout")}</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu> */}
         </div>
       </div>
     </header>

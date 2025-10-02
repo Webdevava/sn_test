@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 export const metadata: Metadata = {
   title: "Uttaradhikari",
@@ -16,7 +17,9 @@ export default function RootLayout({
       <body
         className={` antialiased`}
       >
-        {children}
+  <LanguageProvider>
+    {children}
+  </LanguageProvider>
       </body>
     </html>
   );

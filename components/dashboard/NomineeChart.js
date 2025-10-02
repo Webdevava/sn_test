@@ -1,6 +1,5 @@
 "use client";
 
-// import { TrendingUp } from "lucide-react";
 import { Pie, PieChart } from "recharts";
 import {
   Card,
@@ -13,6 +12,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Define the chart data for the nominees
 const chartData = [
@@ -28,29 +28,31 @@ const chartConfig = {
     label: "Percentage",
   },
   father: {
-    label: "Father",
+    label: "father",
     color: "#10B981", // Green
   },
   mother: {
-    label: "Mother",
+    label: "mother",
     color: "#F59E0B", // Yellow
   },
   brother: {
-    label: "Brother",
+    label: "brother",
     color: "#F97316", // Orange
   },
   sister: {
-    label: "Sister",
+    label: "sister",
     color: "#3B82F6", // Blue
   },
 };
 
 export default function NomineeChart() {
+  const { t } = useLanguage();
+
   return (
     <Card className="flex flex-col rounded-lg shadow-sm border h-full">
       <CardHeader className="border-b flex items-center flex-row justify-between p-3 h-16">
         <CardTitle className="text-lg sm:text-xl font-bold">
-          Nominee Overview
+          {t("nomineeOverview")}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 pb-0">
@@ -67,9 +69,9 @@ export default function NomineeChart() {
               data={chartData}
               dataKey="percentage"
               nameKey="nominee"
-              innerRadius={90}  // Reduced for smaller screens
-              outerRadius={140}  // Reduced for smaller screens
-              className="sm:[&_circle]:inner-r-[90] sm:[&_circle]:outer-r-[140] " // Responsive radii
+              innerRadius={90}
+              outerRadius={140}
+              className="sm:[&_circle]:inner-r-[90] sm:[&_circle]:outer-r-[140]"
             />
             <text
               x="50%"
@@ -87,7 +89,7 @@ export default function NomineeChart() {
               dominantBaseline="middle"
               className="text-xs sm:text-xs"
             >
-              Total Nominee
+              {t("totalNominee")}
             </text>
           </PieChart>
         </ChartContainer>
@@ -103,7 +105,7 @@ export default function NomineeChart() {
                 style={{ backgroundColor: chartConfig[item.nominee].color }}
               ></div>
               <span className="text-xs sm:text-sm font-semibold mr-1 truncate">
-                {chartConfig[item.nominee].label} {item.percentage}%
+                {t(chartConfig[item.nominee].label)} {item.percentage}%
               </span>
               <svg
                 className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0"

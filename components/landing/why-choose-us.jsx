@@ -10,8 +10,10 @@ import {
   UserCircle,
   Heart,
 } from "@phosphor-icons/react/dist/ssr";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function WhyChooseUsSection() {
+  const { t } = useLanguage();
   const sectionRef = useRef(null);
 
   const sectionVariants = {
@@ -42,39 +44,33 @@ export default function WhyChooseUsSection() {
   const reasons = [
     {
       icon: ShieldCheck,
-      title: "Unmatched Security",
-      description:
-        "With AES-256 encryption and triple verification, your sensitive data is protected like a bank vault—never shared without your consent.",
+      title: t("unmatchedSecurity"),
+      description: t("withAes256Encryption"),
     },
     {
       icon: Lock,
-      title: "Privacy You Control",
-      description:
-        "Hide transactions or assets until the right time. You decide what’s revealed, when, and to whom—even after you're gone.",
+      title: t("privacyYouControl"),
+      description: t("hideTransactionsOrAssets"),
     },
     {
       icon: Gear,
-      title: "Total Flexibility",
-      description:
-        "Pause, update, or cancel nominee settings anytime. Tailor your legacy plan to fit your life, no matter your situation.",
+      title: t("totalFlexibility"),
+      description: t("pauseUpdateOrCancel"),
     },
     {
       icon: Bell,
-      title: "Thoughtful Verification",
-      description:
-        "We check inactivity multiple times via email, SMS, calls, and alerts before any disclosure, ensuring accuracy and peace of mind.",
+      title: t("thoughtfulVerification"),
+      description: t("weCheckInactivityMultiple"),
     },
     {
       icon: UserCircle,
-      title: "Built for Everyone",
-      description:
-        "From families to retirees, investors to property owners—our platform serves all, safeguarding what matters most to you.",
+      title: t("builtForEveryone"),
+      description: t("fromFamiliesToRetirees"),
     },
     {
       icon: Heart,
-      title: "Legacy with Love",
-      description:
-        "Real stories prove it: we help your loved ones avoid financial struggles, leaving a legacy that’s organized and secure.",
+      title: t("legacyWithLove"),
+      description: t("realStoriesProveIt"),
     },
   ];
 
@@ -84,9 +80,6 @@ export default function WhyChooseUsSection() {
       className="py-12 md:py-16 lg:py-20 relative overflow-hidden"
       id="why-choose-us"
     >
-      {/* Subtle Background Gradient */}
-      {/* <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-background z-0" /> */}
-
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Heading */}
         <motion.div
@@ -98,14 +91,14 @@ export default function WhyChooseUsSection() {
         >
           <div className="bg-gradient-to-r from-primary/35 via-primary/15 to-transparent w-fit px-3 py-1 rounded-md">
             <h2 className="text-sm md:text-base font-medium text-primary tracking-wide">
-              Why Choose Us
+              {t("whyChooseUs")}
             </h2>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-foreground">
-            Why We Stand Out
+            {t("whyWeStandOut")}
           </h1>
           <p className="text-base md:text-lg text-muted-foreground ">
-            We’re more than a tool—we’re your partner in securing your legacy with unmatched care and control.
+            {t("weAreMoreThanATool")}
           </p>
         </motion.div>
 
