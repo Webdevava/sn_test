@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { MenuIcon, X } from "lucide-react";
+import { MenuIcon, X, Globe } from "lucide-react";
 import AuthDialog from "../dialogs/auth/auth-dialog";
 import { useLanguage } from "@/context/LanguageContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Navbar() {
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const [scrollY, setScrollY] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -25,12 +26,9 @@ export default function Navbar() {
     e.preventDefault();
     const targetElement = document.getElementById(targetId);
     if (targetElement) {
-      // Ensure mobile menu closes when link is clicked
       setMobileMenuOpen(false);
-      
-      // Use a small timeout to ensure menu closes before scrolling
       setTimeout(() => {
-        const navbarHeight = 80; // Adjust based on your navbar height
+        const navbarHeight = 80;
         const targetPosition =
           targetElement.getBoundingClientRect().top +
           window.pageYOffset -
@@ -40,7 +38,7 @@ export default function Navbar() {
           top: targetPosition,
           behavior: "smooth",
         });
-      }, 300); // Small delay to allow menu to close
+      }, 300);
     }
   };
 
@@ -109,11 +107,7 @@ export default function Navbar() {
                 { name: "home", href: "#home", id: "home" },
                 { name: "aboutUs", href: "#about-us", id: "about-us" },
                 { name: "keyFeatures", href: "#features", id: "features" },
-                {
-                  name: "whyChooseUs",
-                  href: "#why-choose-us",
-                  id: "why-choose-us",
-                },
+                { name: "whyChooseUs", href: "#why-choose-us", id: "why-choose-us" },
                 { name: "pricing", href: "#pricing", id: "pricing" },
                 { name: "faq", href: "#faq", id: "faq" },
               ].map((item) => (
@@ -123,7 +117,7 @@ export default function Navbar() {
                   onClick={(e) => handleSmoothScroll(e, item.id)}
                   className={`${
                     scrollY > 20
-                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap "
+                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap"
                       : "text-white font-medium hover:text-foreground text-sm lg:text-sm cursor-pointer text-nowrap"
                   }`}
                 >
@@ -133,13 +127,34 @@ export default function Navbar() {
             </nav>
 
             <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
+              {/* Language Selector in Navbar */}
+              <div className="flex items-center space-x-2">
+                <Globe className={`h-4 w-4 flex-shrink-0 ${
+                  scrollY > 20 ? "text-foreground" : "text-white"
+                }`} />
+                <Select value={language} onValueChange={setLanguage}>
+                  <SelectTrigger className={`w-fit h-9 text-sm border-none bg-transparent hover:bg-transparent focus:bg-transparent focus:ring-0 focus:ring-offset-0 p-0 ${
+                    scrollY > 20 
+                      ? "text-foreground" 
+                      : "text-white"
+                  }`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="border-gray-700 bg-white text-foreground w-fit">
+                    <SelectItem value="en">en</SelectItem>
+                    <SelectItem value="hi">hi</SelectItem>
+                    <SelectItem value="mr">mr</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <AuthDialog type="login">
                 <Button
                   variant="ghost"
                   size="sm"
                   className={`${
                     scrollY > 20
-                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap "
+                      ? "text-foreground font-medium hover:text-primary text-sm lg:text-sm cursor-pointer text-nowrap"
                       : "text-white font-medium hover:text-foreground text-sm lg:text-sm cursor-pointer text-nowrap"
                   }`}
                 >
@@ -179,14 +194,26 @@ export default function Navbar() {
 
         <motion.div
           initial={{ height: 0, opacity: 0 }}
-          animate={{
-            height: mobileMenuOpen ? "auto" : 0,
-            opacity: mobileMenuOpen ? 1 : 0,
-          }}
+          animate={{ height: mobileMenuOpen ? "auto" : 0, opacity: mobileMenuOpen ? 1 : 0 }}
           transition={{ duration: 0.3 }}
           className="md:hidden overflow-hidden bg-white border-t border-slate-100"
         >
-          <div className="container mx-auto px-4 pt-2 pb-4 space-y-1">
+          <div className="container mx-auto px-4 pt-2 pb-4 space-y-4">
+            {/* Language Selector in Mobile Menu */}
+            <div className="flex items-center space-x-2 px-2 py-2">
+              <Globe className="h-4 w-4 text-foreground flex-shrink-0" />
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger className="w-fit h-9 text-sm border-gray-300 bg-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="border-gray-300 bg-white w-fit">
+                  <SelectItem value="en">en</SelectItem>
+                  <SelectItem value="hi">hi</SelectItem>
+                  <SelectItem value="mr">mr</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {[
               { name: "home", id: "home" },
               { name: "aboutUs", id: "about-us" },
