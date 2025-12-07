@@ -2,46 +2,51 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { toast, Toaster } from "sonner";
+import { Toaster } from "sonner";
 import AddVehicleDialog from "@/components/dialogs/vehicle/add-vehicle";
+import VehicleCard from "@/components/cards/vehicle-card";
+import DocumentDownload from "@/components/document-download"; // NEW
 import { Car } from "@phosphor-icons/react";
 import { listVehicleInsurances } from "@/lib/vehicle-insurance-api";
-import VehicleCard from "@/components/cards/vehicle-card";
 
 const VehicleInsurancePage = () => {
   const [insurances, setInsurances] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
 
   const fetchInsurances = async () => {
     try {
       setLoading(true);
       const response = await listVehicleInsurances();
-      if (response.status && response.data) {
+
+      // Always set data — even if empty
+      if (response?.data) {
         setInsurances(response.data);
+      } else {
+        setInsurances([]);
       }
     } catch (err) {
-      setError("Failed to fetch vehicle insurances");
-      toast.error("Failed to fetch vehicle insurances");
+      console.error("Error fetching vehicle insurances:", err);
+      setInsurances([]); // Silent fail
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSuccess = () => {
-    fetchInsurances();
+  const handleDelete = (id) => {
+    setInsurances(prev => prev.filter(ins => ins.id !== id));
+    toast.success("Vehicle insurance deleted");
   };
 
   useEffect(() => {
     fetchInsurances();
   }, []);
 
-  if (loading && !insurances.length) {
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-[60vh] animate-pulse">
-        <Car size={48} className="mx-auto mb-4 text-gray-400" />
-        <p className="text-gray-500 text-sm sm:text-base">Loading vehicle insurances...</p>
+      <div className="flex flex-col justify-center items-center h-[60vh] animate-pulse">
+        <Car size={48} className="mb-4 text-gray-400" />
+        <p className="text-gray-500">Loading vehicle insurances...</p>
       </div>
     );
   }
@@ -49,53 +54,50 @@ const VehicleInsurancePage = () => {
   return (
     <div className="container mx-auto py-6 px-4 sm:py-12 sm:px-6 lg:px-8 relative">
       <Toaster richColors />
+
+      {/* Header with Download Button */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl sm:text-2xl font-bold">
-            Vehicle Insurances ({insurances.length})
-          </h1>
-        </div>
-        <div className="hidden sm:block">
-          <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
-            <Car size={20} />
-            Add Insurance
-          </Button>
+        <h1 className="text-xl sm:text-2xl font-bold">
+          Vehicle Insurances ({insurances.length})
+        </h1>
+
+        <div className="flex gap-3 items-center">
+          {/* Download List Button */}
+          {insurances.length > 0 && (
+            <DocumentDownload 
+              data={insurances} 
+              title="Vehicle Insurances" 
+              buttonText="Download List"
+            />
+          )}
+
+          {/* Add Button - Desktop */}
+          <div className="hidden sm:block">
+            <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
+              <Car size={20} />
+              Add Insurance
+            </Button>
+          </div>
         </div>
       </div>
 
+      {/* Add Dialog */}
       <AddVehicleDialog
         open={openAddDialog}
         onOpenChange={setOpenAddDialog}
-        onSuccess={handleSuccess}
+        onSuccess={fetchInsurances}
       />
 
-      {error ? (
-        <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
-          <Car size={36} className="mb-4 text-red-400 sm:size-48" />
-          <p className="text-red-500 text-base sm:text-lg">{error}</p>
-          <p className="text-gray-400 mt-2 text-sm sm:text-base">
-            Something went wrong. Try adding an insurance or refresh the page.
-          </p>
-          <div className="mt-4">
-            <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
-              <Car size={20} />
-              Add Insurance
-            </Button>
-          </div>
-        </div>
-      ) : insurances.length === 0 ? (
-        <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
-          <Car size={36} className="mb-4 text-gray-400 sm:size-48" />
-          <p className="text-gray-500 text-base sm:text-lg">No vehicle insurances found</p>
-          <p className="text-gray-400 mt-2 text-sm sm:text-base">
-            Click below to add your first vehicle insurance
-          </p>
-          <div className="mt-4">
-            <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
-              <Car size={20} />
-              Add Insurance
-            </Button>
-          </div>
+      {/* Empty State */}
+      {insurances.length === 0 ? (
+        <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-6">
+          <Car size={80} className="mb-4 text-gray-400" />
+          <p className="text-lg text-gray-500">No vehicle insurances found</p>
+          <p className="text-gray-400 mt-2">Click below to add your first policy</p>
+          <Button onClick={() => setOpenAddDialog(true)} className="mt-6 gap-2">
+            <Car size={20} />
+            Add Insurance
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:gap-6 pb-16 sm:pb-0">
@@ -104,15 +106,19 @@ const VehicleInsurancePage = () => {
               key={insurance.id}
               vehicleInsurance={insurance}
               onEdit={fetchInsurances}
-              onDelete={(id) => setInsurances(insurances.filter((ins) => ins.id !== id))}
+              onDelete={handleDelete}
             />
           ))}
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t sm:hidden w-full">
-        <div className="flex items-center justify-center">
-          <Button onClick={() => setOpenAddDialog(true)} className="gap-2 w-full">
+      {/* Mobile Bottom Bar */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t sm:hidden z-10">
+        <div className="flex gap-3 max-w-md mx-auto">
+          {insurances.length > 0 && (
+            <DocumentDownload data={insurances} title="Vehicle Insurances" />
+          )}
+          <Button onClick={() => setOpenAddDialog(true)} className="flex-1 gap-2">
             <Car size={20} />
             Add Insurance
           </Button>

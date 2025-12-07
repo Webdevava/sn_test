@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { toast, Toaster } from "sonner";
+import { Toaster } from "sonner";
 import AddDepositDialog from "@/components/dialogs/deposit/add-deposit";
 import DepositCard from "@/components/cards/deposit-card";
-import { listDeposits } from "@/lib/deposit-api";
+import DocumentDownload from "@/components/document-download";
 import { Bank } from "@phosphor-icons/react";
+import { listDeposits } from "@/lib/deposit-api";
 
-const FDRDPage = () => {
+export default function FDRDPage() {
   const [deposits, setDeposits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openAddDialog, setOpenAddDialog] = useState(false);
@@ -16,100 +17,57 @@ const FDRDPage = () => {
   const fetchDeposits = async () => {
     try {
       setLoading(true);
-      const response = await listDeposits();
-      
-      // If status is true and data exists, set the deposits
-      if (response.status && response.data) {
-        setDeposits(response.data);
-      } else {
-        // If status is false (including 400 "No deposits available"), 
-        // just set an empty array - don't treat as an error
-        setDeposits([]);
-      }
+      const res = await listDeposits();
+      setDeposits(res.status && res.data ? res.data : []);
     } catch (err) {
-      console.error("Error fetching deposits:", err);
-      // For unexpected errors (like network issues), 
-      // we'll still set empty array but not show an error toast
       setDeposits([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchDeposits();
-  }, []);
+  useEffect(() => { fetchDeposits(); }, []);
 
-  const handleSuccess = () => {
-    fetchDeposits();
-  };
-
-  if (loading && !deposits.length) {
-    return (
-      <div className="flex flex-col justify-center items-center h-[60vh] animate-pulse">
-        <Bank size={48} className="mb-4 text-gray-400" />
-        <p className="text-gray-500 text-sm sm:text-base">Loading deposits...</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="flex justify-center items-center h-96"><Bank size={48} className="animate-pulse" /></div>;
 
   return (
-    <div className="container mx-auto py-6 px-4 sm:py-12 sm:px-6 lg:px-8 relative">
+    <div className="container mx-auto p-4 sm:p-8">
       <Toaster richColors />
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl sm:text-2xl font-bold">
-            Deposits (FD/RD) ({deposits.length})
-          </h1>
-        </div>
-        <div className="hidden sm:block">
-          <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
-            <Bank size={20} />
-            Add Deposit
+
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold">Deposits (FD/RD) ({deposits.length})</h1>
+        <div className="flex gap-3">
+          {deposits.length > 0 && <DocumentDownload data={deposits} title="FD & RD Deposits" />}
+          <Button onClick={() => setOpenAddDialog(true)} className="gap-2 hidden sm:flex">
+            <Bank size={20} /> Add Deposit
           </Button>
         </div>
       </div>
 
-      <AddDepositDialog open={openAddDialog} onOpenChange={setOpenAddDialog} onSuccess={handleSuccess} />
+      <AddDepositDialog open={openAddDialog} onOpenChange={setOpenAddDialog} onSuccess={fetchDeposits} />
 
       {deposits.length === 0 ? (
-        <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 rounded-lg text-center p-4 sm:p-6">
-          <Bank size={36} className="mb-4 text-gray-400 sm:size-48" />
-          <p className="text-gray-500 text-base sm:text-lg">No deposits found</p>
-          <p className="text-gray-400 mt-2 text-sm sm:text-base">
-            Click below to add your first deposit
-          </p>
-          <div className="mt-4">
-            <Button onClick={() => setOpenAddDialog(true)} className="gap-2">
-              <Bank size={20} />
-              Add Deposit
-            </Button>
-          </div>
+        <div className="text-center py-20">
+          <Bank size={80} className="mx-auto text-gray-400 mb-4" />
+          <p className="text-lg text-gray-500">No deposits found</p>
+          <Button onClick={() => setOpenAddDialog(true)} className="mt-6 gap-2">
+            <Bank size={20} /> Add First Deposit
+          </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 pb-16 sm:pb-0">
-          {deposits.map((deposit) => (
-            <DepositCard
-              key={deposit.id}
-              deposit={deposit}
-              onEdit={handleSuccess}
-            />
-          ))}
+        <div className="space-y-4 pb-20 sm:pb-0">
+          {deposits.map(d => <DepositCard key={d.id} deposit={d} onEdit={fetchDeposits} />)}
         </div>
       )}
 
-      {/* Fixed Add Button for Mobile */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t sm:hidden w-full">
-        <div className="flex items-center justify-center">
-          <Button onClick={() => setOpenAddDialog(true)} className="gap-2 w-full">
-            <Bank size={20} />
-            Add Deposit
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t sm:hidden">
+        <div className="flex gap-3 max-w-md mx-auto">
+          {deposits.length > 0 && <DocumentDownload data={deposits} title="Deposits" />}
+          <Button onClick={() => setOpenAddDialog(true)} className="flex-1 gap-2">
+            <Bank size={20} /> Add Deposit
           </Button>
         </div>
       </div>
     </div>
   );
-};
-
-export default FDRDPage;
+}

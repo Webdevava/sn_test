@@ -1,9 +1,11 @@
+// app/banks/page.jsx or wherever your BankPage is
 "use client";
 
 import { useState, useEffect } from "react";
 import BankCard from "@/components/cards/bank-card";
 import { Toaster, toast } from "sonner";
 import AddBankDialog from "@/components/dialogs/bank/add-bank";
+import DocumentDownload from "@/components/document-download";
 import { Bank as BankIcon } from "@phosphor-icons/react";
 import { listBanks, deleteBank } from "@/lib/bank-api";
 
@@ -16,19 +18,9 @@ export default function BankPage() {
     try {
       setLoading(true);
       const response = await listBanks();
-      
-      // If status is true, set the banks
-      if (response.status) {
-        setBanks(response.data);
-      } else {
-        // If status is false (including 400 "No banks available"), 
-        // just set an empty array - don't treat as an error
-        setBanks([]);
-      }
+      setBanks(response.status ? response.data : []);
     } catch (err) {
       console.error("Error fetching banks:", err);
-      // For unexpected errors (like network issues), 
-      // we'll still set empty array but not show an error toast
       setBanks([]);
     } finally {
       setLoading(false);
@@ -63,6 +55,7 @@ export default function BankPage() {
   return (
     <div className="container mx-auto py-6 px-4 sm:py-12 sm:px-6 lg:px-8 relative">
       <Toaster richColors />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
         <div className="flex items-center gap-3">
@@ -70,12 +63,13 @@ export default function BankPage() {
             Total Banks ({banks.length})
           </h1>
         </div>
-        <div className="hidden sm:block">
-          <AddBankDialog 
-            openAddDialog={openAddDialog}
-            setOpenAddDialog={setOpenAddDialog}
-            onBankAdded={fetchBanks} 
-          />
+        <div className="flex gap-3 items-center">
+          {banks.length > 0 && (
+            <DocumentDownload data={banks} title="Bank Accounts" buttonText="Download List" />
+          )}
+          <div className="hidden sm:block">
+            <AddBankDialog openAddDialog={openAddDialog} setOpenAddDialog={setOpenAddDialog} onBankAdded={fetchBanks} />
+          </div>
         </div>
       </div>
 
@@ -87,34 +81,24 @@ export default function BankPage() {
             Click below to create your first bank account
           </p>
           <div className="mt-4">
-            <AddBankDialog 
-              openAddDialog={openAddDialog}
-              setOpenAddDialog={setOpenAddDialog}
-              onBankAdded={fetchBanks} 
-            />
+            <AddBankDialog openAddDialog={openAddDialog} setOpenAddDialog={setOpenAddDialog} onBankAdded={fetchBanks} />
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:gap-6 pb-16 sm:pb-0">
           {banks.map((bank) => (
-            <BankCard
-              key={bank.id}
-              bank={bank}
-              onEdit={fetchBanks}
-              onDelete={handleDelete}
-            />
+            <BankCard key={bank.id} bank={bank} onEdit={fetchBanks} onDelete={handleDelete} />
           ))}
         </div>
       )}
 
-      {/* Fixed Add Button for Mobile */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t sm:hidden w-full">
-        <div className="flex items-center justify-center">
-          <AddBankDialog 
-            openAddDialog={openAddDialog}
-            setOpenAddDialog={setOpenAddDialog}
-            onBankAdded={fetchBanks} 
-          />
+      {/* Mobile Fixed Button */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t sm:hidden w-full z-10">
+        <div className="flex gap-2 justify-center">
+          {banks.length > 0 && (
+            <DocumentDownload data={banks} title="Bank Accounts" />
+          )}
+          <AddBankDialog openAddDialog={openAddDialog} setOpenAddDialog={setOpenAddDialog} onBankAdded={fetchBanks} />
         </div>
       </div>
     </div>
