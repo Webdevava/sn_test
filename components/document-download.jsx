@@ -1,4 +1,3 @@
-// components/document-download.jsx
 "use client";
 
 import { Download, FileText, FileSpreadsheet } from "lucide-react";
